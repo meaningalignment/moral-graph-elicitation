@@ -166,6 +166,20 @@ npm run fixtures:transitions
 
 A live quality dashboard is also available at `/dashboard/:id/quality` (admin only).
 
+## Dedup dry-run (does it actually cluster sensibly?)
+
+To test the production deduplication pipeline against a real deliberation **without writing anything to the database**, use the dry-run. It pulls the deliberation's `ValuesCard` rows, runs the same `deduplicateValues` clustering function the production cron uses, then asks an in-repo discriminator (the same 5-criterion rubric the dedup pipeline is supposed to satisfy) whether each resulting cluster *actually* makes sense.
+
+```bash
+# Diagnostic — colored cluster-by-cluster scorecard, never writes
+npm run dedup:dryrun -- --deliberation 33 --limit 40
+
+# Same logic, gated as a vitest regression test
+RUN_PIPELINE=1 DEDUP_DRYRUN_DELIBERATION=33 DEDUP_DRYRUN_LIMIT=25 npm run test:pipeline
+```
+
+For each multi-member cluster the discriminator returns `allEquivalent: true|false`, the largest equivalent subset, and the outlier ids — so when the pipeline produces a junk cluster you immediately see *which* card it shouldn't have grouped and *which* of the 5 criteria fails.
+
 # Contributing
 
 ## Local Setup
