@@ -173,6 +173,21 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     })
 
     return json({ success: true, refetch: true })
+  } else if (action === "simulateParticipants") {
+    const deliberationId = Number(params.deliberationId)!
+    const count = Number(formData.get("count") ?? 4)
+    const articulateOnly = formData.get("articulateOnly") === "true"
+    const personas = (formData.get("personas") as string) || String(count)
+    await inngest.send({
+      name: "simulate-deliberation",
+      data: {
+        deliberationId,
+        personas,
+        articulateOnly,
+        voteLimit: 5,
+      },
+    })
+    return json({ success: true, simulationStarted: true })
   }
 }
 
@@ -426,6 +441,24 @@ export default function DeliberationDashboard() {
                 Show Graph
               </Button>
             </Link>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={fetcher.state !== "idle"}
+              onClick={() => {
+                const raw = window.prompt(
+                  "How many simulated participants? (number, or comma-separated persona slugs e.g. worried-parent,civil-libertarian)",
+                  "4"
+                )
+                if (!raw) return
+                fetcher.submit(
+                  { action: "simulateParticipants", personas: raw },
+                  { method: "post" }
+                )
+              }}
+            >
+              Simulate Participants
+            </Button>
             <Link
               to={`/deliberation/${deliberation.id}/start`}
               prefetch="intent"
@@ -436,6 +469,15 @@ export default function DeliberationDashboard() {
               </Button>
             </Link>
           </div>
+          {(fetcher.data as any)?.simulationStarted && (
+            <Alert className="mt-4 bg-slate-50">
+              <AlertTitle>Simulation queued</AlertTitle>
+              <AlertDescription>
+                Simulated participants are being run in the background. New
+                chats and values cards should appear within a couple of minutes.
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 

@@ -1,6 +1,6 @@
 # Moral Graph Elicitation
 
-*Developed by the [Meaning Alignment Institute](https://www.meaningalignment.org/), funded by [OpenAI](https://openai.com/blog/democratic-inputs-to-ai). Live deployment available at [dft.meaningalignment.org](https://dft.meaningalignment.org).*
+*Developed by the [Meaning Alignment Institute](https://www.meaningalignment.org/), funded by [OpenAI](https://openai.com/blog/democratic-inputs-to-ai). Companion to the paper [What are human values, and how do we align AI to them?](https://arxiv.org/abs/2404.10636). Live deployment available at [dft.meaningalignment.org](https://dft.meaningalignment.org).*
 
 
 ## Table of Contents
@@ -11,6 +11,8 @@
     - [Output](#output)
 - [Setting Up a New Environment](#setting-up-a-new-environment)
 - [Setting Up a New Deliberation](#setting-up-a-new-deliberation)
+- [Simulating a Deliberation](#simulating-a-deliberation)
+- [Testing](#testing)
 - [Contributing](#contributing)
     - [Local Setup](#local-setup)
     - [Database Evolution](#database-evolution)
@@ -53,11 +55,11 @@ Subsequent endeavors will focus on fine-tuning the LLM based on these values.
 
 ## Output
 
-The moral graph, survey data and demographics data we collected can be found [here](./data/).
-
-- **Database Schema**: The data collated during the process adheres to our [database schema](./schema.prisma).
-- **Moral Graph Generation**: The code responsible for generating the moral graph is available [here](./app/values-tools/generate-moral-graph.ts).
-- **Data Export**: A moral graph can be exported in JSON format via [this endpoint](http://dft.meaningalignment.org/data/edges.json). The export schema is detailed [here](./app/values-tools/moral-graph-summary.ts).
+- **Database schema**: [schema.prisma](./schema.prisma).
+- **Moral graph summarisation, embedding, dedup, transition story generation**: live in the
+  [`values-tools`](https://github.com/meaningalignment/values-tools) package, used here as a dependency.
+- **Data export**: a moral graph can be exported in JSON format via the
+  `/data/graph` endpoint (see `app/routes/api.data.graph.ts`).
 
 
 # Setting Up a New Environment
@@ -112,15 +114,71 @@ After completing these steps, your environment should be set up and ready.
 
 # Setting Up a New Deliberation
 
-Deliberations are conducted by creating a case. Here are the steps to set up a new deliberation:
+Deliberations are containers for a topic, the questions generated for that topic, the contexts, the values articulated by participants, and the votes between values. Here is the actual flow:
 
-1. **Make yourself an admin user**: This can be done by setting `isAdmin = true` for your user in the database.
+1. **Make yourself an admin user**: set `isAdmin = true` on your user row in the DB.
+2. **Create a deliberation**: navigate to `/dashboard/new` (linked from `/dashboard`). Enter a title and topic, pick how many questions and contexts to generate. Submitting kicks off background generation via Inngest.
+3. **Wait for setup**: the deliberation page polls `setupStatus` until it transitions to `ready`. You'll see questions and contexts populate.
+4. **Share or simulate**: participants can begin at `/deliberation/:id/start`. As an admin you can also click **Simulate Participants** on the dashboard to drive synthetic personas through the full flow (see [Simulating a Deliberation](#simulating-a-deliberation) below).
 
-2. **Creating a Case**: Deliberations are initiated by creating a case. This can be done by navigating to `/admin/cases` on your site. 
+# Simulating a Deliberation
 
-3. **Generating Seed Values and Upgrade Stories**: After a case is created, some seed values and upgrade stories are automatically generated in the background, assuming Inngest is set up correctly.
+The simulator drives one or more synthetic personas through the articulation and voting flow. Every action is attributed to a `User` row marked `role = ["SIMULATED"]` and named `sim+<persona-slug>@simulation.local`, so you can backtrack who did what.
 
-Once a case has been added, participants can begin the deliberation process by navigating to `/start` on the site. As values and upgrades are populated, the resulting moral graph can be viewed at `/data/edges`, providing insights into the convergence of values through the deliberation process.
+```bash
+# Drive 4 personas (in order from simulation/personas/) through deliberation 40
+npm run simulate -- --deliberation 40 --personas 4
+
+# Specific personas, articulation only
+npm run simulate -- --deliberation 40 --personas worried-parent,civil-libertarian --articulate-only
+
+# Voting only (on existing edge hypotheses)
+npm run simulate -- --deliberation 40 --personas community-organizer --vote-only --limit 10
+```
+
+Personas live in [`simulation/personas/`](./simulation/personas) as JSON files. Each persona has a `name`, `demographic`, `voice`, and `leanings`. Add new ones by dropping new JSON files in that directory.
+
+A run writes per-persona JSONL transcripts to `simulation/transcripts/<runId>/<personaSlug>.jsonl` for full debuggability.
+
+The simulator and the human chat UI share the same articulation logic — the system prompt (see `app/services/articulation/prompt.ts`) and the same `submit_values_card` tool — so what the simulator does is what a real participant would do.
+
+# Testing
+
+Two layers:
+
+```bash
+# Unit tier (no LLM, no DB, < 2s)
+npm run test:unit
+
+# Pipeline tier (real LLM, real DB, costs credits)
+RUN_PIPELINE=1 TEST_POSTGRES_URL=... npm run test:pipeline
+
+# Or run a single fixture as a script (human-readable PASS/FAIL)
+tsx tests/pipeline/dedup.fixture.ts
+```
+
+Fixtures are sampled from real paper data. Build / refresh them with:
+
+```bash
+npm run fixtures:dedup
+npm run fixtures:transitions
+```
+
+A live quality dashboard is also available at `/dashboard/:id/quality` (admin only).
+
+## Dedup dry-run (does it actually cluster sensibly?)
+
+To test the production deduplication pipeline against a real deliberation **without writing anything to the database**, use the dry-run. It pulls the deliberation's `ValuesCard` rows, runs the same `deduplicateValues` clustering function the production cron uses, then asks an in-repo discriminator (the same 5-criterion rubric the dedup pipeline is supposed to satisfy) whether each resulting cluster *actually* makes sense.
+
+```bash
+# Diagnostic — colored cluster-by-cluster scorecard, never writes
+npm run dedup:dryrun -- --deliberation 33 --limit 40
+
+# Same logic, gated as a vitest regression test
+RUN_PIPELINE=1 DEDUP_DRYRUN_DELIBERATION=33 DEDUP_DRYRUN_LIMIT=25 npm run test:pipeline
+```
+
+For each multi-member cluster the discriminator returns `allEquivalent: true|false`, the largest equivalent subset, and the outlier ids — so when the pipeline produces a junk cluster you immediately see *which* card it shouldn't have grouped and *which* of the 5 criteria fails.
 
 # Contributing
 
@@ -134,6 +192,17 @@ Once a case has been added, participants can begin the deliberation process by n
 ## Database Evolution
 
 To update the database schema, execute: `npx prisma db push`. The schema can be found [here](./schema.prisma).
+
+## Querying the database
+
+A small helper script `scripts/db.ts` runs read-only queries via Neon's HTTPS-based serverless driver. Useful in environments that block raw `5432/tcp` (CI sandboxes, edge runtimes, etc.):
+
+```bash
+npm run db -- 'SELECT COUNT(*) FROM "Deliberation"'
+npm run db -- --json 'SELECT id, title FROM "Deliberation" LIMIT 5'
+```
+
+For the running app (Remix/Inngest) in those same environments, set `USE_NEON_HTTP_DRIVER=true` in your `.env`. This routes Prisma through `@prisma/adapter-neon` instead of the default TCP connection.
 
 
 ## Additional Documentation

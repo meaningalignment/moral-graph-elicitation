@@ -42,7 +42,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         run.status === "queued" ||
         run.status === "requires_action"
       ) {
-        return openai.beta.threads.runs.cancel(threadId, run.id)
+        return openai.beta.threads.runs.cancel(run.id, { thread_id: threadId })
       }
     })
   )

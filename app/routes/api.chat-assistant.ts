@@ -2,17 +2,20 @@ import { ActionFunctionArgs } from "@remix-run/node"
 import { kv } from "@vercel/kv"
 import { AssistantResponse, DataMessage } from "ai"
 import { AssistantStream } from "openai/lib/AssistantStream.mjs"
-import { openai, ensureLoggedIn, db, inngest } from "~/config.server"
-import { embedNonCanonicalCard } from "~/services/embedding"
+import { openai, ensureLoggedIn } from "~/config.server"
+import { persistArticulatedCard, ChatMessage } from "~/services/articulation/chat"
 
 export const config = { maxDuration: 300 }
+
+const ASSISTANT_ID =
+  process.env.OPENAI_ASSISTANT_ID ?? "asst_aPIlnXJb5RmDyVuSWd2FLil5"
 
 export async function action({ request }: ActionFunctionArgs) {
   const authorId = await ensureLoggedIn(request)
 
   const { threadId, deliberationId, questionId, message } = await request.json()
   return await assistantResponseWithTools({
-    assistant_id: "asst_aPIlnXJb5RmDyVuSWd2FLil5",
+    assistant_id: ASSISTANT_ID,
     context: { authorId, threadId, deliberationId, questionId },
     threadId,
     message,
@@ -48,71 +51,23 @@ async function submitValuesCard(
     questionId: number
     deliberationId: number
   },
-  {
-    title,
-    description,
-    policies,
-  }: {
-    title: string
-    description: string
-    policies: string[]
-  },
+  card: { title: string; description: string; policies: string[] },
   sendDataMessage: (message: DataMessage) => void
 ) {
-  const transcript = await getTranscript(threadId)
-  const chat = await db.chat.upsert({
-    create: {
-      id: threadId,
-      userId: authorId,
-      deliberationId,
-      questionId,
-      transcript,
-    },
-    update: {},
-    where: { id: threadId },
-  })
-  const card = await db.valuesCard.upsert({
-    create: {
-      title,
-      chatId: chat.id,
-      deliberationId: chat.deliberationId,
-      description,
-      policies,
-      questionId,
-    },
-    update: {
-      title,
-      description,
-      policies,
-    },
-    where: { chatId: chat.id },
+  const transcript = (await getTranscript(threadId)) as unknown as ChatMessage[]
+  await persistArticulatedCard({
+    authorId,
+    threadId,
+    deliberationId,
+    questionId,
+    transcript,
+    card,
   })
 
-  // Embed the card
-  await embedNonCanonicalCard(card)
-
-  // Find new contexts surfaced in the chat in the background
-  try {
-    await inngest.send({
-      name: "find-new-contexts",
-      data: {
-        deliberationId,
-        chatId: chat.id,
-      },
-    })
-  } catch (e) {
-    console.error("Error sending `find-new-contexts` event", e)
-  }
-
-  const data = {
-    type: "values_card",
-    title,
-    description,
-    policies,
-  }
-  console.log("Data in KV", data)
-  kv.set(`data:${threadId}`, JSON.stringify(data)) // Data messages are not saved, so we persist in KV for reloads.
-  sendDataMessage({ role: "data", data })
+  sendDataMessage({
+    role: "data",
+    data: { type: "values_card", ...card },
+  })
 
   return "Submitted the values card. Go ahead and thank the user."
 }
@@ -194,9 +149,8 @@ async function assistantResponseWithTools<C>({
         )
         runResult = await forwardStream(
           openai.beta.threads.runs.submitToolOutputsStream(
-            threadId,
             runResult.id,
-            { tool_outputs }
+            { thread_id: threadId, tool_outputs }
           )
         )
       }
