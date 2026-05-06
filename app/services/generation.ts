@@ -6,7 +6,7 @@ import {
 } from "values-tools"
 import { db, inngest } from "~/config.server"
 import { Question } from "@prisma/client"
-import { Logger } from "inngest/middleware/logger"
+import type { Logger } from "inngest"
 import { embedContext } from "./embedding"
 import {
   generateScenario,

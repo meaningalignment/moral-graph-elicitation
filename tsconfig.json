@@ -1,14 +1,16 @@
 {
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/.server/**/*.ts",
-    "**/.server/**/*.tsx",
-    "**/.client/**/*.ts",
-    "**/.client/**/*.tsx"
-, "tailwind.config.js"  ],
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "scripts/**/*.ts",
+    "simulation/**/*.ts",
+    "tests/**/*.ts",
+    "env.d.ts",
+    "tailwind.config.js"
+  ],
+  "exclude": ["node_modules", "build"],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
     "types": ["@remix-run/node", "vite/client", "bun"],
     "isolatedModules": true,
     "esModuleInterop": true,

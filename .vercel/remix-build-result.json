@@ -1,0 +1,723 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs-eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "nodejs-eyJtYXhEdXJhdGlvbiI6MzAwLCJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs-eyJtYXhEdXJhdGlvbiI6MzAwLCJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs-eyJtYXhEdXJhdGlvbiI6MzAwLCJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "maxDuration": 300,
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.$questionId.chat-explainer": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.$questionId.chat.$threadId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.$questionId.link-explainer": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.$questionId.chat._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.data.graph.$deliberationId.$questionId[.]json": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.chats.$chatId.duplicate": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.card.$canonicalCardId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.$questionId.report": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.$questionId.link": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.admin.cards": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.chats.$chatId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.finished": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.question": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.hypotheses": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.graph": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/deliberation.$deliberationId.start": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.quality": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.values": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.chats": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.merge": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.votes": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.$deliberationId.edit": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.messages.$chatId.delete": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/data.deduplications._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.chat.$chatId.function": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.data.graph.local": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.messages.$chatId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.chat-assistant": "nodejs-eyJtYXhEdXJhdGlvbiI6MzAwLCJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.data.graph": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.prolific": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/dashboard.new": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.inngest": "nodejs-eyJtYXhEdXJhdGlvbiI6MzAwLCJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.logout": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.login": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.code": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/_index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "app/root.tsx",
+        "config": {}
+      },
+      "routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash": {
+        "file": "app/routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash.tsx",
+        "id": "routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash",
+        "path": ":fromId/:toId/:contextHash",
+        "parentId": "routes/dashboard.$deliberationId.hypotheses",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.$questionId.chat-explainer": {
+        "file": "app/routes/deliberation.$deliberationId.$questionId.chat-explainer.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.chat-explainer",
+        "path": "deliberation/:deliberationId/:questionId/chat-explainer",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.$questionId.chat.$threadId": {
+        "file": "app/routes/deliberation.$deliberationId.$questionId.chat.$threadId.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.chat.$threadId",
+        "path": "deliberation/:deliberationId/:questionId/chat/:threadId",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.$questionId.link-explainer": {
+        "file": "app/routes/deliberation.$deliberationId.$questionId.link-explainer.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.link-explainer",
+        "path": "deliberation/:deliberationId/:questionId/link-explainer",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId": {
+        "file": "app/routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId.tsx",
+        "id": "routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId",
+        "path": ":userId/:fromId/:toId",
+        "parentId": "routes/dashboard.$deliberationId.votes",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.$questionId.chat._index": {
+        "file": "app/routes/deliberation.$deliberationId.$questionId.chat._index.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.chat._index",
+        "path": "deliberation/:deliberationId/:questionId/chat",
+        "index": true,
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.data.graph.$deliberationId.$questionId[.]json": {
+        "file": "app/routes/api.data.graph.$deliberationId.$questionId[.]json.ts",
+        "id": "routes/api.data.graph.$deliberationId.$questionId[.]json",
+        "path": ":deliberationId/:questionId.json",
+        "parentId": "routes/api.data.graph",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.chats.$chatId.duplicate": {
+        "file": "app/routes/dashboard.$deliberationId.chats.$chatId.duplicate.ts",
+        "id": "routes/dashboard.$deliberationId.chats.$chatId.duplicate",
+        "path": "duplicate",
+        "parentId": "routes/dashboard.$deliberationId.chats.$chatId",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.card.$canonicalCardId": {
+        "file": "app/routes/dashboard.$deliberationId.card.$canonicalCardId.tsx",
+        "id": "routes/dashboard.$deliberationId.card.$canonicalCardId",
+        "path": ":deliberationId/card/:canonicalCardId",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.$questionId.report": {
+        "file": "app/routes/deliberation.$deliberationId.$questionId.report.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.report",
+        "path": "deliberation/:deliberationId/:questionId/report",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.$questionId.link": {
+        "file": "app/routes/deliberation.$deliberationId.$questionId.link.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.link",
+        "path": "deliberation/:deliberationId/:questionId/link",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.admin.cards": {
+        "file": "app/routes/deliberation.$deliberationId.admin.cards.tsx",
+        "id": "routes/deliberation.$deliberationId.admin.cards",
+        "path": "deliberation/:deliberationId/admin/cards",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.chats.$chatId": {
+        "file": "app/routes/dashboard.$deliberationId.chats.$chatId.tsx",
+        "id": "routes/dashboard.$deliberationId.chats.$chatId",
+        "path": ":chatId",
+        "parentId": "routes/dashboard.$deliberationId.chats",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.finished": {
+        "file": "app/routes/deliberation.$deliberationId.finished.tsx",
+        "id": "routes/deliberation.$deliberationId.finished",
+        "path": "deliberation/:deliberationId/finished",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.question": {
+        "file": "app/routes/deliberation.$deliberationId.question.tsx",
+        "id": "routes/deliberation.$deliberationId.question",
+        "path": "deliberation/:deliberationId/question",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.hypotheses": {
+        "file": "app/routes/dashboard.$deliberationId.hypotheses.tsx",
+        "id": "routes/dashboard.$deliberationId.hypotheses",
+        "path": ":deliberationId/hypotheses",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.graph": {
+        "file": "app/routes/deliberation.$deliberationId.graph.tsx",
+        "id": "routes/deliberation.$deliberationId.graph",
+        "path": "deliberation/:deliberationId/graph",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/deliberation.$deliberationId.start": {
+        "file": "app/routes/deliberation.$deliberationId.start.tsx",
+        "id": "routes/deliberation.$deliberationId.start",
+        "path": "deliberation/:deliberationId/start",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.quality": {
+        "file": "app/routes/dashboard.$deliberationId.quality.tsx",
+        "id": "routes/dashboard.$deliberationId.quality",
+        "path": ":deliberationId/quality",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId._index": {
+        "file": "app/routes/dashboard.$deliberationId._index.tsx",
+        "id": "routes/dashboard.$deliberationId._index",
+        "path": ":deliberationId",
+        "index": true,
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.values": {
+        "file": "app/routes/dashboard.$deliberationId.values.tsx",
+        "id": "routes/dashboard.$deliberationId.values",
+        "path": ":deliberationId/values",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.chats": {
+        "file": "app/routes/dashboard.$deliberationId.chats.tsx",
+        "id": "routes/dashboard.$deliberationId.chats",
+        "path": ":deliberationId/chats",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.merge": {
+        "file": "app/routes/dashboard.$deliberationId.merge.tsx",
+        "id": "routes/dashboard.$deliberationId.merge",
+        "path": ":deliberationId/merge",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.votes": {
+        "file": "app/routes/dashboard.$deliberationId.votes.tsx",
+        "id": "routes/dashboard.$deliberationId.votes",
+        "path": ":deliberationId/votes",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.$deliberationId.edit": {
+        "file": "app/routes/dashboard.$deliberationId.edit.tsx",
+        "id": "routes/dashboard.$deliberationId.edit",
+        "path": ":deliberationId/edit",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.messages.$chatId.delete": {
+        "file": "app/routes/api.messages.$chatId.delete.ts",
+        "id": "routes/api.messages.$chatId.delete",
+        "path": "delete",
+        "parentId": "routes/api.messages.$chatId",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/data.deduplications._index": {
+        "file": "app/routes/data.deduplications._index.tsx",
+        "id": "routes/data.deduplications._index",
+        "path": "data/deduplications",
+        "index": true,
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.chat.$chatId.function": {
+        "file": "app/routes/api.chat.$chatId.function.ts",
+        "id": "routes/api.chat.$chatId.function",
+        "path": "api/chat/:chatId/function",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.data.graph.local": {
+        "file": "app/routes/api.data.graph.local.ts",
+        "id": "routes/api.data.graph.local",
+        "path": "local",
+        "parentId": "routes/api.data.graph",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.messages.$chatId": {
+        "file": "app/routes/api.messages.$chatId.ts",
+        "id": "routes/api.messages.$chatId",
+        "path": "api/messages/:chatId",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.chat-assistant": {
+        "file": "app/routes/api.chat-assistant.ts",
+        "id": "routes/api.chat-assistant",
+        "path": "api/chat-assistant",
+        "parentId": "root",
+        "config": {
+          "maxDuration": 300,
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard._index": {
+        "file": "app/routes/dashboard._index.tsx",
+        "id": "routes/dashboard._index",
+        "index": true,
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.data.graph": {
+        "file": "app/routes/api.data.graph.ts",
+        "id": "routes/api.data.graph",
+        "path": "api/data/graph",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.prolific": {
+        "file": "app/routes/auth.prolific.tsx",
+        "id": "routes/auth.prolific",
+        "path": "auth/prolific",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard.new": {
+        "file": "app/routes/dashboard.new.tsx",
+        "id": "routes/dashboard.new",
+        "path": "new",
+        "parentId": "routes/dashboard",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.inngest": {
+        "file": "app/routes/api.inngest.ts",
+        "id": "routes/api.inngest",
+        "path": "api/inngest",
+        "parentId": "root",
+        "config": {
+          "maxDuration": 300,
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.logout": {
+        "file": "app/routes/auth.logout.ts",
+        "id": "routes/auth.logout",
+        "path": "auth/logout",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.login": {
+        "file": "app/routes/auth.login.tsx",
+        "id": "routes/auth.login",
+        "path": "auth/login",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.code": {
+        "file": "app/routes/auth.code.tsx",
+        "id": "routes/auth.code",
+        "path": "auth/code",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/dashboard": {
+        "file": "app/routes/dashboard.tsx",
+        "id": "routes/dashboard",
+        "path": "dashboard",
+        "parentId": "root",
+        "config": {}
+      },
+      "routes/_index": {
+        "file": "app/routes/_index.ts",
+        "id": "routes/_index",
+        "index": true,
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    }
+  },
+  "remixConfig": {
+    "appDirectory": "/home/user/moral-graph-elicitation/app",
+    "basename": "/",
+    "buildDirectory": "/home/user/moral-graph-elicitation/build",
+    "future": {
+      "v3_fetcherPersist": false,
+      "v3_relativeSplatPath": false,
+      "v3_throwAbortReason": false,
+      "v3_routeConfig": false,
+      "v3_singleFetch": false,
+      "v3_lazyRouteDiscovery": false,
+      "unstable_optimizeDeps": false
+    },
+    "manifest": false,
+    "publicPath": "/",
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "root.tsx"
+      },
+      "routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash": {
+        "file": "routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash.tsx",
+        "id": "routes/dashboard.$deliberationId.hypotheses.$fromId.$toId.$contextHash",
+        "path": ":fromId/:toId/:contextHash",
+        "parentId": "routes/dashboard.$deliberationId.hypotheses"
+      },
+      "routes/deliberation.$deliberationId.$questionId.chat-explainer": {
+        "file": "routes/deliberation.$deliberationId.$questionId.chat-explainer.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.chat-explainer",
+        "path": "deliberation/:deliberationId/:questionId/chat-explainer",
+        "parentId": "root"
+      },
+      "routes/deliberation.$deliberationId.$questionId.chat.$threadId": {
+        "file": "routes/deliberation.$deliberationId.$questionId.chat.$threadId.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.chat.$threadId",
+        "path": "deliberation/:deliberationId/:questionId/chat/:threadId",
+        "parentId": "root"
+      },
+      "routes/deliberation.$deliberationId.$questionId.link-explainer": {
+        "file": "routes/deliberation.$deliberationId.$questionId.link-explainer.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.link-explainer",
+        "path": "deliberation/:deliberationId/:questionId/link-explainer",
+        "parentId": "root"
+      },
+      "routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId": {
+        "file": "routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId.tsx",
+        "id": "routes/dashboard.$deliberationId.votes.$userId.$fromId.$toId",
+        "path": ":userId/:fromId/:toId",
+        "parentId": "routes/dashboard.$deliberationId.votes"
+      },
+      "routes/deliberation.$deliberationId.$questionId.chat._index": {
+        "file": "routes/deliberation.$deliberationId.$questionId.chat._index.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.chat._index",
+        "path": "deliberation/:deliberationId/:questionId/chat",
+        "index": true,
+        "parentId": "root"
+      },
+      "routes/api.data.graph.$deliberationId.$questionId[.]json": {
+        "file": "routes/api.data.graph.$deliberationId.$questionId[.]json.ts",
+        "id": "routes/api.data.graph.$deliberationId.$questionId[.]json",
+        "path": ":deliberationId/:questionId.json",
+        "parentId": "routes/api.data.graph"
+      },
+      "routes/dashboard.$deliberationId.chats.$chatId.duplicate": {
+        "file": "routes/dashboard.$deliberationId.chats.$chatId.duplicate.ts",
+        "id": "routes/dashboard.$deliberationId.chats.$chatId.duplicate",
+        "path": "duplicate",
+        "parentId": "routes/dashboard.$deliberationId.chats.$chatId"
+      },
+      "routes/dashboard.$deliberationId.card.$canonicalCardId": {
+        "file": "routes/dashboard.$deliberationId.card.$canonicalCardId.tsx",
+        "id": "routes/dashboard.$deliberationId.card.$canonicalCardId",
+        "path": ":deliberationId/card/:canonicalCardId",
+        "parentId": "routes/dashboard"
+      },
+      "routes/deliberation.$deliberationId.$questionId.report": {
+        "file": "routes/deliberation.$deliberationId.$questionId.report.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.report",
+        "path": "deliberation/:deliberationId/:questionId/report",
+        "parentId": "root"
+      },
+      "routes/deliberation.$deliberationId.$questionId.link": {
+        "file": "routes/deliberation.$deliberationId.$questionId.link.tsx",
+        "id": "routes/deliberation.$deliberationId.$questionId.link",
+        "path": "deliberation/:deliberationId/:questionId/link",
+        "parentId": "root"
+      },
+      "routes/deliberation.$deliberationId.admin.cards": {
+        "file": "routes/deliberation.$deliberationId.admin.cards.tsx",
+        "id": "routes/deliberation.$deliberationId.admin.cards",
+        "path": "deliberation/:deliberationId/admin/cards",
+        "parentId": "root"
+      },
+      "routes/dashboard.$deliberationId.chats.$chatId": {
+        "file": "routes/dashboard.$deliberationId.chats.$chatId.tsx",
+        "id": "routes/dashboard.$deliberationId.chats.$chatId",
+        "path": ":chatId",
+        "parentId": "routes/dashboard.$deliberationId.chats"
+      },
+      "routes/deliberation.$deliberationId.finished": {
+        "file": "routes/deliberation.$deliberationId.finished.tsx",
+        "id": "routes/deliberation.$deliberationId.finished",
+        "path": "deliberation/:deliberationId/finished",
+        "parentId": "root"
+      },
+      "routes/deliberation.$deliberationId.question": {
+        "file": "routes/deliberation.$deliberationId.question.tsx",
+        "id": "routes/deliberation.$deliberationId.question",
+        "path": "deliberation/:deliberationId/question",
+        "parentId": "root"
+      },
+      "routes/dashboard.$deliberationId.hypotheses": {
+        "file": "routes/dashboard.$deliberationId.hypotheses.tsx",
+        "id": "routes/dashboard.$deliberationId.hypotheses",
+        "path": ":deliberationId/hypotheses",
+        "parentId": "routes/dashboard"
+      },
+      "routes/deliberation.$deliberationId.graph": {
+        "file": "routes/deliberation.$deliberationId.graph.tsx",
+        "id": "routes/deliberation.$deliberationId.graph",
+        "path": "deliberation/:deliberationId/graph",
+        "parentId": "root"
+      },
+      "routes/deliberation.$deliberationId.start": {
+        "file": "routes/deliberation.$deliberationId.start.tsx",
+        "id": "routes/deliberation.$deliberationId.start",
+        "path": "deliberation/:deliberationId/start",
+        "parentId": "root"
+      },
+      "routes/dashboard.$deliberationId.quality": {
+        "file": "routes/dashboard.$deliberationId.quality.tsx",
+        "id": "routes/dashboard.$deliberationId.quality",
+        "path": ":deliberationId/quality",
+        "parentId": "routes/dashboard"
+      },
+      "routes/dashboard.$deliberationId._index": {
+        "file": "routes/dashboard.$deliberationId._index.tsx",
+        "id": "routes/dashboard.$deliberationId._index",
+        "path": ":deliberationId",
+        "index": true,
+        "parentId": "routes/dashboard"
+      },
+      "routes/dashboard.$deliberationId.values": {
+        "file": "routes/dashboard.$deliberationId.values.tsx",
+        "id": "routes/dashboard.$deliberationId.values",
+        "path": ":deliberationId/values",
+        "parentId": "routes/dashboard"
+      },
+      "routes/dashboard.$deliberationId.chats": {
+        "file": "routes/dashboard.$deliberationId.chats.tsx",
+        "id": "routes/dashboard.$deliberationId.chats",
+        "path": ":deliberationId/chats",
+        "parentId": "routes/dashboard"
+      },
+      "routes/dashboard.$deliberationId.merge": {
+        "file": "routes/dashboard.$deliberationId.merge.tsx",
+        "id": "routes/dashboard.$deliberationId.merge",
+        "path": ":deliberationId/merge",
+        "parentId": "routes/dashboard"
+      },
+      "routes/dashboard.$deliberationId.votes": {
+        "file": "routes/dashboard.$deliberationId.votes.tsx",
+        "id": "routes/dashboard.$deliberationId.votes",
+        "path": ":deliberationId/votes",
+        "parentId": "routes/dashboard"
+      },
+      "routes/dashboard.$deliberationId.edit": {
+        "file": "routes/dashboard.$deliberationId.edit.tsx",
+        "id": "routes/dashboard.$deliberationId.edit",
+        "path": ":deliberationId/edit",
+        "parentId": "routes/dashboard"
+      },
+      "routes/api.messages.$chatId.delete": {
+        "file": "routes/api.messages.$chatId.delete.ts",
+        "id": "routes/api.messages.$chatId.delete",
+        "path": "delete",
+        "parentId": "routes/api.messages.$chatId"
+      },
+      "routes/data.deduplications._index": {
+        "file": "routes/data.deduplications._index.tsx",
+        "id": "routes/data.deduplications._index",
+        "path": "data/deduplications",
+        "index": true,
+        "parentId": "root"
+      },
+      "routes/api.chat.$chatId.function": {
+        "file": "routes/api.chat.$chatId.function.ts",
+        "id": "routes/api.chat.$chatId.function",
+        "path": "api/chat/:chatId/function",
+        "parentId": "root"
+      },
+      "routes/api.data.graph.local": {
+        "file": "routes/api.data.graph.local.ts",
+        "id": "routes/api.data.graph.local",
+        "path": "local",
+        "parentId": "routes/api.data.graph"
+      },
+      "routes/api.messages.$chatId": {
+        "file": "routes/api.messages.$chatId.ts",
+        "id": "routes/api.messages.$chatId",
+        "path": "api/messages/:chatId",
+        "parentId": "root"
+      },
+      "routes/api.chat-assistant": {
+        "file": "routes/api.chat-assistant.ts",
+        "id": "routes/api.chat-assistant",
+        "path": "api/chat-assistant",
+        "parentId": "root"
+      },
+      "routes/dashboard._index": {
+        "file": "routes/dashboard._index.tsx",
+        "id": "routes/dashboard._index",
+        "index": true,
+        "parentId": "routes/dashboard"
+      },
+      "routes/api.data.graph": {
+        "file": "routes/api.data.graph.ts",
+        "id": "routes/api.data.graph",
+        "path": "api/data/graph",
+        "parentId": "root"
+      },
+      "routes/auth.prolific": {
+        "file": "routes/auth.prolific.tsx",
+        "id": "routes/auth.prolific",
+        "path": "auth/prolific",
+        "parentId": "root"
+      },
+      "routes/dashboard.new": {
+        "file": "routes/dashboard.new.tsx",
+        "id": "routes/dashboard.new",
+        "path": "new",
+        "parentId": "routes/dashboard"
+      },
+      "routes/api.inngest": {
+        "file": "routes/api.inngest.ts",
+        "id": "routes/api.inngest",
+        "path": "api/inngest",
+        "parentId": "root"
+      },
+      "routes/auth.logout": {
+        "file": "routes/auth.logout.ts",
+        "id": "routes/auth.logout",
+        "path": "auth/logout",
+        "parentId": "root"
+      },
+      "routes/auth.login": {
+        "file": "routes/auth.login.tsx",
+        "id": "routes/auth.login",
+        "path": "auth/login",
+        "parentId": "root"
+      },
+      "routes/auth.code": {
+        "file": "routes/auth.code.tsx",
+        "id": "routes/auth.code",
+        "path": "auth/code",
+        "parentId": "root"
+      },
+      "routes/dashboard": {
+        "file": "routes/dashboard.tsx",
+        "id": "routes/dashboard",
+        "path": "dashboard",
+        "parentId": "root"
+      },
+      "routes/_index": {
+        "file": "routes/_index.ts",
+        "id": "routes/_index",
+        "index": true,
+        "parentId": "root"
+      }
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}
