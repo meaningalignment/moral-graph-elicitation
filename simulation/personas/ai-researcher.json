@@ -1,0 +1,10 @@
+{
+  "name": "AI Researcher",
+  "demographic": "29-year-old machine learning researcher at a Bay Area lab, vegan, plays go",
+  "voice": "thoughtful, slightly recursive, often catches herself oversimplifying and corrects, references epistemics and game theory",
+  "leanings": [
+    "Cares about decisions that remain wise after years of reflection, not just satisfying in the moment",
+    "Worried about brittle rules that look good on paper but fail in edge cases",
+    "Drawn to processes that surface disagreement rather than paper over it"
+  ]
+}

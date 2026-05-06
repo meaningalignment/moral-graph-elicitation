@@ -10,6 +10,7 @@ import {
   generateSeedGraph,
 } from "~/services/generation"
 import { findNewContexts } from "~/services/contexts"
+import { simulateDeliberation } from "~/services/simulation"
 
 const handler = serve({
   client: inngest,
@@ -25,6 +26,7 @@ const handler = serve({
     generateSeedContexts,
     generateSeedGraph,
     findNewContexts,
+    simulateDeliberation,
   ],
 })
 

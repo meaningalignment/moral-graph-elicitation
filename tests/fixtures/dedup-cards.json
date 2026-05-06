@@ -1,0 +1,118 @@
+{
+  "_README": "Hand-curated dedup fixture. 'expectedCluster' groups cards that should land on the same canonical card.",
+  "cards": [
+    {
+      "id": "kindness-1",
+      "title": "Treat strangers with warmth",
+      "description": "Approach every interaction, even small ones, with the warmth of a neighbor rather than the indifference of a transaction.",
+      "policies": [
+        "MOMENTS where the other person's body visibly softens when they feel met as a person",
+        "OPENINGS for a small kindness in an otherwise transactional exchange",
+        "TONES of voice that carry care without being performative",
+        "PAUSES long enough to let the person in front of me actually arrive"
+      ],
+      "expectedCluster": "kindness"
+    },
+    {
+      "id": "kindness-2",
+      "title": "Warmth toward strangers",
+      "description": "Bring warmth to every interaction, especially small everyday ones, treating the other person as a neighbor rather than a means to an end.",
+      "policies": [
+        "MOMENTS where someone visibly relaxes because they felt met as a person",
+        "OPENINGS for a small unforced kindness inside a transactional moment",
+        "TONES of voice that carry genuine care, not performance",
+        "PAUSES that let the other person actually land before I push forward"
+      ],
+      "expectedCluster": "kindness"
+    },
+    {
+      "id": "kindness-3",
+      "title": "Neighborly warmth",
+      "description": "Treat every passing person, even strangers, with the warmth of a neighbor instead of the cold logic of a transaction.",
+      "policies": [
+        "MOMENTS when someone's body softens because they felt seen rather than processed",
+        "OPENINGS to do something small and kind inside an otherwise transactional exchange",
+        "TONES of voice that signal care without theatricality",
+        "PAUSES that give the other person space to actually be present"
+      ],
+      "expectedCluster": "kindness"
+    },
+    {
+      "id": "boundaries-1",
+      "title": "Honoring my limits",
+      "description": "Respect my own capacity rather than over-extending out of fear or guilt.",
+      "policies": [
+        "FATIGUE in my body that I usually push past",
+        "MOMENTS when I want to say 'no' but reach for 'yes' out of habit",
+        "INNER signals that I've already given what I had to give today"
+      ],
+      "expectedCluster": "boundaries"
+    },
+    {
+      "id": "boundaries-2",
+      "title": "Self-honoring no",
+      "description": "Speaking a clear no when honoring my limits matters more than pleasing others.",
+      "policies": [
+        "TENSIONS in my chest that warn me a yes would be self-betrayal",
+        "PATTERNS where saying yes once made the next yes harder to refuse",
+        "MOMENTS where a clean no preserves my ability to be fully present later"
+      ],
+      "expectedCluster": "boundaries"
+    },
+    {
+      "id": "curiosity-1",
+      "title": "Following live curiosity",
+      "description": "Pay attention to what I'm genuinely curious about, not what I think I should be curious about.",
+      "policies": [
+        "FLICKERS of interest that I usually dismiss",
+        "QUESTIONS that keep returning even after I've tried to set them aside",
+        "TOPICS I find myself reading about in spare moments"
+      ],
+      "expectedCluster": "curiosity"
+    },
+    {
+      "id": "curiosity-2",
+      "title": "Genuine wonder",
+      "description": "Privilege real wonder over performed expertise.",
+      "policies": [
+        "MOMENTS of surprise where my model of the world breaks",
+        "QUESTIONS I'd ask if no one were watching",
+        "DOMAINS where I'm willing to be visibly a beginner"
+      ],
+      "expectedCluster": "curiosity"
+    },
+    {
+      "id": "duty-1",
+      "title": "Keeping my word",
+      "description": "Do what I said I would do, especially when no one would notice if I didn't.",
+      "policies": [
+        "COMMITMENTS I would silently let slip if I weren't paying attention",
+        "MOMENTS where the cheap thing to do would be to renegotiate",
+        "PEOPLE who may be quietly counting on me"
+      ],
+      "expectedCluster": "duty"
+    },
+    {
+      "id": "craftsmanship-1",
+      "title": "Doing it well",
+      "description": "Take real care with the thing in front of me, even if no one else will know the difference.",
+      "policies": [
+        "DETAILS that only the person making the thing notices",
+        "STEPS I'd be tempted to skip late at night",
+        "STANDARDS I hold even when 'good enough' would pass"
+      ],
+      "expectedCluster": "craftsmanship"
+    },
+    {
+      "id": "playfulness-1",
+      "title": "Letting it be light",
+      "description": "Don't let importance crowd out lightness when both can exist.",
+      "policies": [
+        "OPENINGS for a small joke that doesn't undercut the gravity",
+        "MOMENTS where the room visibly relaxes",
+        "INSTANCES where play is exactly what the situation needed"
+      ],
+      "expectedCluster": "playfulness"
+    }
+  ]
+}

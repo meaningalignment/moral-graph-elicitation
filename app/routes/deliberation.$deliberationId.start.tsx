@@ -19,6 +19,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     "Welcome! This process takes around 10-15 minutes."
 
   const carouselValues = await db.canonicalValuesCard.findMany({
+    where: { deliberationId: Number(deliberationId), isArchived: false },
     take: 12,
     include: {
       edgesFrom: true,

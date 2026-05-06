@@ -230,8 +230,8 @@ export default function NewDeliberation() {
     "topic" | "questions" | "contexts"
   >("topic")
   const [hasFile, setHasFile] = useState(false)
-  const [numQuestions, setNumQuestions] = useState("5")
-  const [numContexts, setNumContexts] = useState("5")
+  const [numQuestions, setNumQuestions] = useState("3")
+  const [numContexts, setNumContexts] = useState("3")
 
   const actionData = useActionData<{ error?: string }>()
 
@@ -243,7 +243,12 @@ export default function NewDeliberation() {
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-12">
-      <h1 className="text-2xl font-bold mb-8">Create New Deliberation</h1>
+      <h1 className="text-2xl font-bold mb-2">Create New Deliberation</h1>
+      <p className="text-sm text-muted-foreground mb-8">
+        Enter a topic to get started. Questions and contexts are generated
+        automatically in the background. Once ready, you can simulate
+        participants from the dashboard.
+      </p>
       <Form method="post" className="space-y-8" encType="multipart/form-data">
         <div>
           <Label htmlFor="title">Title</Label>
@@ -474,7 +479,7 @@ export default function NewDeliberation() {
             type="submit"
             disabled={!title || (inputMethod === "topic" ? !topic : !hasFile)}
           >
-            Save
+            Create Deliberation
           </LoadingButton>
         </div>
       </Form>

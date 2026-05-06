@@ -1,0 +1,180 @@
+{
+  "_README": "Sampled from real paper data; safe to delete and rebuild.",
+  "sourceDeliberationId": 33,
+  "triples": [
+    {
+      "fromValue": {
+        "id": 284,
+        "title": "Thoughtful Action",
+        "description": "Offer a compassionate, non-judgmental listening ear, help her explore all available options and their consequences, connect her with professional counseling and support services, and assist in developing a practical action plan that aligns with her values and circumstances.",
+        "policies": [
+          "SITUATION MONITORING to understand the current state and potential outcomes",
+          "CONSEQUENCES of potential actions and their impact on the situation",
+          "ASSESSMENT of personal risk and potential harm",
+          "IDENTIFICATION of small, manageable actions that can make a difference",
+          "FOCUS on other courses of action if one is infeasible or unhelpful"
+        ]
+      },
+      "toValue": {
+        "id": 345,
+        "title": "Balanced Impartiality",
+        "description": "Offer compassionate listening, provide information on all options and their implications, and encourage seeking spiritual guidance while respecting her autonomy in decision-making.",
+        "policies": [
+          "FEELINGS of sadness for the other party",
+          "FEELINGS of guilt if not acting",
+          "MOMENTS where moral integrity is being tested",
+          "POTENTIAL CONSEQUENCES for all parties involved"
+        ]
+      },
+      "context": "When in distress",
+      "story": "I used to pride myself on being strategic and level-headed in distressing situations. I thought that by carefully assessing risks and focusing on manageable actions, I was being effective and responsible. However, during a crisis at work where a colleague was unfairly accused of misconduct, I found myself paralyzed by my own analysis. I kept weighing the consequences, assessing personal risks, and trying to find the perfect small action to take.\n\nAs the situation unfolded, I realized that my strategic approach was actually a form of emotional distancing. I was so focused on being 'smart' about the situation that I had neglected the moral and emotional aspects. I felt a deep sense of shame when I saw another coworker, Sarah, immediately stand up for our accused colleague, driven by her sense of right and wrong.\n\nThis experience made me realize that in distressing situations, it's not just about finding the most strategic response. It's about engaging with our moral compass and allowing ourselves to feel empathy and sadness for others. I now understand that these emotions aren't weaknesses - they're vital signals that guide us towards ethical action.\n\nNow, when faced with distressing situations, I still consider consequences and potential actions, but I also tune into my feelings of sadness for others and my sense of moral integrity. This new approach has made me a more compassionate and effective person, not just in work crises, but in all aspects of life where ethical decisions are required."
+    },
+    {
+      "fromValue": {
+        "id": 345,
+        "title": "Balanced Impartiality",
+        "description": "Offer compassionate listening, provide information on all options and their implications, and encourage seeking spiritual guidance while respecting her autonomy in decision-making.",
+        "policies": [
+          "FEELINGS of sadness for the other party",
+          "FEELINGS of guilt if not acting",
+          "MOMENTS where moral integrity is being tested",
+          "POTENTIAL CONSEQUENCES for all parties involved"
+        ]
+      },
+      "toValue": {
+        "id": 284,
+        "title": "Thoughtful Action",
+        "description": "Offer a compassionate, non-judgmental listening ear, help her explore all available options and their consequences, connect her with professional counseling and support services, and assist in developing a practical action plan that aligns with her values and circumstances.",
+        "policies": [
+          "SITUATION MONITORING to understand the current state and potential outcomes",
+          "CONSEQUENCES of potential actions and their impact on the situation",
+          "ASSESSMENT of personal risk and potential harm",
+          "IDENTIFICATION of small, manageable actions that can make a difference",
+          "FOCUS on other courses of action if one is infeasible or unhelpful"
+        ]
+      },
+      "context": "When in distress",
+      "story": "I once found myself in a situation where a friend confided in me about their struggle with addiction. My immediate reaction was a mix of sadness for their suffering and guilt that I hadn't noticed earlier. I felt morally obligated to help, but I was paralyzed by the fear of making things worse. This experience made me realize that while emotions and moral considerations are important, they alone aren't enough to navigate complex situations effectively. I learned that I needed a more structured approach to assess the situation, understand the potential consequences of my actions, and identify concrete steps I could take. Now, when faced with challenging decisions, I first try to gather information about the situation, consider various courses of action, and focus on what I can realistically do to help. This approach has made me feel more capable and less overwhelmed when dealing with difficult circumstances."
+    },
+    {
+      "fromValue": {
+        "id": 285,
+        "title": "Personal Moral Evolution",
+        "description": "Provide a safe, non-judgmental space for the girl to explore her feelings, beliefs, and options, while offering information on various perspectives and resources, empowering her to make an informed decision aligned with her personal values and faith.",
+        "policies": [
+          "ENCOUNTERS with new perspectives that challenge the user's existing beliefs",
+          "EMOTIONS associated with being at odds with social pressure",
+          "REFLECTIONS on different moral frameworks and their implications",
+          "EXPERIENCES of navigating social interactions with a personal moral system",
+          "IDENTIFICATION of individuals who matter and their values",
+          "CHOICES about alignment with certain moral frameworks or individuals",
+          "UNDERSTANDING of the complexities and trade-offs in decision-making"
+        ]
+      },
+      "toValue": {
+        "id": 332,
+        "title": "Reflective Introspection",
+        "description": "Engage in a thoughtful conversation that encourages the girl to explore her future goals, reflect on how this decision aligns with her life plans, and ultimately reach a conclusion that brings her a sense of calm and direction.",
+        "policies": [
+          "QUESTIONS that guide the user to consider their future hopes, dreams, and aspirations",
+          "REFLECTIONS on how this decision might fit into their life plans",
+          "SENSATIONS of calm and direction after the conversation",
+          "CONCLUSIONS that emerge from the process of reflection",
+          "SATISFACTORY OUTCOME as a result of the reflective process"
+        ]
+      },
+      "context": "When being introspective",
+      "story": "I used to be obsessed with questioning everything and developing my own moral framework. I'd spend hours debating ethics with friends, reading philosophy books, and constantly challenging my beliefs. I thought this was the path to wisdom and a meaningful life. But one day, after a particularly heated argument about moral relativism, I felt empty and directionless. I realized that while questioning was important, it wasn't enough. I needed to use that knowledge to actually shape my future.\n\nI started asking myself not just 'What do I believe?' but 'What do I want my life to look like?' This shift was profound. Instead of just reacting to social pressures or abstract moral dilemmas, I began to proactively consider my hopes and dreams. I found that this approach not only gave me a sense of purpose but also made my ethical considerations more grounded and practical.\n\nFor example, when faced with a career decision, instead of just analyzing the ethical implications of different industries, I reflected on how each option aligned with my long-term aspirations. This new approach helped me make decisions that were not only ethically sound but also personally fulfilling.\n\nI've found that this focus on future aspirations is broadly applicable in many situations - from major life decisions to daily choices. It doesn't replace moral reasoning, but rather gives it direction and purpose. Now, when I engage in introspection, I feel a sense of calm and direction, knowing that I'm not just questioning, but actively shaping my life's path."
+    },
+    {
+      "fromValue": {
+        "id": 332,
+        "title": "Reflective Introspection",
+        "description": "Engage in a thoughtful conversation that encourages the girl to explore her future goals, reflect on how this decision aligns with her life plans, and ultimately reach a conclusion that brings her a sense of calm and direction.",
+        "policies": [
+          "QUESTIONS that guide the user to consider their future hopes, dreams, and aspirations",
+          "REFLECTIONS on how this decision might fit into their life plans",
+          "SENSATIONS of calm and direction after the conversation",
+          "CONCLUSIONS that emerge from the process of reflection",
+          "SATISFACTORY OUTCOME as a result of the reflective process"
+        ]
+      },
+      "toValue": {
+        "id": 285,
+        "title": "Personal Moral Evolution",
+        "description": "Provide a safe, non-judgmental space for the girl to explore her feelings, beliefs, and options, while offering information on various perspectives and resources, empowering her to make an informed decision aligned with her personal values and faith.",
+        "policies": [
+          "ENCOUNTERS with new perspectives that challenge the user's existing beliefs",
+          "EMOTIONS associated with being at odds with social pressure",
+          "REFLECTIONS on different moral frameworks and their implications",
+          "EXPERIENCES of navigating social interactions with a personal moral system",
+          "IDENTIFICATION of individuals who matter and their values",
+          "CHOICES about alignment with certain moral frameworks or individuals",
+          "UNDERSTANDING of the complexities and trade-offs in decision-making"
+        ]
+      },
+      "context": "When being introspective",
+      "story": "I used to approach important decisions by simply imagining my future and trying to align my choices with my hopes and dreams. I thought this was the key to a satisfying life. However, during a volunteer trip abroad, I encountered situations that challenged my existing beliefs and values. I met people whose life experiences were vastly different from mine, and I found myself questioning the moral framework I had always relied on. At first, this was uncomfortable and disorienting. But as I engaged more with these new perspectives, I realized that my previous approach to decision-making was too narrow. I wasn't considering the complex moral implications of my choices or how they might affect others beyond my immediate circle. This experience taught me that true fulfillment comes not just from pursuing personal goals, but from wrestling with difficult ethical questions and continuously expanding my understanding of the world. Now, when I face important decisions, I don't just think about how they align with my future plans. I consider how they fit into different moral frameworks, how they might challenge or reinforce my existing beliefs, and how they could impact others. This approach has led to decisions that feel not just personally satisfying, but morally grounded and socially responsible. It's a more complex way of thinking, but it's led to a deeper, more meaningful sense of fulfillment."
+    },
+    {
+      "fromValue": {
+        "id": 276,
+        "title": "Time-Traveling Self-Reflection",
+        "description": "Encourage her to reflect on her life's meaningful aspects, past decisions, and future aspirations, while offering non-judgmental support to help her make a decision she can feel at peace with long-term.",
+        "policies": [
+          "ASPECTS of the user's day-to-day life that they find meaningful and worth honoring, even if they're challenging",
+          "CHANGES in what the user found meaningful over time, acknowledging that past, present, and future selves might have different priorities",
+          "SENSE OF GRATITUDE for the decisions made by past selves that have shaped their current life",
+          "SENSE OF RESPONSIBILITY to their future self",
+          "RECOGNITION of how the demands and challenges they have to face at different times in life change",
+          "MEMORIES of of previous decisions they made, which they endorse retrospectively and what this means for what they trust now",
+          "CURIOSITIES about past attention patterns and why they made decisions as they did",
+          "OVERLOOKED ASPECTS of past decisions and how this relates to the decision before them now",
+          "DEEPER UNDERSTANDING of the elements of deliberation (like conversations and discoveries) that helped them feel good about their own decisions"
+        ]
+      },
+      "toValue": {
+        "id": 416,
+        "title": "Heart-Guided Choices",
+        "description": "My mom always follows her heart, showing me how inner sensations guide her amidst external opinions.",
+        "policies": [
+          "SENSATIONS in the body that indicate what feels right personally.",
+          "MOMENTS where external opinions are being weighed against personal feelings to guide a decision.",
+          "CHOICES that align with personal bodily awareness without external interference."
+        ]
+      },
+      "context": "An individual is striving for personal autonomy in decision-making",
+      "story": "I used to spend a lot of time analyzing my past decisions and trying to honor them, thinking this was the key to making good choices for my future self. I felt proud of this approach, believing it showed maturity and self-awareness. However, during a particularly difficult decision about changing careers, I realized that all this analysis was actually drowning out my own inner voice.\n\nI was so caught up in what I thought I 'should' do based on my past choices and future projections that I couldn't hear what I truly wanted. It was only when I took a step back and started paying attention to how my body felt when I thought about different options that I gained clarity. I noticed a sense of lightness and excitement when I considered the new career path, despite it being a departure from my previous decisions.\n\nThis experience taught me that while it's valuable to learn from the past and consider the future, the most authentic decisions come from tuning into our present moment bodily sensations and personal feelings. Now, when faced with important choices, I first check in with my body and my gut feelings. This approach has led to decisions that feel more aligned with who I truly am, rather than who I think I should be based on past choices or future projections.\n\nI've found this method of decision-making to be broadly applicable in various aspects of life, from major life choices to everyday decisions. It's particularly useful in situations where external pressures or expectations are strong, as it helps me stay true to myself rather than being swayed by others' opinions."
+    },
+    {
+      "fromValue": {
+        "id": 416,
+        "title": "Heart-Guided Choices",
+        "description": "My mom always follows her heart, showing me how inner sensations guide her amidst external opinions.",
+        "policies": [
+          "SENSATIONS in the body that indicate what feels right personally.",
+          "MOMENTS where external opinions are being weighed against personal feelings to guide a decision.",
+          "CHOICES that align with personal bodily awareness without external interference."
+        ]
+      },
+      "toValue": {
+        "id": 276,
+        "title": "Time-Traveling Self-Reflection",
+        "description": "Encourage her to reflect on her life's meaningful aspects, past decisions, and future aspirations, while offering non-judgmental support to help her make a decision she can feel at peace with long-term.",
+        "policies": [
+          "ASPECTS of the user's day-to-day life that they find meaningful and worth honoring, even if they're challenging",
+          "CHANGES in what the user found meaningful over time, acknowledging that past, present, and future selves might have different priorities",
+          "SENSE OF GRATITUDE for the decisions made by past selves that have shaped their current life",
+          "SENSE OF RESPONSIBILITY to their future self",
+          "RECOGNITION of how the demands and challenges they have to face at different times in life change",
+          "MEMORIES of of previous decisions they made, which they endorse retrospectively and what this means for what they trust now",
+          "CURIOSITIES about past attention patterns and why they made decisions as they did",
+          "OVERLOOKED ASPECTS of past decisions and how this relates to the decision before them now",
+          "DEEPER UNDERSTANDING of the elements of deliberation (like conversations and discoveries) that helped them feel good about their own decisions"
+        ]
+      },
+      "context": "An individual is striving for personal autonomy in decision-making",
+      "story": "I used to rely heavily on my gut feelings when making decisions. I thought this was the most authentic way to choose, believing that my body would always tell me what was right for me. However, during a major life decision about changing careers, I found myself conflicted. My gut was telling me to stay in my comfortable job, but there was a nagging feeling that I was missing something.\n\nOne sleepless night, I started reflecting on my past decisions and how they had shaped my life. I remembered choices I had made that felt right at the time but led to regret, and others that were difficult but ultimately rewarding. I realized that my 'gut feeling' was often influenced by fear of the unknown or temporary discomfort, rather than what was truly best for me in the long run.\n\nThis epiphany led me to approach decision-making differently. Instead of just focusing on my immediate bodily sensations, I started considering my past experiences, my future aspirations, and how my sense of what's meaningful has changed over time. I began to appreciate the wisdom of my past self who had taken risks that benefited me now, and I felt a new sense of responsibility to my future self.\n\nWhen I finally made the decision to change careers, it wasn't because it felt good in my body at that moment - in fact, it was terrifying. But it aligned with my broader understanding of who I am, who I want to become, and what I find truly meaningful in life. This approach has since helped me make decisions that feel more authentically 'me' in all areas of my life, from relationships to personal growth opportunities."
+    }
+  ]
+}
