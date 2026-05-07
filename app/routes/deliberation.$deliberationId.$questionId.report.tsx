@@ -316,6 +316,7 @@ function ForceGraphWrapper({
         </Tooltip>
       </TooltipProvider>
       <Link
+        prefetch="intent"
         to={`/deliberation/${deliberationId}/graph?contextId=${encodeURIComponent(
           intervention.contextId
         )}`}

@@ -8,46 +8,39 @@ import {
   useRouteLoaderData,
 } from "@remix-run/react"
 import { auth, db } from "./config.server"
-import { Deliberation, User, ValuesCard } from "@prisma/client"
+import { Deliberation, User } from "@prisma/client"
 import { TooltipProvider } from "@radix-ui/react-tooltip"
 import { Toaster } from "sonner"
+import { NavigationProgress } from "./components/navigation-progress"
 
 import "./globals.css"
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
+  // Runs on every navigation. Keep it tight: two indexed lookups in parallel,
+  // no unbounded queries. The previous version pulled every ValuesCard for
+  // the user, which got slow as users accumulated chats.
   const userId = await auth.getUserId(request)
+  const deliberationId = params.deliberationId
+    ? Number(params.deliberationId)
+    : undefined
 
-  const user =
-    userId &&
-    ((await db.user.findUnique({
-      where: { id: userId },
-    })) as User | null)
+  const [user, deliberation] = await Promise.all([
+    userId
+      ? (db.user.findUnique({ where: { id: userId } }) as Promise<User | null>)
+      : Promise.resolve(null),
+    deliberationId
+      ? (db.deliberation.findFirst({
+          where: { id: deliberationId },
+        }) as Promise<Deliberation | null>)
+      : Promise.resolve(null),
+  ])
 
-  const values =
-    userId &&
-    ((await db.valuesCard.findMany({
-      where: { chat: { userId } },
-    })) as ValuesCard[] | null)
-
-  const deliberation =
-    params.deliberationId &&
-    ((await db.deliberation.findFirst({
-      where: {
-        id: Number(params.deliberationId),
-      },
-    })) as Deliberation | null)
-
-  return json({ user, values, deliberation })
+  return json({ user, deliberation })
 }
 
 export function useCurrentUser(): User | null {
   const { user } = useRouteLoaderData("root") as SerializeFrom<typeof loader>
   return user
-}
-
-export function useCurrentUserValues(): ValuesCard[] | null {
-  const { values } = useRouteLoaderData("root") as SerializeFrom<typeof loader>
-  return values
 }
 
 export function useCurrentDeliberation(): Deliberation | null {
@@ -68,6 +61,7 @@ export default function App() {
           <Links />
         </head>
         <body>
+          <NavigationProgress />
           <Outlet />
           <ScrollRestoration />
           <Scripts />

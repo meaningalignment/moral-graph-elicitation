@@ -1,5 +1,11 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node"
-import { NavLink, Outlet, useLoaderData, useParams } from "@remix-run/react"
+import { defer, LoaderFunctionArgs } from "@remix-run/node"
+import {
+  Await,
+  NavLink,
+  Outlet,
+  useLoaderData,
+  useParams,
+} from "@remix-run/react"
 import { db } from "~/config.server"
 import { cn } from "~/lib/utils"
 import { Alert, AlertTitle, AlertDescription } from "~/components/ui/alert"
@@ -11,18 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
-import { useState } from "react"
+import { Suspense, useState } from "react"
+import { Skeleton } from "~/components/ui/skeleton"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { deliberationId } = params
 
-  // Get edges, questions and contexts
-  const [edges, questions, contexts] = await Promise.all([
+  const data = Promise.all([
     db.edge.findMany({
       orderBy: { createdAt: "desc" },
-      where: {
-        deliberationId: Number(deliberationId)!,
-      },
+      where: { deliberationId: Number(deliberationId)! },
       select: {
         userId: true,
         createdAt: true,
@@ -31,13 +35,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
         comment: true,
         type: true,
         contextId: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        user: { select: { id: true, name: true, email: true } },
       },
     }),
     db.question.findMany({
@@ -45,22 +43,18 @@ export async function loader({ params }: LoaderFunctionArgs) {
       select: {
         id: true,
         title: true,
-        ContextsForQuestions: {
-          select: { contextId: true },
-        },
+        ContextsForQuestions: { select: { contextId: true } },
       },
     }),
     db.context.findMany({
       where: { deliberationId: Number(deliberationId) },
       include: {
-        ContextsForQuestions: {
-          select: { questionId: true },
-        },
+        ContextsForQuestions: { select: { questionId: true } },
       },
     }),
-  ])
+  ]).then(([edges, questions, contexts]) => ({ edges, questions, contexts }))
 
-  return json({ edges, questions, contexts })
+  return defer({ data })
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -85,7 +79,42 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminLinks() {
-  const data = useLoaderData<typeof loader>()
+  const { data } = useLoaderData<typeof loader>()
+  return (
+    <Suspense fallback={<VotesShell />}>
+      <Await resolve={data}>{(resolved) => <VotesView data={resolved} />}</Await>
+    </Suspense>
+  )
+}
+
+function VotesShell() {
+  return (
+    <div className="flex h-full">
+      <div className="w-64 flex-shrink-0 border-r bg-white px-3 py-4 space-y-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+        <div className="space-y-3 pt-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 p-6">
+        <Skeleton className="h-32 w-full" />
+      </div>
+    </div>
+  )
+}
+
+function VotesView({
+  data,
+}: {
+  data: { edges: any[]; questions: any[]; contexts: any[] }
+}) {
   const { deliberationId } = useParams()
   const [selectedQuestion, setSelectedQuestion] = useState<string>("all")
   const [selectedContext, setSelectedContext] = useState<string>("all")

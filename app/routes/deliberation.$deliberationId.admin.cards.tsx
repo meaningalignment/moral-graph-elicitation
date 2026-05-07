@@ -33,6 +33,7 @@ export default function AdminCardsScreen() {
           {values.map((value) => (
             <Link
               key={value.id}
+              prefetch="intent"
               to={`/dashboard/${deliberationId}/card/${value.id}`}
             >
               <div className="cursor-pointer hover:opacity-80 active:opacity-70 hover:duration-0 hover:transition-none opacity-100">
