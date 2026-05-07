@@ -159,20 +159,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     })
 
     return json({ success: true })
-  } else if (action === "generateSeedGraph") {
-    const deliberationId = Number(params.deliberationId)!
-
-    await db.deliberation.update({
-      where: { id: deliberationId },
-      data: { setupStatus: "generating_graph" },
-    })
-
-    await inngest.send({
-      name: "gen-seed-graph",
-      data: { deliberationId, numValues: 12 },
-    })
-
-    return json({ success: true, refetch: true })
   } else if (action === "simulateParticipants") {
     const deliberationId = Number(params.deliberationId)!
     const count = Number(formData.get("count") ?? 4)
@@ -187,7 +173,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         voteLimit: 5,
       },
     })
-    return json({ success: true, simulationStarted: true })
+    return json({ success: true, simulationStarted: true, refetch: true })
   }
 }
 
@@ -239,13 +225,11 @@ export default function DeliberationDashboard() {
   const revalidator = useRevalidator()
   const { deliberationId } = useParams()
   const [openQuestionId, setOpenQuestionId] = useState<number | null>(null)
-  const [isGeneratingGraph, setIsGeneratingGraph] = useState(false)
 
   // Poll for setup status if the deliberation is not ready
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null
     if (deliberation.setupStatus !== "ready") {
-      setIsGeneratingGraph(false)
       intervalId = setInterval(() => {
         revalidator.revalidate()
       }, 5000)
@@ -271,14 +255,6 @@ export default function DeliberationDashboard() {
 
   const toggleQuestionDropdown = (questionId: number) => {
     setOpenQuestionId(openQuestionId === questionId ? null : questionId)
-  }
-
-  const handleGenerateSeedGraph = () => {
-    setIsGeneratingGraph(true)
-    fetcher.submit(
-      { action: "generateSeedGraph", numValues: "10" },
-      { method: "post" }
-    )
   }
 
   const handleResetDeliberation = () => {
@@ -394,43 +370,20 @@ export default function DeliberationDashboard() {
               </p>
             </div>
           </div>
-          {((deliberation._count.canonicalValuesCards === 0 &&
-            deliberation.setupStatus === "ready") ||
-            deliberation.setupStatus === "generating_graph") && (
-            <Alert className="mt-6 mb-4 bg-slate-50">
-              <div className="flex flex-row space-x-2 mb-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>No responses yet</AlertTitle>
-              </div>
-
-              <AlertDescription className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <span className="pr-4">
-                    Would you like to generate a moral graph to seed the
-                    deliberation?
-                  </span>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This might take a few minutes to complete
-                  </p>
+          {deliberation._count.canonicalValuesCards === 0 &&
+            deliberation.setupStatus === "ready" && (
+              <Alert className="mt-6 mb-4 bg-slate-50">
+                <div className="flex flex-row space-x-2 mb-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>No responses yet</AlertTitle>
                 </div>
-                {deliberation.setupStatus === "generating_graph" ||
-                isGeneratingGraph ? (
-                  <div className="bg-white rounded-md px-2 py-1 border flex flex-row items-center gap-1 mt-2 sm:mt-0 animate-pulse">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                    <span className="text-gray-400">Generating Graph...</span>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    onClick={handleGenerateSeedGraph}
-                    className="mt-2 sm:mt-0"
-                  >
-                    Generate Graph
-                  </Button>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
+                <AlertDescription>
+                  Click <b>Simulate Participants</b> below to seed this
+                  deliberation with persona-driven chats, values cards, and
+                  upgrade stories.
+                </AlertDescription>
+              </Alert>
+            )}
           <div className="mt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link
               to={`/deliberation/${deliberationId}/graph`}
@@ -444,7 +397,10 @@ export default function DeliberationDashboard() {
             <Button
               variant="outline"
               className="w-full sm:w-auto"
-              disabled={fetcher.state !== "idle"}
+              disabled={
+                fetcher.state !== "idle" ||
+                deliberation.setupStatus === "generating_graph"
+              }
               onClick={() => {
                 const raw = window.prompt(
                   "How many simulated participants? (number, or comma-separated persona slugs e.g. worried-parent,civil-libertarian)",
@@ -457,7 +413,14 @@ export default function DeliberationDashboard() {
                 )
               }}
             >
-              Simulate Participants
+              {deliberation.setupStatus === "generating_graph" ? (
+                <span className="flex items-center gap-1">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Simulating…
+                </span>
+              ) : (
+                "Simulate Participants"
+              )}
             </Button>
             <Link
               to={`/deliberation/${deliberation.id}/start`}
