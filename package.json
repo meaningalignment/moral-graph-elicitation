@@ -19,6 +19,7 @@
     "db-diff": "prisma migrate diff --from-schema-datasource ./schema.prisma --to-schema-datamodel ./schema.prisma",
     "db": "tsx scripts/db.ts",
     "simulate": "tsx scripts/simulate.ts",
+    "seed": "tsx scripts/seed-deliberation.ts",
     "dedup:dryrun": "tsx tests/pipeline/dedup-dryrun.fixture.ts",
     "fixtures:dedup": "tsx scripts/build-dedup-fixture.ts",
     "fixtures:transitions": "tsx scripts/build-transitions-fixture.ts"

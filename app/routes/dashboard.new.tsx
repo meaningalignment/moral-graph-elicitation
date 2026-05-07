@@ -30,7 +30,20 @@ import {
   generateScenario,
   parseScenarioGenerationData as parseScenarioGenData,
 } from "~/services/scenario-generation"
+import { seedQuestionsAndContextsCore } from "~/services/generation"
 import { Deliberation } from "@prisma/client"
+
+/** Fire a background promise that survives the response. Plays nicely
+ * both in local Node (the process keeps it alive) and on Vercel
+ * serverless (where the lambda will hold for up to maxDuration).
+ *
+ * Vercel's @vercel/functions exports `waitUntil` for the same purpose;
+ * we don't import it to avoid a hard dep on the runtime. */
+function fireAndForget(label: string, fn: () => Promise<unknown>) {
+  fn().catch((e) => {
+    console.error(`[bg ${label}] ${(e as Error).message}`)
+  })
+}
 
 async function handleTopicSubmission(deliberationData: {
   title: string
@@ -52,15 +65,35 @@ async function handleTopicSubmission(deliberationData: {
     },
   })
 
-  await inngest.send({
-    name: "gen-seed-questions-contexts",
-    data: {
+  // Send the Inngest event for production (where Inngest cloud picks it up).
+  // Don't await — if Inngest isn't configured, we don't want to block.
+  inngest
+    .send({
+      name: "gen-seed-questions-contexts",
+      data: {
+        deliberationId: deliberation.id,
+        topic,
+        numQuestions,
+        numContexts,
+      },
+    })
+    .catch((e) =>
+      console.warn("inngest.send failed (non-fatal):", (e as Error).message)
+    )
+
+  // ALSO run the seed directly as a background promise. This makes the seed
+  // work in local dev (where `npm run inngest` may not be running) and as a
+  // safety net in production. Inngest itself is idempotent on its event id,
+  // and the seed function early-exits if questions already exist (writes are
+  // upserts), so a double-run is harmless.
+  fireAndForget(`seed delib ${deliberation.id}`, () =>
+    seedQuestionsAndContextsCore({
       deliberationId: deliberation.id,
       topic,
       numQuestions,
       numContexts,
-    },
-  })
+    })
+  )
 
   return deliberation
 }
