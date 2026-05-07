@@ -18,11 +18,25 @@ export async function generateQuestions(
   numQuestions: number = 5
 ) {
   return genObj({
-    prompt: `You will be given a topic. Your task is to reason about what potential questions could be posed around the topic, where each question starts with a personal story depicting a specific scenario that would require a different approach than all other questions.
+    prompt: `You will be given a topic. Generate ${numQuestions} questions a real person might actually ask about it.
 
-    Return a list of ${numQuestions} such questions that would be relevant to consider for the topic.
-    
-    For example, if the topic is "Abortion policy in the US", a question might be "A christian girl is considering an abortion, grappling with her faith and personal needs. What support could be provided to her?"`,
+# Length & tone
+Each question should be SHORT — at most 1-2 sentences, ideally written the way a worried friend or a frustrated parent would phrase it. Set the scene with one concrete situation and then ask a single, plain question. NO policy framing, NO multi-clause "while also" sentences, NO lists of mechanisms, NO "should we do A, B, or C". Just one human asking one human question.
+
+# Diversity
+Each question should depict a DIFFERENT specific scenario from the others — different person, different context, different value tension. Together they should span the topic.
+
+# Good examples
+"My 10-year-old son refuses to do his homework, spending all his time at his computer instead. How can I make him behave properly?"
+
+"How could US abortion policy support christian girls considering abortion?"
+
+"My elderly father is forgetting things and I'm scared. Should I take away his car keys?"
+
+# Bad examples (too long, too policy-essay)
+"A 72-year-old woman on a fixed income was displaced when her SRO closed for code violations; with limited mobility and diabetes, she has spent months in a temporary respite site while waiting for supportive housing. Each move worsens her health and risks hospitalization. What should SF do to fast-track placements for medically fragile seniors—master-leasing hotels, increasing home- and community-based services, and incentivizing landlords to accept vouchers—while also preserving and rehabilitating existing SRO stock to prevent future displacements?"
+
+(The bad one packs a CV, three policy proposals, and a "while also" clause into one question. Don't do that.)`,
     data: { topic },
     schema: z.object({
       questions: z
@@ -31,7 +45,7 @@ export async function generateQuestions(
             question: z
               .string()
               .describe(
-                `A brief personal story (2-3 sentences) depicting a specific scenario related to the topic, followed by a question about how to address the situation. The questions should be values-laden and focus on how to best support or address the situations described.`
+                `A short, plain-spoken question. Maximum 1-2 sentences, under 240 characters total. Sets one concrete scene then asks one direct question. No policy enumeration.`
               ),
             title: z
               .string()
