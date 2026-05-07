@@ -1,5 +1,11 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node"
-import { NavLink, Outlet, useLoaderData, useParams } from "@remix-run/react"
+import { defer, LoaderFunctionArgs } from "@remix-run/node"
+import {
+  Await,
+  NavLink,
+  Outlet,
+  useLoaderData,
+  useParams,
+} from "@remix-run/react"
 import { db } from "~/config.server"
 import { cn } from "~/lib/utils"
 import {
@@ -9,19 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { Alert, AlertTitle, AlertDescription } from "~/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { Skeleton } from "~/components/ui/skeleton"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { deliberationId } = params
 
-  const [chats, questions, contexts] = await Promise.all([
+  const data = Promise.all([
     db.chat.findMany({
       orderBy: { createdAt: "desc" },
-      where: {
-        deliberationId: Number(deliberationId)!,
-      },
+      where: { deliberationId: Number(deliberationId)! },
       select: {
         id: true,
         createdAt: true,
@@ -30,20 +35,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
         questionId: true,
         Question: {
           select: {
-            ContextsForQuestions: {
-              select: {
-                contextId: true,
-              },
-            },
+            ContextsForQuestions: { select: { contextId: true } },
           },
         },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        user: { select: { id: true, name: true, email: true } },
         ValuesCard: true,
       },
     }),
@@ -55,9 +50,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
       where: { deliberationId: Number(deliberationId)! },
       select: { id: true },
     }),
-  ])
+  ]).then(([chats, questions, contexts]) => ({ chats, questions, contexts }))
 
-  return json({ chats, questions, contexts })
+  return defer({ data })
 }
 
 function StatusBadge({ hasValuesCard }: { hasValuesCard: boolean }) {
@@ -76,7 +71,42 @@ function StatusBadge({ hasValuesCard }: { hasValuesCard: boolean }) {
 }
 
 export default function AdminChats() {
-  const data = useLoaderData<typeof loader>()
+  const { data } = useLoaderData<typeof loader>()
+  return (
+    <Suspense fallback={<ChatsShell />}>
+      <Await resolve={data}>{(resolved) => <ChatsView data={resolved} />}</Await>
+    </Suspense>
+  )
+}
+
+function ChatsShell() {
+  return (
+    <div className="flex h-full">
+      <div className="w-64 flex-shrink-0 border-r bg-white px-3 py-4 space-y-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+        <div className="space-y-3 pt-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 p-6">
+        <Skeleton className="h-32 w-full" />
+      </div>
+    </div>
+  )
+}
+
+function ChatsView({
+  data,
+}: {
+  data: { chats: any[]; questions: any[]; contexts: any[] }
+}) {
   const [selectedQuestion, setSelectedQuestion] = useState("all")
   const [selectedContext, setSelectedContext] = useState("all")
 

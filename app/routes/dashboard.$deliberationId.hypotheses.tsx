@@ -1,5 +1,6 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node"
+import { defer, LoaderFunctionArgs, json } from "@remix-run/node"
 import {
+  Await,
   NavLink,
   Outlet,
   useLoaderData,
@@ -18,18 +19,16 @@ import {
   SelectValue,
 } from "~/components/ui/select"
 import { Button } from "~/components/ui/button"
-import { useState } from "react"
+import { Suspense, useState } from "react"
+import { Skeleton } from "~/components/ui/skeleton"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { deliberationId } = params
 
-  // Get hypotheses, questions and contexts
-  const [hypotheses, questions, contexts] = await Promise.all([
+  const data = Promise.all([
     db.edgeHypothesis.findMany({
       orderBy: { createdAt: "desc" },
-      where: {
-        deliberationId: Number(deliberationId)!,
-      },
+      where: { deliberationId: Number(deliberationId)! },
       select: {
         fromId: true,
         toId: true,
@@ -37,20 +36,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
         hypothesisRunId: true,
         createdAt: true,
         contextId: true,
-        from: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-          },
-        },
-        to: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-          },
-        },
+        from: { select: { id: true, title: true, description: true } },
+        to: { select: { id: true, title: true, description: true } },
       },
     }),
     db.question.findMany({
@@ -58,22 +45,22 @@ export async function loader({ params }: LoaderFunctionArgs) {
       select: {
         id: true,
         title: true,
-        ContextsForQuestions: {
-          select: { contextId: true },
-        },
+        ContextsForQuestions: { select: { contextId: true } },
       },
     }),
     db.context.findMany({
       where: { deliberationId: Number(deliberationId) },
       include: {
-        ContextsForQuestions: {
-          select: { questionId: true },
-        },
+        ContextsForQuestions: { select: { questionId: true } },
       },
     }),
-  ])
+  ]).then(([hypotheses, questions, contexts]) => ({
+    hypotheses,
+    questions,
+    contexts,
+  }))
 
-  return json({ hypotheses, questions, contexts })
+  return defer({ data })
 }
 
 export async function action({ request, params }: LoaderFunctionArgs) {
@@ -88,7 +75,48 @@ export async function action({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function AdminHypotheses() {
-  const data = useLoaderData<typeof loader>()
+  const { data } = useLoaderData<typeof loader>()
+  return (
+    <Suspense fallback={<HypothesesShell />}>
+      <Await resolve={data}>{(resolved) => <HypothesesView data={resolved} />}</Await>
+    </Suspense>
+  )
+}
+
+function HypothesesShell() {
+  return (
+    <div className="flex h-full">
+      <div className="w-64 flex-shrink-0 border-r bg-white px-3 py-4 space-y-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+        <div className="space-y-3 pt-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 p-6">
+        <Skeleton className="h-6 w-1/3 mb-3" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    </div>
+  )
+}
+
+function HypothesesView({
+  data,
+}: {
+  data: {
+    hypotheses: any[]
+    questions: any[]
+    contexts: any[]
+  }
+}) {
   const { deliberationId } = useParams()
   const fetcher = useFetcher()
   const [selectedQuestion, setSelectedQuestion] = useState<string>("all")

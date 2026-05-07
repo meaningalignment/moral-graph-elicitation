@@ -51,6 +51,7 @@ function Chats() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
         {card.valuesCards.map((c) => (
           <Link
+            prefetch="intent"
             to={`/dashboard/${deliberationId}/${c.chat!.id}`}
             className="mb-6"
           >
@@ -75,6 +76,7 @@ function SimilarCards({
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
         {similar.map((card) => (
           <Link
+            prefetch="intent"
             to={`/dashboard/${deliberationId}/card/${card.id}`}
             className="mb-6"
           >
