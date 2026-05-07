@@ -169,6 +169,84 @@ async function onFailure({ event, step }: { event: any; step: any }) {
   )
 }
 
+/**
+ * Inngest-free version of the seed flow. Generates questions for a topic,
+ * then contexts for each question, and writes everything to the DB.
+ * Called directly from the dashboard.new action (so seeding works even
+ * when Inngest isn't connected) and from the Inngest function below for
+ * retry-ability when it is.
+ */
+export async function seedQuestionsAndContextsCore({
+  deliberationId,
+  topic,
+  numQuestions = 5,
+  numContexts = 5,
+  log = console,
+}: {
+  deliberationId: number
+  topic: string
+  numQuestions?: number
+  numContexts?: number
+  log?: { info: (s: string) => void; error?: (s: string) => void }
+}): Promise<{ questionIds: number[]; contextCount: number }> {
+  // Idempotency guard: if questions already exist for this deliberation,
+  // there's nothing to seed. Lets us safely call this twice (e.g. once
+  // from the dashboard.new action AND once from Inngest).
+  const existingQuestions = await db.question.count({ where: { deliberationId } })
+  if (existingQuestions > 0) {
+    log.info(
+      `[seed] deliberation ${deliberationId} already has ${existingQuestions} questions, skipping`
+    )
+    return { questionIds: [], contextCount: 0 }
+  }
+
+  log.info(`[seed] deliberation=${deliberationId} topic=${topic}`)
+  await db.deliberation.update({
+    where: { id: deliberationId },
+    data: { setupStatus: "generating_questions" },
+  })
+
+  try {
+    const questions = await generateQuestions(topic, numQuestions)
+    log.info(`[seed] generated ${questions.length} questions`)
+    const contexts: { context: string; questionId: number }[] = []
+    const dbQuestionIds: number[] = []
+
+    for (const question of questions) {
+      const dbQuestion = (await db.question.create({
+        data: {
+          question: question.question,
+          title: question.title,
+          deliberationId,
+        },
+      })) as Question
+      dbQuestionIds.push(dbQuestion.id)
+
+      const questionContexts = await generateContextsFromQuestion(
+        question.question,
+        numContexts
+      )
+      contexts.push(
+        ...questionContexts.map((c: any) => ({
+          context: c,
+          questionId: dbQuestion.id,
+        }))
+      )
+    }
+
+    await upsertContextsInDb(deliberationId, contexts, log as any)
+    await resetDeliberationStatus(deliberationId)
+    log.info(
+      `[seed] done — ${dbQuestionIds.length} questions, ${contexts.length} contexts`
+    )
+    return { questionIds: dbQuestionIds, contextCount: contexts.length }
+  } catch (e) {
+    log.error?.(`[seed] failed: ${(e as Error).message}`)
+    await resetDeliberationStatus(deliberationId)
+    throw e
+  }
+}
+
 export const generateSeedQuestionsAndContexts = inngest.createFunction(
   { id: "generate-seed-questions-and-contexts", onFailure },
   { event: "gen-seed-questions-contexts" },
