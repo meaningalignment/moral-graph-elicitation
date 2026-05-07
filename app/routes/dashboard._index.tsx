@@ -25,12 +25,14 @@ export default function DeliberationsIndex() {
 
   return (
     <div className="container mx-auto flex flex-col items-center justify-center h-screen space-y-6">
-      <h1 className="text-3xl font-bold text-center">Welcome</h1>
-      <p className="text-center text-gray-600">
-        To get started, create a new type of deliberation.
+      <h1 className="font-serif text-4xl font-semibold tracking-tight text-center">
+        Welcome
+      </h1>
+      <p className="text-center text-muted-foreground text-base leading-relaxed">
+        To get started, create a new deliberation.
       </p>
       <Button asChild>
-        <Link prefetch="intent" to="/dashboard/new">
+        <Link prefetch="render" to="/dashboard/new">
           New Deliberation
         </Link>
       </Button>

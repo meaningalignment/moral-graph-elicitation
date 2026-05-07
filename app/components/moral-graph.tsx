@@ -101,44 +101,44 @@ function LinkInfoBox({
 
   return (
     <div className="info-box z-50" style={style as any}>
-      <div className="border-2 border-gray-200 rounded-xl px-8 py-4 max-w-sm bg-white flex flex-col">
-        <p className="text-sm font-semibold text-gray-400 mb-1">
+      <div className="border border-border rounded-xl px-8 py-5 max-w-sm bg-card flex flex-col">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
           {link.contexts.join(", ")}
         </p>
-        <p className="text-base mb-6">
+        <p className="font-serif text-base leading-snug mb-6">
           Is it wiser to follow{" "}
-          <em className="font-semibold">
+          <em className="font-semibold not-italic">
             {(link.target as CanonicalValuesCard).title}
           </em>{" "}
           rather than{" "}
-          <em className="font-semibold">
+          <em className="font-semibold not-italic">
             {(link.source as CanonicalValuesCard).title}
           </em>
           ?
         </p>
-        <div className="flex justify-between">
-          <p className="font-bold">Wiser</p>
-          <p className="text-gray-400">
+        <div className="flex justify-between text-sm">
+          <p className="font-medium">Wiser</p>
+          <p className="font-mono text-muted-foreground">
             {formatCount(link.counts.markedWiser)}
           </p>
         </div>
-        <div className="flex justify-between">
-          <p className="font-bold">Not Wiser</p>
-          <p className="text-gray-400">
+        <div className="flex justify-between text-sm">
+          <p className="font-medium">Not Wiser</p>
+          <p className="font-mono text-muted-foreground">
             {formatCount(link.counts.markedNotWiser)}
           </p>
         </div>
         {link.counts.markedLessWise > 0 && (
-          <div className="flex justify-between">
-            <p className="font-bold">Less Wise</p>
-            <p className="text-gray-400">
+          <div className="flex justify-between text-sm">
+            <p className="font-medium">Less Wise</p>
+            <p className="font-mono text-muted-foreground">
               {formatCount(link.counts.markedLessWise)}
             </p>
           </div>
         )}
-        <div className="flex justify-between">
-          <p className="font-bold">Unsure</p>
-          <p className="text-gray-400">
+        <div className="flex justify-between text-sm">
+          <p className="font-medium">Unsure</p>
+          <p className="font-mono text-muted-foreground">
             {formatCount(link.counts.markedUnsure)}
           </p>
         </div>
@@ -249,6 +249,8 @@ function Graph({
       .attr("xoverflow", "visible")
       .append("svg:path")
       .attr("d", "M 0,-5 L 10,0 L 0,5")
+      .attr("fill", "#B8854A")
+      .attr("stroke", "none")
 
     // Add zoom behavior
     const zoom = d3.zoom().on("zoom", (event) => {
@@ -285,6 +287,11 @@ function Graph({
           .strength(0.05)
       ) // Weaker central pull
 
+    // Notebook palette: warm tan edges, navy nodes.
+    const tan = "#B8854A"
+    const navy = "#1A2540"
+    const tanFaint = "#D9C2A3" // light tan for low-confidence edges
+
     // Draw links
     const link = g
       .append("g")
@@ -292,8 +299,10 @@ function Graph({
       .data(links)
       .join("line")
       .attr("stroke", (d: Link) => {
-        return d3.interpolateGreys(d.thickness * 5)
+        // Confidence ramps from light tan -> solid tan.
+        return d3.interpolateRgb(tanFaint, tan)(Math.min(1, d.thickness * 1.5))
       })
+      .attr("stroke-opacity", 0.85)
       .attr("stroke-width", 2)
       .attr("marker-end", "url(#arrowhead)") // Add arrowheads
       .on("mouseover", (event: any, d: Link) => {
@@ -317,7 +326,8 @@ function Graph({
       .enter()
       .append("text")
       .attr("font-size", "8px")
-      .attr("fill", "#cccccc")
+      .attr("font-family", '"IBM Plex Mono", ui-monospace, monospace')
+      .attr("fill", "#9C8A6F")
       .attr("text-anchor", "middle")
       .attr("dy", -5)
       .on("mouseover", (event: any, d: Link) => {
@@ -342,8 +352,12 @@ function Graph({
       .join("circle")
       .attr("r", 10)
       .attr("fill", (d: Node) =>
-        d.wisdom ? d3.interpolateBlues(d.wisdom / 5) : "lightgray"
+        d.wisdom
+          ? d3.interpolateRgb("#D9C2A3", tan)(Math.min(1, d.wisdom / 5))
+          : navy
       )
+      .attr("stroke", navy)
+      .attr("stroke-width", 1)
       .on("mouseover", (event: any, d: Node) => {
         if (hoverTimeout) clearTimeout(hoverTimeout)
         setHoveredNode(d)
@@ -372,7 +386,9 @@ function Graph({
       .data(nodes)
       .join("text")
       .text((d: Node) => d.title)
-      .attr("font-size", "10px")
+      .attr("font-size", "11px")
+      .attr("font-family", '"Source Serif 4", ui-serif, Georgia, serif')
+      .attr("fill", navy)
 
     // Update positions
     simulation.on("tick", () => {

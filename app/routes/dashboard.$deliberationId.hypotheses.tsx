@@ -86,7 +86,7 @@ export default function AdminHypotheses() {
 function HypothesesShell() {
   return (
     <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r bg-white px-3 py-4 space-y-4">
+      <div className="w-64 flex-shrink-0 border-r bg-card px-3 py-4 space-y-4">
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-9 w-full" />
         <Skeleton className="h-9 w-full" />
@@ -172,9 +172,9 @@ function HypothesesView({
 
   return (
     <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r overflow-y-auto bg-white px-3 py-4">
+      <div className="w-64 flex-shrink-0 border-r overflow-y-auto bg-card px-3 py-4">
         <div className="mb-6">
-          <div className="flex items-center rounded-lg px-3 py-2 text-slate-900">
+          <div className="flex items-center rounded-lg px-3 py-2 text-foreground">
             <svg
               className="h-5 w-5"
               xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +189,7 @@ function HypothesesView({
             </svg>
             <span className="ml-3 text-base font-semibold">Hypotheses</span>
           </div>
-          <div className="px-3 text-sm text-slate-500">
+          <div className="px-3 text-sm text-muted-foreground">
             {filteredHypotheses.length} upgrade
             {filteredHypotheses.length !== 1 ? "s" : ""} available
           </div>
@@ -260,9 +260,9 @@ function HypothesesView({
               key={`${hypothesis.fromId}-${hypothesis.toId}-${hypothesis.contextId}`}
               className={({ isActive, isPending }) =>
                 cn(
-                  "block rounded-lg hover:bg-slate-100",
-                  isPending && "bg-slate-50",
-                  isActive && "bg-slate-100"
+                  "block rounded-lg hover:bg-muted",
+                  isPending && "bg-muted",
+                  isActive && "bg-muted"
                 )
               }
             >
@@ -273,10 +273,10 @@ function HypothesesView({
                 >
                   {hypothesis.from!.title} → {hypothesis.to!.title}
                 </div>
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="text-xs text-muted-foreground mt-1">
                   {new Date(hypothesis.createdAt).toLocaleDateString()}
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-muted-foreground">
                   {hypothesis.contextId}
                 </div>
               </li>
@@ -288,7 +288,7 @@ function HypothesesView({
       <div className="flex-1 overflow-y-auto">
         <div className="p-6">
           {filteredHypotheses.length === 0 ? (
-            <Alert className="bg-slate-50">
+            <Alert className="bg-muted">
               <div className="flex flex-row space-x-2">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>No hypotheses found</AlertTitle>

@@ -39,7 +39,7 @@ export default function AdminLink() {
         <h1 className="text-md font-bold mb-2 pl-12 md:pl-0">
           {edge.contextId}
         </h1>
-        <p className="text-gray-700">{edge.story}</p>
+        <p className="text-foreground">{edge.story}</p>
       </div>
       <div
         className={cn(
@@ -86,7 +86,7 @@ export default function AdminLink() {
           <Textarea
             id="comment"
             disabled={true}
-            className="bg-white min-h-[200px]"
+            className="bg-card min-h-[200px]"
             value={edge.comment ?? ""}
           />
         </div>

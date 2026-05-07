@@ -68,7 +68,7 @@ export function SkeletonRow({ cols = 3 }: { cols?: number }) {
 /** Mimics the ValuesCard component shape used in /values, /chats etc. */
 export function SkeletonValuesCard() {
   return (
-    <div className="rounded-lg border bg-white p-4 space-y-3 shadow-sm">
+    <div className="rounded-lg border border-border bg-card p-4 space-y-3">
       <Skeleton className="h-5 w-2/3" />
       <SkeletonText lines={2} />
       <div className="space-y-1.5 pt-1">
@@ -98,7 +98,7 @@ export function SkeletonTable({
   cols?: number
 }) {
   return (
-    <div className="divide-y rounded-md border bg-white">
+    <div className="divide-y divide-border rounded-md border border-border bg-card">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="px-3">
           <SkeletonRow cols={cols} />

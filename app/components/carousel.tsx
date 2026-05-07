@@ -53,15 +53,15 @@ export default function Carousel({ cards }: { cards: CardWithCounts[] }) {
             <div className="flex-grow w-96">
               <ValuesCard card={card} />
             </div>
-            <p className="mx-8 mt-2 text-sm text-neutral-500">
+            <p className="mx-8 mt-2 text-sm text-muted-foreground">
               {footerText(card)}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-slate-50 to-transparent z-20"></div>
-      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-20"></div>
+      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-20"></div>
+      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-20"></div>
     </div>
   )
 }

@@ -41,7 +41,7 @@ export default function MoralGraphSettings({
   )
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto border-l-2 bg-white px-6 py-8">
+    <div className="flex h-full flex-col overflow-y-auto border-l-2 bg-card px-6 py-8">
       <h2 className="text-lg font-bold mb-6">Graph Settings</h2>
 
       {/* Question Dropdown - Only show if there are multiple questions */}
@@ -100,7 +100,7 @@ export default function MoralGraphSettings({
       </div>
 
       {settings.questionId ? (
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-muted-foreground mb-4">
           Showing values articulated when users were asked:
           <br />
           <br />
@@ -109,7 +109,7 @@ export default function MoralGraphSettings({
           </span>
         </p>
       ) : settings.questions.length === 1 ? (
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-muted-foreground mb-4">
           Showing values articulated when users were asked:
           <br />
           <br />
@@ -118,7 +118,7 @@ export default function MoralGraphSettings({
           </span>
         </p>
       ) : (
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-muted-foreground mb-4">
           Show values for all questions.
         </p>
       )}
@@ -139,7 +139,7 @@ export default function MoralGraphSettings({
           Visualize Edge Certainty
         </label>
       </div>
-      <p className="text-xs text-gray-400 mb-6">
+      <p className="text-xs text-muted-foreground mb-6">
         Edge certainty is the likelihood participants agree on a wisdom upgrade.
         Visualized as the thickness of the edges.
       </p>
@@ -159,7 +159,7 @@ export default function MoralGraphSettings({
           Visualize Wisdom Score
         </label>
       </div>
-      <p className="text-xs text-gray-400 mb-6">
+      <p className="text-xs text-muted-foreground mb-6">
         The wisdom score for a value is the sum of the certainty of all incoming
         edges. Visualized as the blueness of the nodes.
       </p>

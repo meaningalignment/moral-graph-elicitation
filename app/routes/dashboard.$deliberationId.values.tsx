@@ -53,7 +53,7 @@ export default function ValuesView() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Values</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight mb-6">Values</h1>
         <Suspense fallback={<ValuesLoading />}>
           <Await resolve={data}>
             {(resolved) => <ValuesContent {...resolved} />}
@@ -93,7 +93,7 @@ function ValuesContent({
 
   if (values.length === 0) {
     return (
-      <Alert className="bg-slate-50">
+      <Alert className="bg-muted">
         <div className="flex flex-row space-x-2">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No values yet</AlertTitle>

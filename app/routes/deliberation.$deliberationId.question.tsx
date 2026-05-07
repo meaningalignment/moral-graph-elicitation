@@ -50,11 +50,11 @@ function QuestionCard({ questionData }: { questionData: Question }) {
     <div
       key={questionData.id}
       className={
-        "border-2 rounded-xl px-6 py-6 max-w-xs min-h-xs h-full bg-white flex flex-col gap-4"
+        "border border-border rounded-xl px-6 py-6 max-w-xs min-h-xs h-full bg-card flex flex-col gap-4"
       }
     >
-      <p className="text-md font-bold">{questionData.title}</p>
-      <p className="text-md text-neutral-500">{questionData.question}</p>
+      <p className="font-serif text-xl font-semibold leading-tight">{questionData.title}</p>
+      <p className="text-md text-muted-foreground leading-relaxed">{questionData.question}</p>
       <div className="flex-grow" />
     </div>
   )
@@ -63,10 +63,10 @@ function QuestionCard({ questionData }: { questionData: Question }) {
 function SelectedQuestionCard({ questionData }: { questionData: Question }) {
   return (
     <div className="relative h-full w-full">
-      <div className="w-full h-full border-4 border-black rounded-xl z-10 absolute pointer-events-none" />
+      <div className="w-full h-full border-2 border-primary rounded-xl z-10 absolute pointer-events-none" />
       <div className="absolute -bottom-2 -right-2 z-20">
-        <div className="bg-black h-6 w-6 rounded-full flex flex-col justify-center items-center">
-          <Check strokeWidth={3} className="h-4 w-4 text-white" />
+        <div className="bg-primary h-6 w-6 rounded-full flex flex-col justify-center items-center">
+          <Check strokeWidth={3} className="h-4 w-4 text-primary-foreground" />
         </div>
       </div>
       <QuestionCard questionData={questionData} />
@@ -132,7 +132,7 @@ export default function QuestionSelectScreen() {
 
           <div className="flex flex-col justify-center items-center my-4 h-4">
             {!selected && (
-              <p className="text-stone-300">
+              <p className="text-sm text-muted-foreground">
                 {`Select a question to continue`}
               </p>
             )}

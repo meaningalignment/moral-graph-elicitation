@@ -58,7 +58,7 @@ function Canonicalization({ pair }: { pair: Pair }) {
       >
         <div key={pair.card.id} className="flex flex-col h-full">
           <a
-            className="mx-8 mb-2 text-sm text-neutral-500 underline"
+            className="mx-8 mb-2 text-sm text-muted-foreground underline"
             href={`/admin/chats/${pair.card.chatId}`}
           >
             Articulated {new Date(pair.card.createdAt).toLocaleDateString()}
@@ -69,7 +69,7 @@ function Canonicalization({ pair }: { pair: Pair }) {
         </div>
         <IconArrowRight className="h-8 w-8 mx-auto rotate-90 md:rotate-0" />
         <div key={pair.canonical.id} className="flex flex-col h-full">
-          <p className="mx-8 mb-2 text-sm text-neutral-500">
+          <p className="mx-8 mb-2 text-sm text-muted-foreground">
             Canonical Version
           </p>
           <div className="flex-grow h-full w-96">
@@ -88,7 +88,7 @@ export default function UserDeduplications() {
     return (
       <div className="grid place-items-center space-y-4 py-24 px-8">
         <div className="flex flex-col items-center justify-center">
-          <div className="text-3xl font-bold mb-2">No deduplications</div>
+          <div className="font-serif text-3xl font-semibold tracking-tight mb-2">No deduplications</div>
           <div className="text-xl text-center">
             All of your cards were used exactly as you articulated them.
           </div>

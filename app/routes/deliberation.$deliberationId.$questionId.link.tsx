@@ -140,7 +140,7 @@ export default function LinkScreen() {
     <div className="flex flex-col h-screen w-screen">
       <Header />
       <div className="grid flex-grow place-items-center space-y-8 py-12 px-8">
-        <h1 className="text-neutral-500 mb-2">{`User Story ${index + 1}/${
+        <h1 className="text-muted-foreground mb-2">{`User Story ${index + 1}/${
           draw.length
         }`}</h1>
         <div className="w-full max-w-2xl">
@@ -234,7 +234,7 @@ export default function LinkScreen() {
             <Textarea
               id="comment"
               disabled={!relationship}
-              className="bg-white"
+              className="bg-card"
               onChange={(e) => setComment(e.target.value)}
               value={comment ?? ""}
               placeholder="Add your reasoning"

@@ -76,7 +76,7 @@ export default function ProlificScreen() {
           <h1 className="text-2xl mb-8">
             This process will take about 10-15 minutes to complete.
           </h1>
-          <p className="text-neutral-500">
+          <p className="text-muted-foreground">
             You will be redirected to Prolific once done.
           </p>
         </div>

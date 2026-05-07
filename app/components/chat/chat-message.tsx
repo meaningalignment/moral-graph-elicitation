@@ -16,13 +16,13 @@ export interface ChatMessageProps {
 function MessageContent({ message }: { message: Message }) {
   if (message.role === "function") {
     return (
-      <pre className="text-sm text-neutral-500 whitespace-pre-wrap">
+      <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
         {message.content}
       </pre>
     )
   } else if (message.function_call) {
     return (
-      <pre className="text-sm text-neutral-500 whitespace-pre-wrap">
+      <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
         {JSON.stringify(message)}
       </pre>
     )
@@ -86,7 +86,7 @@ export function ChatMessage({
         className={cn(
           "flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow",
           message.role === "user"
-            ? "bg-white"
+            ? "bg-card"
             : "bg-primary text-primary-foreground"
         )}
       >

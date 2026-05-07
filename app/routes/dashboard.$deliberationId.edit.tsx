@@ -56,7 +56,7 @@ export default function EditDeliberation() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-8">Edit Deliberation</h1>
+      <h1 className="font-serif text-2xl font-semibold tracking-tight mb-8">Edit Deliberation</h1>
       <Form method="post" className="space-y-8">
         <div>
           <Label htmlFor="title">Title</Label>

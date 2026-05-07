@@ -36,7 +36,7 @@ function UserMenu({ user }: { user: User }) {
             className="w-[200px]"
           >
             <DropdownMenuItem className="flex-col items-start">
-              <div className="text-xs text-zinc-500">{user?.email}</div>
+              <div className="font-mono text-xs text-muted-foreground">{user?.email}</div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-xs" onClick={handleSubmit}>
@@ -58,14 +58,18 @@ export default function Header({
   const deliberation = useCurrentDeliberation()
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b border-border shrink-0 bg-background/70 backdrop-blur-md">
       <div className="flex-grow">
         {deliberation && (
-          <h1 className="text-lg font-semibold">{deliberation.title}</h1>
+          <h1 className="font-serif text-lg font-semibold tracking-tight">
+            {deliberation.title}
+          </h1>
         )}
       </div>
       {articulatorConfig && articulatorConfig !== "default" && (
-        <p className="text-xs text-gray-400">{articulatorConfig}</p>
+        <p className="font-mono text-xs text-muted-foreground">
+          {articulatorConfig}
+        </p>
       )}
       <div className="flex items-center justify-end">
         {user && <UserMenu user={user} />}

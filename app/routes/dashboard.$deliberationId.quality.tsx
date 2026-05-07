@@ -88,7 +88,7 @@ export default function QualityDashboard() {
   return (
     <div className="container mx-auto py-6 max-w-4xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Quality Dashboard</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Quality Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-2">
           Diagnostics for deduplication and transition stories on this
           deliberation. Use this alongside <code>npm run test:pipeline</code> for
@@ -230,7 +230,7 @@ export default function QualityDashboard() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="border rounded-md p-3 bg-slate-50 space-y-2"
+                    className="border rounded-md p-3 bg-muted space-y-2"
                   >
                     <Skeleton className="h-3 w-1/3" />
                     <Skeleton className="h-4 w-2/3" />
@@ -250,7 +250,7 @@ export default function QualityDashboard() {
                   rows.map((s: any, i: number) => (
                     <div
                       key={`${s.fromId}-${s.toId}-${i}`}
-                      className="border rounded-md p-3 bg-slate-50"
+                      className="border rounded-md p-3 bg-muted"
                     >
                       <div className="text-xs text-muted-foreground">
                         Context: {s.contextId}

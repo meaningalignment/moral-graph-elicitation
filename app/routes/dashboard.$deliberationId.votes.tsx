@@ -90,7 +90,7 @@ export default function AdminLinks() {
 function VotesShell() {
   return (
     <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r bg-white px-3 py-4 space-y-4">
+      <div className="w-64 flex-shrink-0 border-r bg-card px-3 py-4 space-y-4">
         <Skeleton className="h-6 w-24" />
         <Skeleton className="h-9 w-full" />
         <Skeleton className="h-9 w-full" />
@@ -139,9 +139,9 @@ function VotesView({
 
   return (
     <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r overflow-y-auto bg-white px-3 py-4">
+      <div className="w-64 flex-shrink-0 border-r overflow-y-auto bg-card px-3 py-4">
         <div className="mb-6">
-          <div className="flex items-center rounded-lg px-3 py-2 text-slate-900">
+          <div className="flex items-center rounded-lg px-3 py-2 text-foreground">
             <svg
               className="h-5 w-5"
               xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +156,7 @@ function VotesView({
             </svg>
             <span className="ml-3 text-base font-semibold">Votes</span>
           </div>
-          <div className="px-3 text-sm text-slate-500">
+          <div className="px-3 text-sm text-muted-foreground">
             {filteredEdges.length} vote{filteredEdges.length !== 1 ? "s" : ""}{" "}
             available
           </div>
@@ -200,16 +200,16 @@ function VotesView({
               key={edge.userId + edge.fromId + edge.toId}
               className={({ isActive, isPending }) =>
                 cn(
-                  "block rounded-lg hover:bg-slate-100 ",
-                  isPending && "bg-slate-50 ",
-                  isActive && "bg-slate-100 "
+                  "block rounded-lg hover:bg-muted ",
+                  isPending && "bg-muted ",
+                  isActive && "bg-muted "
                 )
               }
             >
               <li className="px-3 py-2">
                 <div className="font-medium">{edge.user.name}</div>
-                <div className="text-sm text-slate-500 ">{edge.user.email}</div>
-                <div className="text-xs text-slate-400  mt-1">
+                <div className="text-sm text-muted-foreground ">{edge.user.email}</div>
+                <div className="text-xs text-muted-foreground  mt-1">
                   {edge.createdAt}
                 </div>
                 <StatusBadge status={edge.type} />
@@ -221,7 +221,7 @@ function VotesView({
       <div className="flex-1 overflow-y-auto">
         <div className="p-6">
           {filteredEdges.length === 0 ? (
-            <Alert className="bg-slate-50">
+            <Alert className="bg-muted">
               <div className="flex flex-row space-x-2">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>No votes found</AlertTitle>

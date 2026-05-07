@@ -108,10 +108,10 @@ export default function GraphPage() {
         {graph && graph.values.length < 2 && graph.edges.length < 2 && (
           <div className="h-screen w-full flex items-center justify-center">
             <div>
-              <h1 className="text-2xl font-bold text-center">
+              <h1 className="font-serif text-2xl font-semibold tracking-tight text-center">
                 Not Enough Data
               </h1>
-              <p className="text-center text-gray-400 mt-4">
+              <p className="text-center text-muted-foreground mt-4">
                 We don't have enough data to show a graph yet. Please try again
                 later.
               </p>

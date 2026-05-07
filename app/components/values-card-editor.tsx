@@ -22,15 +22,15 @@ export function ValuesCardEditor({
     <div key={card.id}>
       <ValuesCard detailsInline card={card as any as CanonicalValuesCard} />
       <Form method="post" className="mt-8 w-96 flex flex-col gap-4">
-        <h1 className="text-3xl font-bold my-8 text-center">Edit your card</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Edit your card</h1>
         <input type="hidden" name="cardId" value={card.id!} />
         <input type="hidden" name="cardType" value={cardType} />
         <Label>
-          <span className="text-gray-700">Title</span>
+          <span className="text-foreground">Title</span>
           <input
             name="title"
             type="text"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-2 py-1.5 text-sm"
             defaultValue={card.title}
           />
         </Label>
@@ -46,27 +46,27 @@ export function ValuesCardEditor({
           </BackgroundTaskButton>
         </div>
         {titleIdeas ? (
-          <div className="text-sm text-neutral-500 text-center">
+          <div className="text-sm text-muted-foreground text-center">
             {titleIdeas}
           </div>
         ) : null}
 
         <Label>
-          <span className="text-gray-700">Instructions Short</span>
+          <span className="text-foreground">Instructions Short</span>
           <textarea
             rows={3}
             name="description"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-2 py-1.5 text-sm"
             defaultValue={card.description}
           />
         </Label>
 
         <Label>
-          <span className="text-gray-700">Evaluation Criteria</span>
+          <span className="text-foreground">Evaluation Criteria</span>
           <textarea
             rows={15}
             name="policies"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-2 py-1.5 text-sm"
             defaultValue={JSON.stringify(card.policies, null, 2)}
           />
         </Label>
@@ -102,8 +102,8 @@ export function ValuesCardEditor({
       </Form>
       {critique && (
         <div className="mt-8">
-          <h1 className="text-3xl font-bold my-8 text-center">Critique</h1>
-          <pre className="text-sm text-neutral-500 whitespace-pre-wrap">
+          <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Critique</h1>
+          <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
             {critique}
           </pre>
         </div>

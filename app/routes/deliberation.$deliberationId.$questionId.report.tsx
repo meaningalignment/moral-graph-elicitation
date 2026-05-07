@@ -561,25 +561,25 @@ export default function ReportView() {
   return (
     <div className="container mx-auto px-8 py-8 animate-fade-in">
       <div className="flex flex-col items-center justify-center mb-20 mt-12 space-y-4 max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold text-center leading-tight text-slate-900">
+        <h1 className="text-3xl md:font-serif text-4xl font-semibold tracking-tight text-center leading-tight text-foreground">
           {question}
         </h1>
       </div>
 
       <div className="mb-16 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card className="relative overflow-hidden bg-white">
+          <Card className="relative overflow-hidden bg-card">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
             <CardHeader className="relative p-6 flex flex-col h-full justify-between">
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-2">
                   <Heart className="w-5 h-5 text-primary" />
-                  <p className="text-sm font-medium text-slate-600">Values</p>
+                  <p className="text-sm font-medium text-muted-foreground">Values</p>
                 </div>
-                <p className="text-3xl font-bold text-primary">
+                <p className="font-serif text-3xl font-semibold tracking-tight text-primary">
                   {countAllValues(interventions)}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Values about what's important to participants
                 </p>
               </div>
@@ -599,18 +599,18 @@ export default function ReportView() {
               />
             </CardHeader>
           </Card>
-          <Card className="relative overflow-hidden bg-white">
+          <Card className="relative overflow-hidden bg-card">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
             <CardHeader className="relative p-6 flex flex-col h-full justify-between">
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-2">
                   <ThumbsUp className="w-5 h-5 text-primary" />
-                  <p className="text-sm font-medium text-slate-600">Votes</p>
+                  <p className="text-sm font-medium text-muted-foreground">Votes</p>
                 </div>
-                <p className="text-3xl font-bold text-primary">
+                <p className="font-serif text-3xl font-semibold tracking-tight text-primary">
                   {countAllVotes(interventions)}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Votes about which values are wiser than others
                 </p>
               </div>
@@ -667,18 +667,18 @@ export default function ReportView() {
               />
             </CardHeader>
           </Card>
-          <Card className="relative overflow-hidden bg-white">
+          <Card className="relative overflow-hidden bg-card">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
             <CardHeader className="relative p-6 flex flex-col h-full justify-between">
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-2">
                   <MessageCircle className="w-5 h-5 text-primary" />
-                  <p className="text-sm font-medium text-slate-600">Contexts</p>
+                  <p className="text-sm font-medium text-muted-foreground">Contexts</p>
                 </div>
-                <p className="text-3xl font-bold text-primary">
+                <p className="font-serif text-3xl font-semibold tracking-tight text-primary">
                   {interventions.length}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Aspects of the question that demand different values
                 </p>
               </div>
@@ -704,12 +704,12 @@ export default function ReportView() {
               Add your voice
             </Link>
           </Button>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             This process takes 10-15 minutes to complete
           </p>
         </div>
 
-        <h2 className="text-3xl font-bold mb-2 mt-6 py-0 text-slate-900">
+        <h2 className="font-serif text-3xl font-semibold tracking-tight mb-2 mt-6 py-0 text-foreground">
           {interventions.length} Suggested Actions
         </h2>
       </div>
@@ -722,7 +722,7 @@ export default function ReportView() {
         >
           {index > 0 && <Separator className="my-16" />}
           <div className="flex items-center gap-4 mb-4">
-            <span className="text-4xl font-bold text-primary/20">
+            <span className="font-serif text-4xl font-semibold tracking-tight text-primary/20">
               {index + 1}
             </span>
             <h3 className="text-lg font-semibold flex justify-between items-center flex-1">
@@ -752,7 +752,7 @@ export default function ReportView() {
                 Values
               </p>
               <div
-                className={`bg-slate-50 rounded-lg overflow-hidden shadow-inner hover:shadow-inner-lg`}
+                className={`bg-muted rounded-lg overflow-hidden shadow-inner hover:shadow-inner-lg`}
               >
                 <ForceGraphWrapper
                   selectedValue={selectedValue}
