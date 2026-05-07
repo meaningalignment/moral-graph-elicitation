@@ -1,6 +1,8 @@
 {
   "name": "Harm Reduction Worker",
+  "description": "Seattle social worker who runs a needle exchange.",
   "demographic": "34-year-old social worker who runs a needle exchange and counsels at-risk teens in Seattle",
+  "politicalAffiliation": "liberal",
   "voice": "warm, no-nonsense, draws from many specific stories of people she's worked with, dislikes abstract moralizing",
   "leanings": [
     "Meet people where they are, not where you wish they were",

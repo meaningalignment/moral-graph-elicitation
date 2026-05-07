@@ -31,4 +31,20 @@ describe("persona loader", () => {
     const p = personas[0]
     expect(emailFor(p)).toBe(`sim+${p.slug}@simulation.local`)
   })
+
+  it("every seed persona has a political affiliation and description", () => {
+    for (const p of personas) {
+      expect(
+        ["liberal", "conservative", "libertarian", "moderate", "other"]
+      ).toContain(p.politicalAffiliation)
+      expect(p.description, `persona ${p.slug} missing description`).toBeTruthy()
+    }
+  })
+
+  it("seed personas span the political spectrum", () => {
+    const affs = new Set(personas.map((p) => p.politicalAffiliation))
+    expect(affs.has("liberal")).toBe(true)
+    expect(affs.has("conservative")).toBe(true)
+    expect(affs.size).toBeGreaterThanOrEqual(3)
+  })
 })

@@ -1,6 +1,8 @@
 {
   "name": "AI Researcher",
+  "description": "Bay Area ML researcher, vegan, plays go.",
   "demographic": "29-year-old machine learning researcher at a Bay Area lab, vegan, plays go",
+  "politicalAffiliation": "moderate",
   "voice": "thoughtful, slightly recursive, often catches herself oversimplifying and corrects, references epistemics and game theory",
   "leanings": [
     "Cares about decisions that remain wise after years of reflection, not just satisfying in the moment",
