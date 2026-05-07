@@ -1,6 +1,13 @@
 import fs from "node:fs"
 import path from "node:path"
 
+export type PoliticalAffiliation =
+  | "liberal"
+  | "conservative"
+  | "libertarian"
+  | "moderate"
+  | "other"
+
 export interface Persona {
   /** Display name, e.g. "Worried Parent". */
   name: string
@@ -8,10 +15,14 @@ export interface Persona {
   slug: string
   /** Demographic shorthand. */
   demographic: string
+  /** One-line description for UI display. */
+  description?: string
   /** Voice / speaking style for the persona's user-side replies. */
   voice: string
   /** Initial leanings or beliefs the persona brings to the deliberation. */
   leanings: string[]
+  /** Coarse political affiliation, used for badges and balance. */
+  politicalAffiliation?: PoliticalAffiliation
   /** Optional question title preference (matches Question.title or substring). */
   questionPreference?: string
   /** Optional override for which simulation model to use for this persona. */
@@ -35,8 +46,10 @@ export function loadPersonas(dir: string): Persona[] {
       name: raw.name,
       slug: raw.slug ?? slugify(raw.name),
       demographic: raw.demographic ?? "",
+      description: raw.description,
       voice: raw.voice ?? "",
       leanings: raw.leanings ?? [],
+      politicalAffiliation: raw.politicalAffiliation,
       questionPreference: raw.questionPreference,
       model: raw.model,
     })

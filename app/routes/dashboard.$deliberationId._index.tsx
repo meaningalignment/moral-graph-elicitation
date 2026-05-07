@@ -25,6 +25,10 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
 import { ChevronRightIcon } from "@radix-ui/react-icons"
 import LoadingButton from "~/components/loading-button"
 import { Input } from "~/components/ui/input"
+import {
+  SimulateDialog,
+  Persona as DialogPersona,
+} from "~/components/simulate-dialog"
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const deliberationId = Number(params.deliberationId)!
@@ -161,17 +165,30 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     return json({ success: true })
   } else if (action === "simulateParticipants") {
     const deliberationId = Number(params.deliberationId)!
-    const count = Number(formData.get("count") ?? 4)
     const articulateOnly = formData.get("articulateOnly") === "true"
-    const personas = (formData.get("personas") as string) || String(count)
+    const inlinePersonasRaw = formData.get("inlinePersonas")
+    const personasSlugs = formData.get("personas") as string | null
+
+    const eventData: any = {
+      deliberationId,
+      articulateOnly,
+      voteLimit: 5,
+    }
+    if (typeof inlinePersonasRaw === "string" && inlinePersonasRaw.length) {
+      try {
+        eventData.inlinePersonas = JSON.parse(inlinePersonasRaw)
+      } catch {
+        return json(
+          { error: "Could not parse inlinePersonas JSON" },
+          { status: 400 }
+        )
+      }
+    } else {
+      eventData.personas = personasSlugs || "6"
+    }
     await inngest.send({
       name: "simulate-deliberation",
-      data: {
-        deliberationId,
-        personas,
-        articulateOnly,
-        voteLimit: 5,
-      },
+      data: eventData,
     })
     return json({ success: true, simulationStarted: true, refetch: true })
   }
@@ -225,6 +242,7 @@ export default function DeliberationDashboard() {
   const revalidator = useRevalidator()
   const { deliberationId } = useParams()
   const [openQuestionId, setOpenQuestionId] = useState<number | null>(null)
+  const [simulateDialogOpen, setSimulateDialogOpen] = useState(false)
 
   // Poll for setup status if the deliberation is not ready
   useEffect(() => {
@@ -405,17 +423,7 @@ export default function DeliberationDashboard() {
                 fetcher.state !== "idle" ||
                 deliberation.setupStatus === "generating_graph"
               }
-              onClick={() => {
-                const raw = window.prompt(
-                  "How many simulated participants? (number, or comma-separated persona slugs e.g. worried-parent,civil-libertarian)",
-                  "4"
-                )
-                if (!raw) return
-                fetcher.submit(
-                  { action: "simulateParticipants", personas: raw },
-                  { method: "post" }
-                )
-              }}
+              onClick={() => setSimulateDialogOpen(true)}
             >
               {deliberation.setupStatus === "generating_graph" ? (
                 <span className="flex items-center gap-1">
@@ -426,6 +434,20 @@ export default function DeliberationDashboard() {
                 "Simulate Participants"
               )}
             </Button>
+            <SimulateDialog
+              open={simulateDialogOpen}
+              onOpenChange={setSimulateDialogOpen}
+              onSubmit={(personas: DialogPersona[]) => {
+                setSimulateDialogOpen(false)
+                fetcher.submit(
+                  {
+                    action: "simulateParticipants",
+                    inlinePersonas: JSON.stringify(personas),
+                  },
+                  { method: "post" }
+                )
+              }}
+            />
             <Link
               to={`/deliberation/${deliberation.id}/start`}
               prefetch="intent"

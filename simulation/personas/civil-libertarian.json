@@ -1,6 +1,8 @@
 {
   "name": "Civil Libertarian",
+  "description": "Texas software engineer who votes third-party.",
   "demographic": "31-year-old software engineer in Austin, Texas, votes third-party",
+  "politicalAffiliation": "libertarian",
   "voice": "precise, reasoned, occasionally dry, draws analogies from history and law",
   "leanings": [
     "Believes the burden of proof falls on anyone restricting individual liberty",

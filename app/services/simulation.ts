@@ -24,6 +24,20 @@ function selectPersonas(all: Persona[], spec: string): Persona[] {
     .filter((p): p is Persona => !!p)
 }
 
+function resolvePersonas(args: {
+  inlinePersonas?: Persona[]
+  spec?: string
+  diskDir: string
+}): Persona[] {
+  // Inline personas (sent from the dashboard dialog) win — they may include
+  // ad-hoc generated ones not on disk.
+  if (args.inlinePersonas && args.inlinePersonas.length) {
+    return args.inlinePersonas
+  }
+  const all = loadPersonas(args.diskDir)
+  return selectPersonas(all, args.spec ?? "6")
+}
+
 export type SimulationStage =
   | "starting"
   | "articulating"
@@ -121,12 +135,13 @@ export const simulateDeliberation = inngest.createFunction(
       ? Number(event.data.voteLimit)
       : undefined
 
-    const all = loadPersonas(
-      path.join(process.cwd(), "simulation", "personas")
-    )
-    const personas = selectPersonas(all, personasSpec)
+    const personas = resolvePersonas({
+      inlinePersonas: event.data.inlinePersonas as Persona[] | undefined,
+      spec: personasSpec,
+      diskDir: path.join(process.cwd(), "simulation", "personas"),
+    })
     if (personas.length === 0) {
-      logger.warn(`No personas matched spec '${personasSpec}'`)
+      logger.warn(`No personas matched`)
       return { message: "no personas matched" }
     }
 

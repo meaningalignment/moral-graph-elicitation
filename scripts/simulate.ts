@@ -44,7 +44,7 @@ function parseArgs(): Args {
   }
   return {
     deliberationId,
-    personas: get("--personas") ?? "4",
+    personas: get("--personas") ?? "6",
     questionId: get("--question") ? Number(get("--question")) : undefined,
     articulateOnly: has("--articulate-only"),
     voteOnly: has("--vote-only"),
