@@ -62,38 +62,42 @@ export async function generateContextsFromQuestion(
   numContexts = 5
 ) {
   return await genObj({
-    prompt: `You will be given a question. Your task is to reason about what factors are present that are relevant for how to wisely approach the question.
-    
-    Return a list of the ${numContexts} most important such factors.
-    
-    For example, if the question is "I am a christian girl and am considering an abortion, what should I do?", the factors might be: "A person is considering an abortion", "A person is seeking guidance", "A person is grappling with their christian faith", "A person is dealing with conflicting values", "A person is considering a life-changing decision".`,
+    prompt: `You will be given a question. Surface the ${numContexts} most meaningfully different SITUATIONS within that question that would call for different values or different wisdom.
+
+# What a context looks like
+Each context is a SHORT clause beginning with "When" — e.g. "When assisting a family facing eviction" or "When the person refuses services". Treat it as completing "What's wise to do ___?". Aim for 4-9 words. Never write a full sentence. Never include policy proposals or demographics that don't change the values needed.
+
+# Diversity
+The ${numContexts} contexts should each pick out a DIFFERENT slice of the question — different actor, different stake, different tension. Together they should span the most morally distinct situations within the question.
+
+# Good examples (for "What should SF do about homelessness?")
+- "When assisting a family facing eviction"
+- "When the person refuses services"
+- "When someone is medically fragile"
+- "When residents fear an encampment near schools"
+- "When a person wants to remain on the street"
+
+# Bad examples (DON'T do this)
+- "A person with severe PTSD and fentanyl addiction repeatedly overdoses and has fluctuating decision-making capacity"  (too long, too clinical)
+- "The city must balance civil liberties and safety by applying CARE Court or conservatorship..."  (policy proposal, not a situation)
+- "A 72-year-old woman on a fixed income..."  (a CV, not a situational frame)`,
     data: { Question: question },
     schema: z.object({
       factors: z
         .array(
           z.object({
-            situationalContext: z
-              .string()
-              .describe(
-                `Describe in 1-2 sentences an aspect of the situation that that affects what's wise to do with regards to the question.`
-              ),
             factor: z
               .string()
               .describe(
-                `The factor from the situational context, in as few words as possible. For example, "The girl is in distress". Should be phrased in a way such that it is possible to append it to the words: "What's wise to do when ...".`
-              ),
-            generalizedFactor: z
-              .string()
-              .describe(
-                `The factor where any unnecessary information is removed, but the meaning is preserved. For example, "The girl is in distress" could be generalized as "A person is in distress". The fact that she is a girl does not change the values one should approach the distress with. However, don't generalize away detail that do change the values one should approach the question with. For example, "The girl considering an abortion is a christian" should not be generalized to "A religious person is considering an abortion". The fact that she is a christian is relevant, as the christian faith has specific views on abortion.`
+                `A short "When ..." clause, 4-9 words, no period. Phrased to complete "What's wise to do ___?". E.g. "When assisting a family facing eviction".`
               ),
           })
         )
         .describe(
-          `${numContexts} of the most important factors to consider in answering the question wisely.`
+          `${numContexts} of the most morally distinct situations to consider when answering the question wisely.`
         ),
     }),
-  }).then((res) => res.factors.map((f) => f.generalizedFactor))
+  }).then((res) => res.factors.map((f) => f.factor))
 }
 
 async function upsertContextsInDb(
@@ -184,12 +188,75 @@ async function onFailure({ event, step }: { event: any; step: any }) {
 }
 
 /**
- * Inngest-free version of the seed flow. Generates questions for a topic,
- * then contexts for each question, and writes everything to the DB.
- * Called directly from the dashboard.new action (so seeding works even
- * when Inngest isn't connected) and from the Inngest function below for
- * retry-ability when it is.
+ * Inngest-free seed flow when the user has supplied questions verbatim
+ * (e.g. from the new dashboard form). We skip question generation and only
+ * generate contexts for each given question.
  */
+export async function seedFromGivenQuestionsCore({
+  deliberationId,
+  questions,
+  numContexts = 5,
+  log = console,
+}: {
+  deliberationId: number
+  questions: { title: string; question: string }[]
+  numContexts?: number
+  log?: { info: (s: string) => void; error?: (s: string) => void }
+}): Promise<{ questionIds: number[]; contextCount: number }> {
+  const existing = await db.question.count({ where: { deliberationId } })
+  if (existing > 0) {
+    log.info(
+      `[seed] deliberation ${deliberationId} already has ${existing} questions, skipping`
+    )
+    return { questionIds: [], contextCount: 0 }
+  }
+
+  log.info(
+    `[seed] verbatim — deliberation=${deliberationId}, ${questions.length} questions`
+  )
+  await db.deliberation.update({
+    where: { id: deliberationId },
+    data: { setupStatus: "generating_contexts" },
+  })
+
+  try {
+    const contexts: { context: string; questionId: number }[] = []
+    const dbQuestionIds: number[] = []
+
+    for (const q of questions) {
+      const dbQuestion = (await db.question.create({
+        data: {
+          question: q.question,
+          title: q.title,
+          deliberationId,
+        },
+      })) as Question
+      dbQuestionIds.push(dbQuestion.id)
+
+      const questionContexts = await generateContextsFromQuestion(
+        q.question,
+        numContexts
+      )
+      contexts.push(
+        ...questionContexts.map((c: any) => ({
+          context: c,
+          questionId: dbQuestion.id,
+        }))
+      )
+    }
+
+    await upsertContextsInDb(deliberationId, contexts, log as any)
+    await resetDeliberationStatus(deliberationId)
+    log.info(
+      `[seed] verbatim done — ${dbQuestionIds.length} questions, ${contexts.length} contexts`
+    )
+    return { questionIds: dbQuestionIds, contextCount: contexts.length }
+  } catch (e) {
+    log.error?.(`[seed] verbatim failed: ${(e as Error).message}`)
+    await resetDeliberationStatus(deliberationId)
+    throw e
+  }
+}
 export async function seedQuestionsAndContextsCore({
   deliberationId,
   topic,
