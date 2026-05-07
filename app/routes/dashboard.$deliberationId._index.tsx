@@ -384,6 +384,10 @@ export default function DeliberationDashboard() {
                 </AlertDescription>
               </Alert>
             )}
+          <SimulationProgressPanel
+            deliberationId={Number(deliberationId)}
+            simulating={deliberation.setupStatus === "generating_graph"}
+          />
           <div className="mt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link
               to={`/deliberation/${deliberationId}/graph`}
@@ -436,8 +440,8 @@ export default function DeliberationDashboard() {
             <Alert className="mt-4 bg-slate-50">
               <AlertTitle>Simulation queued</AlertTitle>
               <AlertDescription>
-                Simulated participants are being run in the background. New
-                chats and values cards should appear within a couple of minutes.
+                Simulated participants are being run in the background. The
+                progress bar above shows the current stage.
               </AlertDescription>
             </Alert>
           )}
@@ -555,4 +559,162 @@ export default function DeliberationDashboard() {
       </div>
     </div>
   )
+}
+
+type SimulationProgress = {
+  stage:
+    | "starting"
+    | "articulating"
+    | "deduping"
+    | "hypothesizing"
+    | "voting"
+    | "done"
+    | "failed"
+  stageIndex: number
+  stageCount: number
+  personasTotal: number
+  personasArticulated: number
+  personasVoted: number
+  startedAt: number
+  estimatedSeconds: number
+  message: string
+  runId: string
+}
+
+function SimulationProgressPanel({
+  deliberationId,
+  simulating,
+}: {
+  deliberationId: number
+  simulating: boolean
+}) {
+  const [progress, setProgress] = useState<SimulationProgress | null>(null)
+  const [now, setNow] = useState(() => Date.now())
+
+  // Poll the progress endpoint every 3s while simulating, plus once on mount
+  // so we surface stale "done" progress from the last run.
+  useEffect(() => {
+    let cancelled = false
+    const fetchOnce = async () => {
+      try {
+        const r = await fetch(`/api/simulation/${deliberationId}/progress`)
+        if (!r.ok) return
+        const data = (await r.json()) as { progress: SimulationProgress | null }
+        if (!cancelled) setProgress(data.progress)
+      } catch {}
+    }
+    fetchOnce()
+    if (!simulating) return
+    const interval = setInterval(fetchOnce, 3000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [deliberationId, simulating])
+
+  // Tick a clock for the elapsed-time and progress-bar render.
+  useEffect(() => {
+    if (!simulating) return
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [simulating])
+
+  if (!progress) return null
+  // Hide done/failed progress if the deliberation isn't currently simulating
+  // and the last run finished more than 30s ago — keeps the UI clean.
+  if (
+    !simulating &&
+    (progress.stage === "done" || progress.stage === "failed") &&
+    Date.now() - progress.startedAt > 30_000
+  ) {
+    return null
+  }
+
+  const elapsedSec = Math.max(0, Math.floor((now - progress.startedAt) / 1000))
+  const fraction =
+    progress.stage === "done"
+      ? 1
+      : progress.stageCount > 0
+      ? Math.min(0.99, progress.stageIndex / progress.stageCount)
+      : 0
+  // For articulate/vote stages, refine fraction with persona progress.
+  let refined = fraction
+  if (progress.stage === "articulating" && progress.personasTotal > 0) {
+    const stageStart = STAGE_FRACTIONS.articulating
+    const stageWidth = STAGE_FRACTIONS.deduping - STAGE_FRACTIONS.articulating
+    refined =
+      stageStart + (progress.personasArticulated / progress.personasTotal) * stageWidth
+  } else if (progress.stage === "voting" && progress.personasTotal > 0) {
+    const stageStart = STAGE_FRACTIONS.voting
+    const stageWidth = STAGE_FRACTIONS.done - STAGE_FRACTIONS.voting
+    refined =
+      stageStart + (progress.personasVoted / progress.personasTotal) * stageWidth
+  } else {
+    refined = STAGE_FRACTIONS[progress.stage]
+  }
+  const pct = Math.round(refined * 100)
+
+  const eta = Math.max(0, progress.estimatedSeconds - elapsedSec)
+
+  return (
+    <div className="mt-6 mb-2 rounded-md border bg-slate-50 p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {progress.stage === "done" ? (
+            <span className="inline-block h-3 w-3 rounded-full bg-emerald-500" />
+          ) : progress.stage === "failed" ? (
+            <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+          ) : (
+            <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+          )}
+          <span className="text-sm font-medium">
+            {STAGE_LABELS[progress.stage]}
+          </span>
+        </div>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {progress.stage === "done"
+            ? `done in ${formatDuration(elapsedSec)}`
+            : `${formatDuration(elapsedSec)} elapsed · ~${formatDuration(eta)} left`}
+        </span>
+      </div>
+      <div className="mt-3 h-2 w-full overflow-hidden rounded bg-slate-200">
+        <div
+          className={`h-full transition-all duration-500 ${
+            progress.stage === "failed" ? "bg-red-500" : "bg-emerald-500"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="mt-2 text-xs text-muted-foreground">
+        {progress.message}
+      </div>
+    </div>
+  )
+}
+
+const STAGE_LABELS: Record<SimulationProgress["stage"], string> = {
+  starting: "Starting…",
+  articulating: "Personas articulating values",
+  deduping: "Clustering values into canonical cards",
+  hypothesizing: "Generating transition stories",
+  voting: "Personas voting on transitions",
+  done: "Simulation complete",
+  failed: "Simulation failed",
+}
+
+const STAGE_FRACTIONS: Record<SimulationProgress["stage"], number> = {
+  starting: 0,
+  articulating: 0.05,
+  deduping: 0.55,
+  hypothesizing: 0.7,
+  voting: 0.85,
+  done: 1,
+  failed: 1,
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}m ${s}s`
 }

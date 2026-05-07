@@ -186,6 +186,12 @@ export const deduplicate = inngest.createFunction(
 
     if (cards.length === 0) {
       logger.info(`No cards to deduplicate for deliberation ${deliberationId}.`)
+      // Always emit a finished event so any waiter (the simulation orchestrator)
+      // doesn't hang for the full timeout.
+      await step.sendEvent("deduplicate-finished", {
+        name: "deduplicate-finished",
+        data: { deliberationId },
+      })
       return {
         message: `No cards to deduplicate for deliberation ${deliberationId}.`,
       }
