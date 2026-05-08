@@ -78,13 +78,14 @@ function initFunctionSpinner(stream: AssistantStream, threadId: string) {
   stream.on("event", (event: any) => {
     const toolCalls = event?.data?.delta?.step_details?.tool_calls
     const fnKey = toolCalls?.length && toolCalls[0]?.function?.name
-    if (fnKey) kv.set(`function:${threadId}`, fnKey)
+    // KV is rate-limited intermittently; spinner state is non-critical.
+    if (fnKey) kv.set(`function:${threadId}`, fnKey).catch(() => {})
   })
 }
 
 // When the function call is done, we remove the spinner.
 function cancelFunctionSpinner(threadId: string) {
-  kv.set(`function:${threadId}`, null)
+  kv.set(`function:${threadId}`, null).catch(() => {})
 }
 
 type Tool<C> = (
