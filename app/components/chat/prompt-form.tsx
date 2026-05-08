@@ -1,6 +1,5 @@
 import * as React from "react"
 import Textarea from "react-textarea-autosize"
-import type { UseChatHelpers } from "ai/react"
 import { Button } from "~/components/ui/button"
 import {
   Tooltip,
@@ -12,9 +11,8 @@ import { useEnterSubmit } from "~/hooks/use-enter-submit"
 import { Link, useParams } from "@remix-run/react"
 import LoadingButton from "~/components/loading-button"
 
-export interface PromptProps
-  extends Pick<UseChatHelpers, "input" | "setInput"> {
-  onSubmit: (value: string) => Promise<void>
+export interface PromptProps {
+  onSubmit: (value: string) => Promise<void> | void
   isLoading: boolean
   isFinished?: boolean
 }
@@ -47,15 +45,10 @@ const FinishedView = () => {
   )
 }
 
-export function PromptForm({
-  onSubmit,
-  input,
-  setInput,
-  isLoading,
-  isFinished,
-}: PromptProps) {
+export function PromptForm({ onSubmit, isLoading, isFinished }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const [input, setInput] = React.useState("")
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -67,11 +60,12 @@ export function PromptForm({
     <form
       onSubmit={async (e) => {
         e.preventDefault()
-        if (isLoading || !input?.trim()) {
+        if (isLoading || !input.trim()) {
           return
         }
+        const value = input
         setInput("")
-        await onSubmit(input)
+        await onSubmit(value)
       }}
       ref={formRef}
     >

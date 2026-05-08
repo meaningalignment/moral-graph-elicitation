@@ -1,25 +1,25 @@
 import { ActionFunctionArgs, json } from "@remix-run/node"
-import { Message } from "ai"
 import { db } from "~/config.server"
+import type { ChatMessage } from "~/services/articulation/chat"
 
 // Export for tests.
-export function removeLastMatchAndPrecedingFunctions(
-  messages: Message[],
-  predicate: (message: Message) => boolean
-): Message[] {
+export function removeLastMatchAndPrecedingToolCalls(
+  messages: ChatMessage[],
+  predicate: (message: ChatMessage) => boolean
+): ChatMessage[] {
   let shouldRemove = false
   let userOrAssistantFound = false
 
   for (let i = messages.length - 1; i >= 0; i--) {
-    const isFunction =
-      messages[i].role === "function" || messages[i].function_call
+    const m = messages[i]
+    const isToolMessage = m.role === "tool" || (m.tool_calls?.length ?? 0) > 0
 
-    if (!isFunction && predicate(messages[i])) {
+    if (!isToolMessage && predicate(m)) {
       shouldRemove = true
       userOrAssistantFound = true
     }
 
-    if (shouldRemove && !isFunction && !userOrAssistantFound) {
+    if (shouldRemove && !isToolMessage && !userOrAssistantFound) {
       break
     }
 
@@ -27,7 +27,7 @@ export function removeLastMatchAndPrecedingFunctions(
       messages.splice(i, 1)
     }
 
-    if (shouldRemove && !isFunction) {
+    if (shouldRemove && !isToolMessage) {
       userOrAssistantFound = false
     }
   }
@@ -37,7 +37,10 @@ export function removeLastMatchAndPrecedingFunctions(
 
 export async function action({ request }: ActionFunctionArgs) {
   const body = await request.json()
-  let { message, chatId } = body
+  let { message, chatId } = body as {
+    message: ChatMessage
+    chatId: string
+  }
 
   const chat = await db.chat.findUnique({ where: { id: chatId } })
 
@@ -45,18 +48,15 @@ export async function action({ request }: ActionFunctionArgs) {
     throw new Error(`No chat with id ${chatId}`)
   }
 
-  const messages = chat.transcript as any as Message[]
+  const messages = chat.transcript as any as ChatMessage[]
 
-  // Remove the last occurence of a message with the matching content and role,
-  // and all directly preceeding function calls.
+  // Remove the last occurrence of a message with the matching content + role,
+  // and any directly-preceding tool-call messages.
   //
-  // Note that we don't store message IDs in the database,
-  // so we cannot be certain this is the correct message.
-  // If there are several messages with the same role and content,
-  // the last one will be removed regardless of which one was actually clicked.
-  //
-  // Since this feature is only available for admin users, this is acceptable for now.
-  const newMessages = removeLastMatchAndPrecedingFunctions(
+  // We don't store stable IDs in the DB. If multiple messages have the same
+  // role + content, the last is removed regardless of which was clicked.
+  // Admin-only feature, so this is acceptable.
+  const newMessages = removeLastMatchAndPrecedingToolCalls(
     messages,
     (m) => m.content === message.content && m.role === message.role
   )
