@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node"
-import { useLoaderData, useParams } from "@remix-run/react"
+import { Form, useLoaderData, useNavigation, useParams } from "@remix-run/react"
 import { kv } from "@vercel/kv"
 import { Chat } from "../components/chat/chat"
 import Header from "../components/header"
@@ -64,6 +64,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function ChatScreen() {
   const { threadId, deliberationId, questionId } = useParams()
   const { messages } = useLoaderData<typeof loader>()
+  const navigation = useNavigation()
+  const seeding =
+    navigation.formAction === "/api/dev/seed-card" &&
+    navigation.state !== "idle"
 
   return (
     <div className="flex flex-col h-screen w-screen">
@@ -74,6 +78,24 @@ export default function ChatScreen() {
         oldMessages={messages}
         threadId={threadId!}
       />
+      {/* Dev helper: skip the conversation, persist a random card to test
+          downstream flow. Subtle muted link in the corner. */}
+      <Form
+        method="post"
+        action="/api/dev/seed-card"
+        className="fixed bottom-2 right-3 z-[60]"
+      >
+        <input type="hidden" name="threadId" value={threadId} />
+        <input type="hidden" name="deliberationId" value={deliberationId} />
+        <input type="hidden" name="questionId" value={questionId} />
+        <button
+          type="submit"
+          disabled={seeding}
+          className="text-[11px] text-muted-foreground/70 hover:text-foreground underline-offset-4 hover:underline disabled:opacity-50"
+        >
+          {seeding ? "Seeding…" : "Seed random value"}
+        </button>
+      </Form>
     </div>
   )
 }
