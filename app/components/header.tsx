@@ -36,7 +36,7 @@ function UserMenu({ user }: { user: User }) {
             className="w-[200px]"
           >
             <DropdownMenuItem className="flex-col items-start">
-              <div className="font-mono text-xs text-muted-foreground">{user?.email}</div>
+              <div className="text-xs text-muted-foreground">{user?.email}</div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-xs" onClick={handleSubmit}>
@@ -61,13 +61,13 @@ export default function Header({
     <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b border-border shrink-0 bg-background/70 backdrop-blur-md">
       <div className="flex-grow">
         {deliberation && (
-          <h1 className="font-serif text-lg font-semibold tracking-tight">
+          <h1 className="text-base font-semibold tracking-tight">
             {deliberation.title}
           </h1>
         )}
       </div>
       {articulatorConfig && articulatorConfig !== "default" && (
-        <p className="font-mono text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {articulatorConfig}
         </p>
       )}

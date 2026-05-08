@@ -88,7 +88,7 @@ export default function UserDeduplications() {
     return (
       <div className="grid place-items-center space-y-4 py-24 px-8">
         <div className="flex flex-col items-center justify-center">
-          <div className="font-serif text-3xl font-semibold tracking-tight mb-2">No deduplications</div>
+          <div className="text-xl font-semibold tracking-tight mb-2">No deduplications</div>
           <div className="text-xl text-center">
             All of your cards were used exactly as you articulated them.
           </div>

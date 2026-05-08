@@ -54,10 +54,10 @@ export default function HypothesisView() {
   return (
     <div className="grid place-items-center space-y-4 py-12 px-8">
       <div className="w-full max-w-2xl mb-6">
-        <h1 className="text-md font-bold mb-2 pl-12 md:pl-0">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 pl-12 md:pl-0">
           {hypothesis.context.id}
-        </h1>
-        <p className="text-foreground">{hypothesis.story}</p>
+        </p>
+        <p className="text-foreground leading-relaxed">{hypothesis.story}</p>
       </div>
       <div
         className={cn(
@@ -74,7 +74,9 @@ export default function HypothesisView() {
 
       {/* Related edges section */}
       <div className="transition-opacity ease-in duration-500 flex flex-col items-center justify-center w-full max-w-xs">
-        <h1 className="font-bold mr-auto">User Responses</h1>
+        <h2 className="text-base font-semibold tracking-tight mr-auto">
+          User responses
+        </h2>
         {relatedEdges.length === 0 ? (
           <p className="text-sm text-muted-foreground mt-4">
             No users have agreed or disagreed with this hypothesis yet.

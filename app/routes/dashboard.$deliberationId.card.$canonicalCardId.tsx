@@ -47,7 +47,7 @@ function Chats() {
 
   return (
     <div className="flex flex-col items-center justify-center p-8">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Chats</h1>
+      <h1 className="text-xl font-semibold tracking-tight my-8 text-center">Chats</h1>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
         {card.valuesCards.map((c) => (
           <Link
@@ -72,7 +72,7 @@ function SimilarCards({
 }) {
   return (
     <div>
-      <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Similar cards</h1>
+      <h1 className="text-xl font-semibold tracking-tight my-8 text-center">Similar cards</h1>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
         {similar.map((card) => (
           <Link

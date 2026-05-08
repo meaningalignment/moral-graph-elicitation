@@ -100,10 +100,8 @@ function ChatsView({
     <div className="flex h-[calc(100vh-4rem)] -mt-4 -mx-4 sm:-mx-6">
       <aside className="w-80 shrink-0 border-r border-border bg-card flex flex-col">
         <div className="px-4 pt-5 pb-3 border-b border-border">
-          <h2 className="font-serif text-xl font-semibold tracking-tight">
-            Chats
-          </h2>
-          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-1">
+          <h2 className="text-base font-semibold tracking-tight">Chats</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
             {filteredChats.length} chat{filteredChats.length !== 1 ? "s" : ""}
           </p>
         </div>
