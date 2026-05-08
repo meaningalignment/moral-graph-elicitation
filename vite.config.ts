@@ -6,7 +6,13 @@ import { vercelPreset } from "@vercel/remix/vite"
 import tailwindcss from "@tailwindcss/vite"
 
 
-installGlobals()
+// Use undici (native-style) for fetch/Response/Request/etc. Without
+// nativeFetch:true, Remix installs @remix-run/web-fetch — its Response.body
+// is a web-streams-polyfill ReadableStream, which can't be pipeThrough'd
+// with a native TransformStream (what ai@6 uses for SSE parsing). That
+// mismatch surfaces as "First parameter has member 'readable' that is not
+// a ReadableStream" when streamText starts streaming.
+installGlobals({ nativeFetch: true })
 
 export default defineConfig({
   plugins: [
