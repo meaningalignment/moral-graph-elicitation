@@ -101,7 +101,7 @@ export default function Deliberations() {
             >
               <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
             </svg>
-            <span className="ml-3 font-serif text-base font-semibold tracking-tight leading-tight">
+            <span className="ml-3 text-base font-semibold tracking-tight">
               Moral Graph
             </span>
           </div>

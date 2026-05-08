@@ -5,7 +5,7 @@ import {
   useNavigate,
 } from "@remix-run/react"
 import { useEffect, useState } from "react"
-import { auth, db } from "~/config.server"
+import { auth, db, inngest } from "~/config.server"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
@@ -19,15 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
-import { seedFromGivenQuestionsCore } from "~/services/generation"
 import { Plus, X } from "lucide-react"
-
-/** Fire a background promise that survives the response. */
-function fireAndForget(label: string, fn: () => Promise<unknown>) {
-  fn().catch((e) => {
-    console.error(`[bg ${label}] ${(e as Error).message}`)
-  })
-}
 
 /** Smart-truncate a question into a 2-5 word title.
  *  "What should SF do about homelessness?" -> "What should SF do…" or similar */
@@ -64,33 +56,43 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: "At least one question is required" }, { status: 400 })
   }
 
-  const questions = rawQuestions.map((question) => ({
-    question,
-    title: titleFromQuestion(question),
-  }))
-
   try {
+    // Create deliberation + question rows synchronously. The slow part —
+    // generating contexts via the LLM — is handed to Inngest so it survives
+    // the lambda termination. (A fire-and-forget Promise here would get cut
+    // off the moment we redirect on Vercel's Node runtime.)
     const deliberation = await db.deliberation.create({
       data: {
         title,
         welcomeText,
         // The first question doubles as the deliberation's "topic" so we keep
         // the existing schema field meaningful.
-        topic: questions[0].question,
+        topic: rawQuestions[0],
+        setupStatus: "generating_contexts",
         user: { connect: { id: user.id } },
       },
     })
 
-    // Background: generate contexts for each given question. Don't await so
-    // the redirect happens immediately and the dashboard's NavigationProgress
-    // bar does the rest.
-    fireAndForget(`seed delib ${deliberation.id}`, () =>
-      seedFromGivenQuestionsCore({
-        deliberationId: deliberation.id,
-        questions,
-        numContexts,
-      })
+    const createdQuestions = await db.$transaction(
+      rawQuestions.map((question) =>
+        db.question.create({
+          data: {
+            question,
+            title: titleFromQuestion(question),
+            deliberationId: deliberation.id,
+          },
+        })
+      )
     )
+
+    await inngest.send({
+      name: "gen-seed-contexts",
+      data: {
+        deliberationId: deliberation.id,
+        questionIds: createdQuestions.map((q) => q.id),
+        numContexts,
+      },
+    })
 
     return redirect(`/dashboard/${deliberation.id}`)
   } catch (error) {
