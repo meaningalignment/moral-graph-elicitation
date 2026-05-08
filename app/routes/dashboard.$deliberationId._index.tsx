@@ -1,19 +1,16 @@
 import {
   LoaderFunctionArgs,
   ActionFunctionArgs,
-  defer,
   json,
 } from "@remix-run/node"
 import {
-  Await,
   useLoaderData,
   Link,
   useRevalidator,
   useParams,
   useFetcher,
 } from "@remix-run/react"
-import { Suspense, useEffect, useState } from "react"
-import { Skeleton } from "~/components/ui/skeleton"
+import { useEffect, useState } from "react"
 import { db, inngest } from "~/config.server"
 import { Button } from "~/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card"
@@ -37,62 +34,56 @@ import {
   Persona as DialogPersona,
 } from "~/components/simulate-dialog"
 
-export const loader = ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const deliberationId = Number(params.deliberationId)!
 
-  // Defer the (heavy, deeply-included) deliberation lookup + intervention
-  // queries together. The page shell renders instantly; the Summary card and
-  // Questions list stream in.
-  const data = (async () => {
-    const [deliberation, firstIntervention, interventionsCount] =
-      await Promise.all([
-        db.deliberation.findFirstOrThrow({
-          where: { id: deliberationId },
-          include: {
-            questions: {
-              include: {
-                ContextsForQuestions: {
-                  include: {
-                    context: {
-                      select: { id: true, createdInChatId: true },
-                    },
+  // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
+  const [deliberation, firstIntervention, interventionsCount] =
+    await Promise.all([
+      db.deliberation.findFirstOrThrow({
+        where: { id: deliberationId },
+        include: {
+          questions: {
+            include: {
+              ContextsForQuestions: {
+                include: {
+                  context: {
+                    select: { id: true, createdInChatId: true },
                   },
                 },
               },
             },
-            _count: {
-              select: {
-                edges: true,
-                edgeHypotheses: true,
-                valuesCards: {
-                  where: { seedGenerationRunId: { equals: null } },
-                },
-                canonicalValuesCards: true,
+          },
+          _count: {
+            select: {
+              edges: true,
+              edgeHypotheses: true,
+              valuesCards: {
+                where: { seedGenerationRunId: { equals: null } },
               },
-            },
-            chats: {
-              select: { userId: true },
-              where: { ValuesCard: { isNot: null } },
-              distinct: ["userId"],
+              canonicalValuesCards: true,
             },
           },
-        }),
-        db.intervention.findFirst({
-          where: { deliberationId, shouldDisplay: true },
-          select: { questionId: true },
-        }),
-        db.intervention.count({
-          where: { deliberationId, shouldDisplay: true },
-        }),
-      ])
-    return {
-      deliberation,
-      interventionsCount,
-      firstQuestionId: firstIntervention?.questionId,
-    }
-  })()
-
-  return defer({ data })
+          chats: {
+            select: { userId: true },
+            where: { ValuesCard: { isNot: null } },
+            distinct: ["userId"],
+          },
+        },
+      }),
+      db.intervention.findFirst({
+        where: { deliberationId, shouldDisplay: true },
+        select: { questionId: true },
+      }),
+      db.intervention.count({
+        where: { deliberationId, shouldDisplay: true },
+      }),
+    ])
+  return json({
+    deliberation,
+    interventionsCount,
+    firstQuestionId: firstIntervention?.questionId,
+  })
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -230,50 +221,8 @@ function ValueContextInfo() {
 }
 
 export default function DeliberationDashboardRoute() {
-  const { data } = useLoaderData<typeof loader>()
-  const { deliberationId } = useParams()
-  return (
-    <Suspense fallback={<DashboardSkeleton deliberationId={deliberationId} />}>
-      <Await resolve={data}>
-        {(resolved: any) => <DeliberationDashboard {...resolved} />}
-      </Await>
-    </Suspense>
-  )
-}
-
-function DashboardSkeleton({ deliberationId }: { deliberationId?: string }) {
-  return (
-    <div className="container mx-auto py-6 max-w-2xl space-y-6">
-      <Skeleton className="h-8 w-2/3" />
-      <div className="rounded-lg border bg-card p-4 space-y-3">
-        <Skeleton className="h-5 w-24" />
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-9 w-full" />
-        ))}
-      </div>
-      <div className="rounded-lg border bg-card p-4 space-y-3">
-        <Skeleton className="h-5 w-24" />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex justify-between items-center py-1">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-8" />
-          </div>
-        ))}
-        <div className="flex gap-3 pt-3">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-32" />
-          <Skeleton className="h-9 w-32" />
-        </div>
-      </div>
-      <Skeleton className="h-6 w-32" />
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-lg border bg-card p-4 space-y-2">
-          <Skeleton className="h-5 w-1/3" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-      ))}
-    </div>
-  )
+  const data = useLoaderData<typeof loader>()
+  return <DeliberationDashboard {...(data as any)} />
 }
 
 function DeliberationDashboard({

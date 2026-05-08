@@ -1,6 +1,5 @@
-import { defer, LoaderFunctionArgs } from "@remix-run/node"
+import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
-  Await,
   NavLink,
   Outlet,
   useLoaderData,
@@ -17,13 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
-import { Suspense, useState } from "react"
-import { Skeleton } from "~/components/ui/skeleton"
+import { useState } from "react"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { deliberationId } = params
 
-  const data = Promise.all([
+  // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
+  const [edges, questions, contexts] = await Promise.all([
     db.edge.findMany({
       orderBy: { createdAt: "desc" },
       where: { deliberationId: Number(deliberationId)! },
@@ -52,9 +51,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
         ContextsForQuestions: { select: { questionId: true } },
       },
     }),
-  ]).then(([edges, questions, contexts]) => ({ edges, questions, contexts }))
+  ])
 
-  return defer({ data })
+  return json({ edges, questions, contexts })
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -79,35 +78,8 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminLinks() {
-  const { data } = useLoaderData<typeof loader>()
-  return (
-    <Suspense fallback={<VotesShell />}>
-      <Await resolve={data}>{(resolved) => <VotesView data={resolved} />}</Await>
-    </Suspense>
-  )
-}
-
-function VotesShell() {
-  return (
-    <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r bg-card px-3 py-4 space-y-4">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-        <div className="space-y-3 pt-2">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-1.5">
-              <Skeleton className="h-4 w-5/6" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex-1 p-6">
-        <Skeleton className="h-32 w-full" />
-      </div>
-    </div>
-  )
+  const data = useLoaderData<typeof loader>()
+  return <VotesView data={data} />
 }
 
 function VotesView({

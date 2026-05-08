@@ -1,6 +1,5 @@
-import { defer, LoaderFunctionArgs, json } from "@remix-run/node"
+import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
-  Await,
   NavLink,
   Outlet,
   useLoaderData,
@@ -19,13 +18,13 @@ import {
   SelectValue,
 } from "~/components/ui/select"
 import { Button } from "~/components/ui/button"
-import { Suspense, useState } from "react"
-import { Skeleton } from "~/components/ui/skeleton"
+import { useState } from "react"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { deliberationId } = params
 
-  const data = Promise.all([
+  // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
+  const [hypotheses, questions, contexts] = await Promise.all([
     db.edgeHypothesis.findMany({
       orderBy: { createdAt: "desc" },
       where: { deliberationId: Number(deliberationId)! },
@@ -54,13 +53,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
         ContextsForQuestions: { select: { questionId: true } },
       },
     }),
-  ]).then(([hypotheses, questions, contexts]) => ({
-    hypotheses,
-    questions,
-    contexts,
-  }))
+  ])
 
-  return defer({ data })
+  return json({ hypotheses, questions, contexts })
 }
 
 export async function action({ request, params }: LoaderFunctionArgs) {
@@ -75,37 +70,8 @@ export async function action({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function AdminHypotheses() {
-  const { data } = useLoaderData<typeof loader>()
-  return (
-    <Suspense fallback={<HypothesesShell />}>
-      <Await resolve={data}>{(resolved) => <HypothesesView data={resolved} />}</Await>
-    </Suspense>
-  )
-}
-
-function HypothesesShell() {
-  return (
-    <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r bg-card px-3 py-4 space-y-4">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-        <div className="space-y-3 pt-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-1.5">
-              <Skeleton className="h-4 w-5/6" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex-1 p-6">
-        <Skeleton className="h-6 w-1/3 mb-3" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-    </div>
-  )
+  const data = useLoaderData<typeof loader>()
+  return <HypothesesView data={data} />
 }
 
 function HypothesesView({
