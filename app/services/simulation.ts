@@ -125,8 +125,11 @@ async function writeProgress(
  * run can never wedge a deliberation again.
  */
 export const simulateDeliberation = inngest.createFunction(
-  { id: "simulate-deliberation", concurrency: 2 },
-  { event: "simulate-deliberation" },
+  {
+    id: "simulate-deliberation",
+    concurrency: 2,
+    triggers: { event: "simulate-deliberation" },
+  },
   async ({ event, step, logger }) => {
     const deliberationId = Number(event.data.deliberationId)
     const personasSpec = String(event.data.personas ?? "4")

@@ -329,9 +329,11 @@ export async function seedQuestionsAndContextsCore({
 }
 
 export const generateSeedQuestionsAndContexts = inngest.createFunction(
-  { id: "generate-seed-questions-and-contexts", onFailure },
-  { event: "gen-seed-questions-contexts" },
-
+  {
+    id: "generate-seed-questions-and-contexts",
+    triggers: { event: "gen-seed-questions-contexts" },
+    onFailure,
+  },
   async ({ event, step, logger }) => {
     logger.info(`Running deliberation setup.`)
 
@@ -394,8 +396,11 @@ export const generateSeedQuestionsAndContexts = inngest.createFunction(
 )
 
 export const generateSeedContexts = inngest.createFunction(
-  { id: "gen-seed-contexts", onFailure },
-  { event: "gen-seed-contexts" },
+  {
+    id: "gen-seed-contexts",
+    triggers: { event: "gen-seed-contexts" },
+    onFailure,
+  },
   async ({ event, step, logger }) => {
     logger.info(`Running deliberation setup.`)
 
@@ -440,8 +445,11 @@ export const generateSeedContexts = inngest.createFunction(
 )
 
 export const generateSeedGraph = inngest.createFunction(
-  { id: "gen-seed-graph", onFailure },
-  { event: "gen-seed-graph" },
+  {
+    id: "gen-seed-graph",
+    triggers: { event: "gen-seed-graph" },
+    onFailure,
+  },
   async ({ event, step, logger, runId }) => {
     logger.info(`Starting graph generation for deliberation`)
 
@@ -553,8 +561,11 @@ export const generateSeedGraph = inngest.createFunction(
 )
 
 export const generateSeedQuestions = inngest.createFunction(
-  { id: "gen-seed-questions", onFailure },
-  { event: "gen-seed-questions" },
+  {
+    id: "gen-seed-questions",
+    triggers: { event: "gen-seed-questions" },
+    onFailure,
+  },
   async ({ event, step, logger }) => {
     logger.info(`Running deliberation setup.`)
 

@@ -130,8 +130,11 @@ async function generateReversedUpgrades(
 }
 
 export const hypothesizeCron = inngest.createFunction(
-  { id: "hypothesize-cron", concurrency: 1 },
-  { cron: "0 */12 * * *" },
+  {
+    id: "hypothesize-cron",
+    concurrency: 1,
+    triggers: [{ cron: "0 */12 * * *" }],
+  },
   async ({ step, logger }) => {
     await step.sendEvent("hypothesize", { name: "hypothesize", data: {} })
 
@@ -179,8 +182,11 @@ export const hypothesizeCron = inngest.createFunction(
 )
 
 export const hypothesize = inngest.createFunction(
-  { id: "hypothesize", concurrency: 1 },
-  { event: "hypothesize" },
+  {
+    id: "hypothesize",
+    concurrency: 1,
+    triggers: { event: "hypothesize" },
+  },
   async ({ event, step, logger, runId }) => {
     const deliberationId = event.data!.deliberationId as number
     logger.info(`Running hypothetical links generation`)

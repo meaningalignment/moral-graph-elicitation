@@ -53,10 +53,17 @@ export async function ensureLoggedIn(request: Request, extraParams = {}) {
   }
 }
 
+// Inngest 4: default mode flipped to "cloud". Mark dev explicitly so the
+// local Inngest dev server (npm run inngest) is reachable; production reads
+// INNGEST_SIGNING_KEY / INNGEST_EVENT_KEY normally.
 export const inngest = new Inngest({
   id: process.env.INNGEST_NAME ?? "Moral Graph Elicitation",
   apiKey: process.env.INNGEST_API_KEY,
   eventKey: process.env.INNGEST_EVENT_KEY,
+  isDev:
+    process.env.INNGEST_DEV === "1" ||
+    (process.env.NODE_ENV !== "production" &&
+      !process.env.INNGEST_EVENT_KEY),
 })
 
 export const openai = new OpenAI({
