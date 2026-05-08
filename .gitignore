@@ -1,6 +1,11 @@
 node_modules
 node_modules.nosync
 
+# Project lockfile is bun.lock; ignore lockfiles from other package managers.
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
 /.cache
 /build
 /public/build
