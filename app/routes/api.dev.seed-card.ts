@@ -74,23 +74,42 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
+  // Synthesize a transcript with a real submit_values_card tool call so the
+  // ai@6 loader -> chatMessagesToUIMessages -> Chat component path produces
+  // a tool-submit_values_card part with output-available, which triggers
+  // the "finished" Continue button.
+  const toolCallId = `seed_${threadId.slice(0, 8)}`
   await persistArticulatedCard({
     authorId: userId,
     threadId,
     deliberationId,
     questionId,
     transcript: [
+      { role: "user", content: "[seeded for testing]" },
       {
-        role: "user",
-        content: "[seeded for testing]",
+        role: "assistant",
+        content: null,
+        tool_calls: [
+          {
+            id: toolCallId,
+            type: "function",
+            function: {
+              name: "submit_values_card",
+              arguments: JSON.stringify(card),
+            },
+          },
+        ],
+      },
+      {
+        role: "tool",
+        tool_call_id: toolCallId,
+        name: "submit_values_card",
+        content: JSON.stringify({ ok: true }),
       },
     ],
     card,
   })
 
-  // Bounce back to the chat — loader re-runs, picks up the new KV data,
-  // Chat component sees the values_card message and flips ChatPanel into
-  // the "finished" state with the Continue button.
   return redirect(
     `/deliberation/${deliberationId}/${questionId}/chat/${threadId}`
   )
