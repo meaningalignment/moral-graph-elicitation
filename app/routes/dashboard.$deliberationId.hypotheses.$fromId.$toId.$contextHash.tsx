@@ -57,7 +57,7 @@ export default function HypothesisView() {
         <h1 className="text-md font-bold mb-2 pl-12 md:pl-0">
           {hypothesis.context.id}
         </h1>
-        <p className="text-gray-700">{hypothesis.story}</p>
+        <p className="text-foreground">{hypothesis.story}</p>
       </div>
       <div
         className={cn(
@@ -76,7 +76,7 @@ export default function HypothesisView() {
       <div className="transition-opacity ease-in duration-500 flex flex-col items-center justify-center w-full max-w-xs">
         <h1 className="font-bold mr-auto">User Responses</h1>
         {relatedEdges.length === 0 ? (
-          <p className="text-sm text-slate-500 mt-4">
+          <p className="text-sm text-muted-foreground mt-4">
             No users have agreed or disagreed with this hypothesis yet.
           </p>
         ) : (
@@ -89,7 +89,7 @@ export default function HypothesisView() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{edge.user.name}</p>
-                    <p className="text-sm text-slate-500">{edge.user.email}</p>
+                    <p className="text-sm text-muted-foreground">{edge.user.email}</p>
                   </div>
                   <Badge
                     variant={
@@ -108,7 +108,7 @@ export default function HypothesisView() {
                   </Badge>
                 </div>
                 {edge.comment && (
-                  <p className="mt-2 text-sm text-slate-600">{edge.comment}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{edge.comment}</p>
                 )}
               </div>
             ))}

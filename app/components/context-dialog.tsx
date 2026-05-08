@@ -23,7 +23,7 @@ export default function ContextDialog({
     <Dialog open={open} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-sm animate-fade-in">
         <DialogHeader></DialogHeader>
-        <DialogTitle className="text-2xl font-bold">
+        <DialogTitle className="font-serif text-2xl font-semibold tracking-tight">
           {contextDisplayName(contextId)}
         </DialogTitle>
 

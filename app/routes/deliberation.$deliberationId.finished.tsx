@@ -69,7 +69,7 @@ export default function FinishedScreen() {
       <Header />
       <div className="grid flex-grow place-items-center py-12">
         <div className="flex flex-col items-center mx-auto max-w-xl text-center px-8">
-          <h1 className="text-4xl font-bold mb-8">🙏 Thank You!</h1>
+          <h1 className="font-serif text-4xl font-semibold tracking-tight mb-8">Thank you</h1>
 
           <p>
             You've contributed{" "}

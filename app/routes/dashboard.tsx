@@ -86,29 +86,27 @@ export default function Deliberations() {
         )}
         aria-label="Sidebar"
       >
-        <div className="flex h-full flex-col overflow-y-auto border-r border-slate-200 bg-white px-3 py-4">
-          <div className="mb-10 flex items-center justify-between rounded-lg px-3 py-2 text-slate-900">
-            <div className="flex items-center">
-              <svg
-                className="h-5 w-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-              </svg>
-              <span className="ml-3 text-base font-semibold">
-                Moral Graph Elicitation
-              </span>
-            </div>
+        <div className="flex h-full flex-col overflow-y-auto border-r border-border bg-card px-3 py-4">
+          <div className="mb-8 flex items-center px-3 py-2 text-foreground">
+            <svg
+              className="h-5 w-5 shrink-0"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+            </svg>
+            <span className="ml-3 font-serif text-base font-semibold tracking-tight leading-tight">
+              Moral Graph
+            </span>
           </div>
           <ScrollArea className="flex-grow">
-            <div className="mb-2 px-3 text-xs font-semibold text-slate-500 ">
+            <div className="mb-2 px-3 text-xs font-semibold text-muted-foreground ">
               Your Deliberations
             </div>
             <ul className="space-y-2 text-sm font-medium">
@@ -119,9 +117,9 @@ export default function Deliberations() {
                     to={`/dashboard/${delib.id}`}
                     className={({ isActive, isPending }) =>
                       cn(
-                        "flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  ",
-                        isPending && "bg-slate-50 ",
-                        isActive && "bg-slate-100 "
+                        "flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  ",
+                        isPending && "bg-muted ",
+                        isActive && "bg-muted "
                       )
                     }
                   >
@@ -149,7 +147,7 @@ export default function Deliberations() {
 
             {participatingIn.length > 0 && (
               <>
-                <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-500 ">
+                <div className="mt-6 mb-2 px-3 text-xs font-semibold text-muted-foreground ">
                   Participating In
                 </div>
                 <ul className="space-y-2 text-sm font-medium">
@@ -159,9 +157,9 @@ export default function Deliberations() {
                         to={`/dashboard/${delib.id}`}
                         className={({ isActive, isPending }) =>
                           cn(
-                            "flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  ",
-                            isPending && "bg-slate-50 ",
-                            isActive && "bg-slate-100 "
+                            "flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  ",
+                            isPending && "bg-muted ",
+                            isActive && "bg-muted "
                           )
                         }
                       >
@@ -251,11 +249,11 @@ export default function Deliberations() {
       </aside>
       <main className="lg:ml-64 flex-1">
         {params.deliberationId && (
-          <nav className="sticky top-0 z-10 px-6 py-4 flex-none border-b border-slate-200 bg-white">
+          <nav className="sticky top-0 z-10 px-6 py-4 flex-none border-b border-border bg-card">
             <div className="flex items-center">
               <button
                 type="button"
-                className="lg:hidden -ml-2 mr-2 p-2 rounded-md text-slate-500 hover:bg-slate-100"
+                className="lg:hidden -ml-2 mr-2 p-2 rounded-md text-muted-foreground hover:bg-muted"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               >
                 <svg
@@ -283,24 +281,24 @@ export default function Deliberations() {
                 </svg>
               </button>
               <ol className="flex items-center text-sm">
-                <li className="font-medium text-slate-800">
+                <li className="font-medium text-foreground">
                   <NavLink
                     prefetch="render"
                     to={`/dashboard/${params.deliberationId}`}
-                    className="hover:text-slate-600 transition-colors"
+                    className="hover:text-muted-foreground transition-colors"
                   >
                     {currentDeliberation?.title}
                   </NavLink>
                 </li>
                 {pathSegments.map((segment, index) => (
                   <li key={segment} className="flex items-center">
-                    <span className="mx-2 text-slate-400">/</span>
+                    <span className="mx-2 text-muted-foreground">/</span>
                     <NavLink
                       prefetch="intent"
                       to={`/dashboard/${params.deliberationId}/${pathSegments
                         .slice(0, index + 1)
                         .join("/")}`}
-                      className="font-medium text-slate-500 capitalize hover:text-slate-700 transition-colors"
+                      className="font-medium text-muted-foreground capitalize hover:text-foreground transition-colors"
                       title={segment}
                     >
                       {segment.length > 17

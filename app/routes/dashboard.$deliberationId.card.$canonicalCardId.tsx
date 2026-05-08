@@ -47,7 +47,7 @@ function Chats() {
 
   return (
     <div className="flex flex-col items-center justify-center p-8">
-      <h1 className="text-3xl font-bold my-8 text-center">Chats</h1>
+      <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Chats</h1>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
         {card.valuesCards.map((c) => (
           <Link
@@ -72,7 +72,7 @@ function SimilarCards({
 }) {
   return (
     <div>
-      <h1 className="text-3xl font-bold my-8 text-center">Similar cards</h1>
+      <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Similar cards</h1>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
         {similar.map((card) => (
           <Link
@@ -85,7 +85,7 @@ function SimilarCards({
               key={card.id}
               card={card as any as CanonicalValuesCard}
             />
-            <div className="text-sm text-neutral-500 text-center">
+            <div className="text-sm text-muted-foreground text-center">
               Distance: {(card as any)._distance}
             </div>
           </Link>

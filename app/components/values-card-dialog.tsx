@@ -43,7 +43,7 @@ export default function ValuesCardDialog({
 
             {links && links.length > 0 && (
               <div className="mb-4">
-                <p className="text-sm text-neutral-500 mb-2 mt-4">
+                <p className="text-sm text-muted-foreground mb-2 mt-4">
                   Voted as wise when:
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -53,7 +53,7 @@ export default function ValuesCardDialog({
                     <Badge
                       key={index}
                       variant="outline"
-                      className="cursor-pointer hover:bg-slate-100 rounded-sm"
+                      className="cursor-pointer hover:bg-muted rounded-sm"
                       onClick={() =>
                         onLinkClicked?.(
                           links.find((link) => link.contexts[0] === context)
@@ -68,17 +68,17 @@ export default function ValuesCardDialog({
             )}
 
             <h3 className="text-md font-bold mb-2 mt-8">{value.title}</h3>
-            <p className="text-md text-neutral-500 mb-4">{value.description}</p>
+            <p className="text-md text-muted-foreground mb-4">{value.description}</p>
 
             {value.policies && value.policies.length > 0 && (
               <div className="mt-4 hidden sm:block">
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
-                    className="w-full flex justify-between items-center p-2 hover:bg-slate-50"
+                    className="w-full flex justify-between items-center p-2 hover:bg-muted"
                     onClick={() => setShowPolicies(!showPolicies)}
                   >
-                    <span className="text-sm font-semibold text-neutral-500">
+                    <span className="text-sm font-semibold text-muted-foreground">
                       Where to pay attention
                     </span>
                     {showPolicies ? (
@@ -124,7 +124,7 @@ export default function ValuesCardDialog({
                           href="https://arxiv.org/abs/2404.10636"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 underline"
+                          className="text-primary underline underline-offset-4"
                         >
                           here
                         </a>
@@ -135,14 +135,14 @@ export default function ValuesCardDialog({
                 </div>
 
                 {showPolicies && (
-                  <div className="bg-blue-50 rounded-md p-2 mt-2">
+                  <div className="bg-secondary rounded-md p-2 mt-2">
                     <div className="space-y-0.5">
                       {(value.policies as string[]).map((policy, idx) => (
-                        <p key={idx} className="text-xs text-neutral-500">
+                        <p key={idx} className="text-xs text-muted-foreground">
                           {policy.split(" ").map((word, wordIdx) => (
                             <React.Fragment key={wordIdx}>
                               {isAllUppercase(word) ? (
-                                <strong className="font-semibold text-neutral-600">
+                                <strong className="font-semibold text-muted-foreground">
                                   {word}
                                 </strong>
                               ) : (

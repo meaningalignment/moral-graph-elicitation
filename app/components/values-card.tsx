@@ -20,11 +20,11 @@ function DetailsList({ card }: { card: ValuesCardData }) {
   return (
     <div className="flex flex-col overflow-auto gap-y-1">
       {card.policies?.map((criterion, id) => (
-        <li key={id} className="text-sm text-neutral-500  list-none">
+        <li key={id} className="text-sm text-muted-foreground list-none">
           {criterion.split(" ").map((word, index) => (
             <React.Fragment key={`${id}/${index}`}>
               {isAllUppercase(word) ? (
-                <strong className="font-bold text-neutral-600 ">{word}</strong>
+                <strong className="font-semibold text-foreground">{word}</strong>
               ) : (
                 word
               )}
@@ -39,23 +39,24 @@ function DetailsList({ card }: { card: ValuesCardData }) {
 
 export default function ValuesCard({ card, header, editButton }: Props) {
   return (
-    <div
-      className={`border-2 rounded-xl px-8 pt-8 pb-6 max-w-sm h-full bg-white   flex flex-col`}
-    >
+    <div className="border border-border rounded-xl px-8 pt-8 pb-6 max-w-sm h-full bg-card flex flex-col">
       {header && header}
       {editButton ? (
         <div className="flex flex-row justify-between items-center">
-          <p className="text-md font-bold">{card.title}</p>
+          <p className="font-serif text-lg font-semibold leading-tight tracking-tight">
+            {card.title}
+          </p>
           {editButton}
         </div>
       ) : (
-        <p className="text-md font-bold">{card.title}</p>
+        <p className="font-serif text-lg font-semibold leading-tight tracking-tight">
+          {card.title}
+        </p>
       )}
-      <p className="text-md text-neutral-500 ">{card.description}</p>
-      <div className="px-4 py-2 -mx-4 mt-4 place-self-stretch bg-blue-100 rounded-md">
-        <p className="text-xs font-bold text-neutral-500 mb-3">
-          {/* <Eye className="h-4 w-4 inline-block mr-2" /> */}
-          WHERE MY ATTENTION GOES
+      <p className="mt-1 text-md text-muted-foreground">{card.description}</p>
+      <div className="px-4 py-3 -mx-4 mt-4 place-self-stretch bg-secondary rounded-md">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
+          Where my attention goes
         </p>
         <DetailsList card={card} />
       </div>

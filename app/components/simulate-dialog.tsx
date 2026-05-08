@@ -35,7 +35,7 @@ const AFFILIATION_STYLES: Record<PoliticalAffiliation, string> = {
   liberal: "bg-blue-100 text-blue-900 border-blue-200",
   conservative: "bg-red-100 text-red-900 border-red-200",
   libertarian: "bg-amber-100 text-amber-900 border-amber-200",
-  moderate: "bg-slate-100 text-slate-700 border-slate-200",
+  moderate: "bg-muted text-foreground border-border",
   other: "bg-purple-100 text-purple-900 border-purple-200",
 }
 
@@ -79,8 +79,8 @@ function PersonaCard({
       className={cn(
         "flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors",
         selected
-          ? "border-slate-900 bg-slate-50"
-          : "border-slate-200 hover:bg-slate-50"
+          ? "border-primary bg-muted"
+          : "border-border hover:bg-muted"
       )}
     >
       <Checkbox
@@ -89,7 +89,7 @@ function PersonaCard({
         onClick={(e) => e.stopPropagation()}
         className="mt-0.5"
       />
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
         {initials(persona.name)}
       </div>
       <div className="min-w-0 flex-1">
@@ -225,7 +225,7 @@ export function SimulateDialog({
               ))}
             </div>
 
-            <details className="rounded-md border bg-slate-50 p-3 group">
+            <details className="rounded-md border bg-muted p-3 group">
               <summary className="flex cursor-pointer items-center gap-2 text-sm font-medium">
                 <Sparkles className="h-4 w-4" />
                 Generate a new persona on the fly
@@ -265,7 +265,7 @@ export function SimulateDialog({
                           "rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors",
                           genAffiliation === a
                             ? AFFILIATION_STYLES[a]
-                            : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                            : "border-border text-muted-foreground hover:bg-muted"
                         )}
                       >
                         {a}

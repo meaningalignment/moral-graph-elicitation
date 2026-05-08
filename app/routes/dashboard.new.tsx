@@ -133,8 +133,10 @@ export default function NewDeliberation() {
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-12 px-4">
-      <h1 className="text-2xl font-bold mb-2">Create New Deliberation</h1>
-      <p className="text-sm text-muted-foreground mb-8">
+      <h1 className="font-serif text-3xl font-semibold tracking-tight mb-3">
+        Create new deliberation
+      </h1>
+      <p className="text-base text-muted-foreground mb-10 leading-relaxed">
         Give your deliberation a title and at least one question. We'll
         automatically surface the most morally distinct situations within each
         question. You can simulate participants from the dashboard once it's

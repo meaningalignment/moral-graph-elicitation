@@ -123,7 +123,7 @@ export default function AdminChat() {
   if (!messages || messages.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-4 mt-12">
-        <div className="rounded-lg border bg-white p-8">
+        <div className="rounded-lg border bg-card p-8">
           <h1 className="mb-2 text-lg font-semibold">No Transcript</h1>
           <p className="mb-2 leading-normal text-muted-foreground">
             Transcript is not available for this chat.

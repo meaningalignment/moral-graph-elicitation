@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Inter:wght@300..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
 .fullheight {
@@ -18,42 +19,83 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Notebook palette — warm ivory paper, navy ink, tan accent. */
+    --background: 43 31% 95%;
+    --foreground: 220 43% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 45 47% 98%;
+    --card-foreground: 220 43% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 45 47% 98%;
+    --popover-foreground: 220 43% 18%;
 
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 33 44% 51%;
+    --primary-foreground: 45 47% 98%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 42 36% 89%;
+    --secondary-foreground: 220 43% 18%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 40 30% 91%;
+    --muted-foreground: 38 11% 38%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 83 21% 46%;
+    --accent-foreground: 45 47% 98%;
 
-    --destructive: 0 72.22% 50.59%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 7 57% 51%;
+    --destructive-foreground: 45 47% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    --border: 42 21% 80%;
+    --input: 42 21% 80%;
 
-    --ring: 240 5% 64.9%;
+    --ring: 33 44% 51%;
 
     --radius: 0.5rem;
 
     --safe-area-inset-bottom: constant(safe-area-inset-bottom);
   }
 
+  /* Dark mode kept structurally identical for now; future seam. */
+  .dark {
+    --background: 43 31% 95%;
+    --foreground: 220 43% 18%;
+    --card: 45 47% 98%;
+    --card-foreground: 220 43% 18%;
+    --popover: 45 47% 98%;
+    --popover-foreground: 220 43% 18%;
+    --primary: 33 44% 51%;
+    --primary-foreground: 45 47% 98%;
+    --secondary: 42 36% 89%;
+    --secondary-foreground: 220 43% 18%;
+    --muted: 40 30% 91%;
+    --muted-foreground: 38 11% 38%;
+    --accent: 83 21% 46%;
+    --accent-foreground: 45 47% 98%;
+    --destructive: 7 57% 51%;
+    --destructive-foreground: 45 47% 98%;
+    --border: 42 21% 80%;
+    --input: 42 21% 80%;
+    --ring: 33 44% 51%;
+  }
+
   * {
     border-color: hsl(var(--border));
+  }
+
+  body {
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .font-serif {
+    font-family: "Source Serif 4", ui-serif, Georgia, serif;
+    font-feature-settings: "kern", "liga";
+  }
+
+  .font-mono {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
   }
 }
 
@@ -89,8 +131,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
 
-  --font-family-poppins: var(--font-poppins);
-  --font-family-inter: var(--font-inter);
+  --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-family-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  --font-family-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;

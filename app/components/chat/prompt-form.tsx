@@ -26,7 +26,7 @@ const FinishedView = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <p className="p-2 pb-4 text-sm text-gray-600">
+      <p className="p-2 pb-4 text-sm text-muted-foreground">
         Thank you for sharing your story!
       </p>
       <div className="flex justify-center pt-2">
@@ -77,7 +77,7 @@ export function PromptForm({
     >
       {(isFinished && <FinishedView />) || (
         <div
-          className={`relative flex max-h-60 w-full grow flex-col overflow-hidden bg-white pr-8 sm:rounded-md sm:border sm:pr-12`}
+          className={`relative flex max-h-60 w-full grow flex-col overflow-hidden bg-card pr-8 sm:rounded-md sm:border sm:pr-12`}
         >
           <Textarea
             ref={inputRef}

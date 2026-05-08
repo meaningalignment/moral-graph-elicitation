@@ -10,7 +10,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await auth.getCurrentUser(request)
   if (!user?.isAdmin) throw new Response("Unauthorized", { status: 401 })
   const deliberationId = Number(params.deliberationId)
-  const raw = await kv.get<SimulationProgress | string>(progressKey(deliberationId))
+  // KV is rate-limited intermittently; treat failure as no progress yet.
+  const raw = await kv
+    .get<SimulationProgress | string>(progressKey(deliberationId))
+    .catch(() => null)
   if (!raw) return json({ progress: null })
   // KV may return either parsed JSON or the raw string depending on how we wrote it.
   const progress = typeof raw === "string" ? JSON.parse(raw) : raw

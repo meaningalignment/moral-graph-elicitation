@@ -40,9 +40,9 @@ export function ScrollingBadges({ items, onItemClick }: ScrollingBadgesProps) {
             <div
               key={index}
               onClick={() => onItemClick?.(item)}
-              className="bg-white rounded-md px-2 py-1 border cursor-pointer hover:bg-slate-50 transition-colors whitespace-nowrap"
+              className="bg-card rounded-md px-2 py-1 border cursor-pointer hover:bg-muted transition-colors whitespace-nowrap"
             >
-              <span className="text-sm text-gray-400">{item}</span>
+              <span className="text-sm text-muted-foreground">{item}</span>
             </div>
           ))}
         </div>

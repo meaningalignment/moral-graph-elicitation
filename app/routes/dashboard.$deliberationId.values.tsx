@@ -1,6 +1,6 @@
-import { LoaderFunctionArgs, defer } from "@remix-run/node"
-import { Await, useLoaderData } from "@remix-run/react"
-import { Suspense, useState } from "react"
+import { LoaderFunctionArgs, json } from "@remix-run/node"
+import { useLoaderData } from "@remix-run/react"
+import { useState } from "react"
 import { db } from "~/config.server"
 import ValuesCard from "~/components/values-card"
 import {
@@ -12,14 +12,11 @@ import {
 } from "~/components/ui/select"
 import { Alert, AlertTitle, AlertDescription } from "~/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { SkeletonValuesGrid } from "~/components/skeletons"
-import { Skeleton } from "~/components/ui/skeleton"
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const deliberationId = Number(params.deliberationId)
-  // Defer all three queries together — the page shell (title) renders
-  // instantly, the filter row + grid stream in.
-  const data = Promise.all([
+  // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
+  const [values, questions, contexts] = await Promise.all([
     db.canonicalValuesCard.findMany({
       where: { deliberationId },
       include: {
@@ -43,36 +40,19 @@ export async function loader({ params }: LoaderFunctionArgs) {
         ContextsForQuestions: { select: { questionId: true } },
       },
     }),
-  ]).then(([values, questions, contexts]) => ({ values, questions, contexts }))
-  return defer({ data })
+  ])
+  return json({ values, questions, contexts })
 }
 
 export default function ValuesView() {
-  const { data } = useLoaderData<typeof loader>()
+  const { values, questions, contexts } = useLoaderData<typeof loader>()
 
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Values</h1>
-        <Suspense fallback={<ValuesLoading />}>
-          <Await resolve={data}>
-            {(resolved) => <ValuesContent {...resolved} />}
-          </Await>
-        </Suspense>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight mb-6">Values</h1>
+        <ValuesContent values={values} questions={questions} contexts={contexts} />
       </div>
-    </div>
-  )
-}
-
-function ValuesLoading() {
-  return (
-    <div>
-      <div className="flex gap-4 mb-6 items-center">
-        <Skeleton className="h-9 w-[200px]" />
-        <Skeleton className="h-9 w-[200px]" />
-        <Skeleton className="h-4 w-32" />
-      </div>
-      <SkeletonValuesGrid count={6} />
     </div>
   )
 }
@@ -82,9 +62,7 @@ function ValuesContent({
   questions,
   contexts,
 }: {
-  values: Awaited<
-    ReturnType<typeof db.canonicalValuesCard.findMany>
-  >
+  values: any[]
   questions: { id: number; title: string; ContextsForQuestions: { contextId: string }[] }[]
   contexts: { id: string; ContextsForQuestions: { questionId: number }[] }[]
 }) {
@@ -93,7 +71,7 @@ function ValuesContent({
 
   if (values.length === 0) {
     return (
-      <Alert className="bg-slate-50">
+      <Alert className="bg-muted">
         <div className="flex flex-row space-x-2">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No values yet</AlertTitle>

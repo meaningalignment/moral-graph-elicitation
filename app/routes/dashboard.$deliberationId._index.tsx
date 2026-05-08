@@ -1,19 +1,16 @@
 import {
   LoaderFunctionArgs,
   ActionFunctionArgs,
-  defer,
   json,
 } from "@remix-run/node"
 import {
-  Await,
   useLoaderData,
   Link,
   useRevalidator,
   useParams,
   useFetcher,
 } from "@remix-run/react"
-import { Suspense, useEffect, useState } from "react"
-import { Skeleton } from "~/components/ui/skeleton"
+import { useEffect, useState } from "react"
 import { db, inngest } from "~/config.server"
 import { Button } from "~/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card"
@@ -37,62 +34,56 @@ import {
   Persona as DialogPersona,
 } from "~/components/simulate-dialog"
 
-export const loader = ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const deliberationId = Number(params.deliberationId)!
 
-  // Defer the (heavy, deeply-included) deliberation lookup + intervention
-  // queries together. The page shell renders instantly; the Summary card and
-  // Questions list stream in.
-  const data = (async () => {
-    const [deliberation, firstIntervention, interventionsCount] =
-      await Promise.all([
-        db.deliberation.findFirstOrThrow({
-          where: { id: deliberationId },
-          include: {
-            questions: {
-              include: {
-                ContextsForQuestions: {
-                  include: {
-                    context: {
-                      select: { id: true, createdInChatId: true },
-                    },
+  // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
+  const [deliberation, firstIntervention, interventionsCount] =
+    await Promise.all([
+      db.deliberation.findFirstOrThrow({
+        where: { id: deliberationId },
+        include: {
+          questions: {
+            include: {
+              ContextsForQuestions: {
+                include: {
+                  context: {
+                    select: { id: true, createdInChatId: true },
                   },
                 },
               },
             },
-            _count: {
-              select: {
-                edges: true,
-                edgeHypotheses: true,
-                valuesCards: {
-                  where: { seedGenerationRunId: { equals: null } },
-                },
-                canonicalValuesCards: true,
+          },
+          _count: {
+            select: {
+              edges: true,
+              edgeHypotheses: true,
+              valuesCards: {
+                where: { seedGenerationRunId: { equals: null } },
               },
-            },
-            chats: {
-              select: { userId: true },
-              where: { ValuesCard: { isNot: null } },
-              distinct: ["userId"],
+              canonicalValuesCards: true,
             },
           },
-        }),
-        db.intervention.findFirst({
-          where: { deliberationId, shouldDisplay: true },
-          select: { questionId: true },
-        }),
-        db.intervention.count({
-          where: { deliberationId, shouldDisplay: true },
-        }),
-      ])
-    return {
-      deliberation,
-      interventionsCount,
-      firstQuestionId: firstIntervention?.questionId,
-    }
-  })()
-
-  return defer({ data })
+          chats: {
+            select: { userId: true },
+            where: { ValuesCard: { isNot: null } },
+            distinct: ["userId"],
+          },
+        },
+      }),
+      db.intervention.findFirst({
+        where: { deliberationId, shouldDisplay: true },
+        select: { questionId: true },
+      }),
+      db.intervention.count({
+        where: { deliberationId, shouldDisplay: true },
+      }),
+    ])
+  return json({
+    deliberation,
+    interventionsCount,
+    firstQuestionId: firstIntervention?.questionId,
+  })
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -230,50 +221,8 @@ function ValueContextInfo() {
 }
 
 export default function DeliberationDashboardRoute() {
-  const { data } = useLoaderData<typeof loader>()
-  const { deliberationId } = useParams()
-  return (
-    <Suspense fallback={<DashboardSkeleton deliberationId={deliberationId} />}>
-      <Await resolve={data}>
-        {(resolved: any) => <DeliberationDashboard {...resolved} />}
-      </Await>
-    </Suspense>
-  )
-}
-
-function DashboardSkeleton({ deliberationId }: { deliberationId?: string }) {
-  return (
-    <div className="container mx-auto py-6 max-w-2xl space-y-6">
-      <Skeleton className="h-8 w-2/3" />
-      <div className="rounded-lg border bg-white p-4 space-y-3">
-        <Skeleton className="h-5 w-24" />
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-9 w-full" />
-        ))}
-      </div>
-      <div className="rounded-lg border bg-white p-4 space-y-3">
-        <Skeleton className="h-5 w-24" />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex justify-between items-center py-1">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-8" />
-          </div>
-        ))}
-        <div className="flex gap-3 pt-3">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-32" />
-          <Skeleton className="h-9 w-32" />
-        </div>
-      </div>
-      <Skeleton className="h-6 w-32" />
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-lg border bg-white p-4 space-y-2">
-          <Skeleton className="h-5 w-1/3" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-      ))}
-    </div>
-  )
+  const data = useLoaderData<typeof loader>()
+  return <DeliberationDashboard {...(data as any)} />
 }
 
 function DeliberationDashboard({
@@ -335,7 +284,9 @@ function DeliberationDashboard({
   return (
     <div className="container mx-auto py-6 max-w-2xl space-y-6">
       {deliberation.topic && (
-        <h1 className="text-3xl font-bold mb-8">{deliberation.topic}</h1>
+        <h1 className="font-serif text-3xl font-semibold leading-tight tracking-tight mb-8">
+          {deliberation.topic}
+        </h1>
       )}
 
       <Card>
@@ -347,42 +298,42 @@ function DeliberationDashboard({
             <Link
               to={`/dashboard/${deliberationId}/edit`}
               prefetch="render"
-              className="flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  "
+              className="flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  "
             >
               <span>Edit Deliberation</span>
-              <ChevronRightIcon className="ml-auto h-4 w-4 text-slate-400" />
+              <ChevronRightIcon className="ml-auto h-4 w-4 text-muted-foreground" />
             </Link>
             <Link
               to={`/dashboard/${deliberationId}/values`}
               prefetch="render"
-              className="flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  "
+              className="flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  "
             >
               <span>Manage Values</span>
-              <ChevronRightIcon className="ml-auto h-4 w-4 text-slate-400" />
+              <ChevronRightIcon className="ml-auto h-4 w-4 text-muted-foreground" />
             </Link>
             <Link
               to={`/dashboard/${deliberationId}/hypotheses`}
               prefetch="render"
-              className="flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  "
+              className="flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  "
             >
               <span>Manage Hypotheses</span>
-              <ChevronRightIcon className="ml-auto h-4 w-4 text-slate-400" />
+              <ChevronRightIcon className="ml-auto h-4 w-4 text-muted-foreground" />
             </Link>
             <Link
               to={`/dashboard/${deliberationId}/votes`}
               prefetch="render"
-              className="flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  "
+              className="flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  "
             >
               <span>Manage Votes</span>
-              <ChevronRightIcon className="ml-auto h-4 w-4 text-slate-400" />
+              <ChevronRightIcon className="ml-auto h-4 w-4 text-muted-foreground" />
             </Link>
             <Link
               to={`/dashboard/${deliberationId}/chats`}
               prefetch="render"
-              className="flex items-center rounded-lg px-3 py-2 text-slate-900 hover:bg-slate-100  "
+              className="flex items-center rounded-lg px-3 py-2 text-foreground hover:bg-muted  "
             >
               <span>Manage Chats</span>
-              <ChevronRightIcon className="ml-auto h-4 w-4 text-slate-400" />
+              <ChevronRightIcon className="ml-auto h-4 w-4 text-muted-foreground" />
             </Link>
           </nav>
         </CardContent>
@@ -437,7 +388,7 @@ function DeliberationDashboard({
           </div>
           {deliberation._count.canonicalValuesCards === 0 &&
             deliberation.setupStatus === "ready" && (
-              <Alert className="mt-6 mb-4 bg-slate-50">
+              <Alert className="mt-6 mb-4 bg-muted">
                 <div className="flex flex-row space-x-2 mb-2">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>No responses yet</AlertTitle>
@@ -506,7 +457,7 @@ function DeliberationDashboard({
             </Link>
           </div>
           {(fetcher.data as any)?.simulationStarted && (
-            <Alert className="mt-4 bg-slate-50">
+            <Alert className="mt-4 bg-muted">
               <AlertTitle>Simulation queued</AlertTitle>
               <AlertDescription>
                 Simulated participants are being run in the background. The
@@ -518,12 +469,12 @@ function DeliberationDashboard({
       </Card>
 
       <div className="flex items-center justify-between mt-8 mb-4">
-        <h2 className="text-2xl font-bold">Questions</h2>
+        <h2 className="font-serif text-2xl font-semibold tracking-tight">Questions</h2>
         {(deliberation.setupStatus === "generating_contexts" ||
           deliberation.setupStatus === "generating_questions") && (
-          <div className="bg-white rounded-md px-2 py-1 border flex flex-row items-center gap-1">
-            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-            <span className="text-gray-400 text-sm">
+          <div className="bg-card rounded-md px-2 py-1 border flex flex-row items-center gap-1">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <span className="text-muted-foreground text-sm">
               {deliberation.setupStatus === "generating_contexts"
                 ? "Generating Contexts"
                 : "Generating Questions"}
@@ -553,9 +504,9 @@ function DeliberationDashboard({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 mb-4">{question.question}</p>
+            <p className="text-sm text-muted-foreground mb-4">{question.question}</p>
             <div
-              className="flex items-center justify-between mb-2 cursor-pointer hover:bg-gray-100 rounded-md p-2 transition-colors duration-200"
+              className="flex items-center justify-between mb-2 cursor-pointer hover:bg-muted rounded-md p-2 transition-colors duration-200"
               onClick={() => toggleQuestionDropdown(question.id)}
             >
               <div className="flex flex-row items-center">
@@ -572,14 +523,14 @@ function DeliberationDashboard({
                 {question.ContextsForQuestions.map((context, index) => (
                   <li
                     key={index}
-                    className="flex flex-col bg-gray-50 p-2 rounded-md"
+                    className="flex flex-col bg-muted p-2 rounded-md"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">
                         {context.context.id}
                       </span>
                       {context.context.createdInChatId && (
-                        <div className="flex items-center gap-1 text-gray-500 whitespace-nowrap ml-2">
+                        <div className="flex items-center gap-1 text-muted-foreground whitespace-nowrap ml-2">
                           <span className="text-xs">Articulated by user</span>
                           <svg
                             className="w-3 h-3"
@@ -599,7 +550,7 @@ function DeliberationDashboard({
                       )}
                     </div>
                     {context.application && (
-                      <span className="text-xs text-gray-600 mt-1">
+                      <span className="text-xs text-muted-foreground mt-1">
                         {context.application}
                       </span>
                     )}
@@ -726,7 +677,7 @@ function SimulationProgressPanel({
   const eta = Math.max(0, progress.estimatedSeconds - elapsedSec)
 
   return (
-    <div className="mt-6 mb-2 rounded-md border bg-slate-50 p-4">
+    <div className="mt-6 mb-2 rounded-md border bg-muted p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {progress.stage === "done" ? (
@@ -734,7 +685,7 @@ function SimulationProgressPanel({
           ) : progress.stage === "failed" ? (
             <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
           ) : (
-            <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           )}
           <span className="text-sm font-medium">
             {STAGE_LABELS[progress.stage]}
@@ -746,7 +697,7 @@ function SimulationProgressPanel({
             : `${formatDuration(elapsedSec)} elapsed · ~${formatDuration(eta)} left`}
         </span>
       </div>
-      <div className="mt-3 h-2 w-full overflow-hidden rounded bg-slate-200">
+      <div className="mt-3 h-2 w-full overflow-hidden rounded bg-muted">
         <div
           className={`h-full transition-all duration-500 ${
             progress.stage === "failed" ? "bg-red-500" : "bg-emerald-500"
