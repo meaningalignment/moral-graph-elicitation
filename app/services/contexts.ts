@@ -107,37 +107,71 @@ export const findNewContexts = inngest.createFunction(
       Promise.all(contexts.map((c) => findDuplicateContext(deliberationId, c)))
     )
 
+    // Two LLM-generated contexts in this batch can resolve to the same target
+    // id (either identical strings, or different strings the dedupe step maps
+    // to the same existing context). Collapse before writing so concurrent
+    // upserts in Promise.all don't fight over the same primary key.
+    const seen = new Set<string>()
+    const writePlan: { isNew: boolean; targetId: string }[] = []
+    for (let i = 0; i < contexts.length; i++) {
+      const targetId = duplicates[i] ?? contexts[i]
+      if (seen.has(targetId)) continue
+      seen.add(targetId)
+      writePlan.push({ isNew: duplicates[i] === null, targetId })
+    }
+
     await step.run("Creating or linking contexts", async () =>
       Promise.all(
-        duplicates.map(async (duplicate, i) => {
-          if (!duplicate) {
+        writePlan.map(async ({ isNew, targetId }) => {
+          if (isNew) {
             // We're dealing with a new context! Create it, embed it, and link it to the question.
-            logger.info(`Creating new context: ${contexts[i]}`)
-            const context = await db.context.create({
-              data: {
-                id: contexts[i],
+            logger.info(`Creating new context: ${targetId}`)
+            // Concurrent find-new-contexts runs (one per chat) can race on the
+            // same generated context name; upsert keeps that idempotent.
+            const context = await db.context.upsert({
+              where: {
+                id_deliberationId: { id: targetId, deliberationId },
+              },
+              update: {},
+              create: {
+                id: targetId,
                 deliberationId,
                 createdInChatId: chatId,
-                ContextsForQuestions: {
-                  create: { questionId },
+              },
+            })
+            await db.contextsForQuestions.upsert({
+              where: {
+                contextId_questionId_deliberationId: {
+                  contextId: context.id,
+                  deliberationId,
+                  questionId,
                 },
+              },
+              update: {},
+              create: {
+                contextId: context.id,
+                deliberationId,
+                questionId,
               },
             })
             await embedContext(context.id)
           } else {
             // Duplicate context already exist in the deliberation! However, it could be from a different question. Link it to the current question (if not already linked).
-            logger.info(
-              `Linking context ${contexts[i]} to question ${questionId}`
-            )
-            await db.contextsForQuestions.update({
+            logger.info(`Linking context ${targetId} to question ${questionId}`)
+            await db.contextsForQuestions.upsert({
               where: {
                 contextId_questionId_deliberationId: {
-                  contextId: duplicate,
+                  contextId: targetId,
                   deliberationId,
                   questionId,
                 },
               },
-              data: { contextId: duplicate },
+              update: {},
+              create: {
+                contextId: targetId,
+                deliberationId,
+                questionId,
+              },
             })
           }
         })
