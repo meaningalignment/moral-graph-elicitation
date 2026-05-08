@@ -193,6 +193,23 @@ For each multi-member cluster the discriminator returns `allEquivalent: true|fal
 
 To update the database schema, execute: `npx prisma db push`. The schema can be found [here](./schema.prisma).
 
+## Dev login (skip the email-code flow)
+
+`POST /auth/dev` lets you log in as any existing user without round-tripping a Mailgun login code. Gated by `SESSION_SECRET` (the same env var cowpunk-auth uses to sign cookies) and hard-disabled when `NODE_ENV=production` (returns 404).
+
+There's a small form at `GET /auth/dev` for manual use, or hit it from the shell:
+
+```bash
+# Log in as user id 1 and capture the session cookie
+curl -s -c /tmp/cookies.txt -X POST http://localhost:5173/auth/dev \
+  -d "secret=$SESSION_SECRET" -d "userId=1" -d "redirect=/"
+
+# Then any authed route works
+curl -s -b /tmp/cookies.txt http://localhost:5173/deliberation/33/start
+```
+
+Form fields: `secret` (required, must equal `process.env.SESSION_SECRET`), `userId` (defaults to `1`), `redirect` (defaults to `/`).
+
 ## Querying the database
 
 A small helper script `scripts/db.ts` runs read-only queries via Neon's HTTPS-based serverless driver. Useful in environments that block raw `5432/tcp` (CI sandboxes, edge runtimes, etc.):
