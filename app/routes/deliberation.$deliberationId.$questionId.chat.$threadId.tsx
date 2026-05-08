@@ -11,9 +11,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const questionId = params.questionId!
 
   // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
+  // Upstash KV is rate-limited intermittently; treat failure as no data
+  // rather than crashing the whole loader.
   const [response, data, runs, chosenQuestion] = await Promise.all([
     openai.beta.threads.messages.list(threadId, { order: "asc" }),
-    kv.get<string>(`data:${threadId}`),
+    kv.get<string>(`data:${threadId}`).catch(() => null),
     openai.beta.threads.runs.list(threadId),
     db.question.findFirst({ where: { id: Number(questionId) } }),
   ])

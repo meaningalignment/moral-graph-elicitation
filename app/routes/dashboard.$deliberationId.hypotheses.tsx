@@ -137,37 +137,25 @@ function HypothesesView({
     .sort((a, b) => b.date.getTime() - a.date.getTime()) // Sort by date descending
 
   return (
-    <div className="flex h-full">
-      <div className="w-64 flex-shrink-0 border-r overflow-y-auto bg-card px-3 py-4">
-        <div className="mb-6">
-          <div className="flex items-center rounded-lg px-3 py-2 text-foreground">
-            <svg
-              className="h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-            </svg>
-            <span className="ml-3 text-base font-semibold">Hypotheses</span>
-          </div>
-          <div className="px-3 text-sm text-muted-foreground">
+    <div className="flex h-[calc(100vh-4rem)] -mt-4 -mx-4 sm:-mx-6">
+      <aside className="w-80 shrink-0 border-r border-border bg-card flex flex-col">
+        <div className="px-4 pt-5 pb-3 border-b border-border">
+          <h2 className="font-serif text-xl font-semibold tracking-tight">
+            Hypotheses
+          </h2>
+          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-1">
             {filteredHypotheses.length} upgrade
-            {filteredHypotheses.length !== 1 ? "s" : ""} available
-          </div>
+            {filteredHypotheses.length !== 1 ? "s" : ""}
+          </p>
         </div>
 
-        <div className="mb-6 space-y-4">
+        <div className="px-4 py-3 space-y-2 border-b border-border">
           <Select value={selectedQuestion} onValueChange={setSelectedQuestion}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Question" />
+            <SelectTrigger className="h-9 w-full text-sm">
+              <SelectValue placeholder="All questions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Questions</SelectItem>
+              <SelectItem value="all">All questions</SelectItem>
               {data.questions.map((question) => (
                 <SelectItem key={question.id} value={question.id.toString()}>
                   {question.title}
@@ -177,11 +165,11 @@ function HypothesesView({
           </Select>
 
           <Select value={selectedContext} onValueChange={setSelectedContext}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Context" />
+            <SelectTrigger className="h-9 w-full text-sm">
+              <SelectValue placeholder="All contexts" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Contexts</SelectItem>
+              <SelectItem value="all">All contexts</SelectItem>
               {data.contexts.map((context) => (
                 <SelectItem key={context.id} value={context.id}>
                   {context.id}
@@ -191,11 +179,11 @@ function HypothesesView({
           </Select>
 
           <Select value={selectedRunId} onValueChange={setSelectedRunId}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Run" />
+            <SelectTrigger className="h-9 w-full text-sm">
+              <SelectValue placeholder="All runs" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Runs</SelectItem>
+              <SelectItem value="all">All runs</SelectItem>
               {runIdsWithDates.map(({ runId, date }) => (
                 <SelectItem key={runId} value={runId}>
                   {date.toLocaleDateString()}
@@ -204,52 +192,60 @@ function HypothesesView({
             </SelectContent>
           </Select>
 
-          <fetcher.Form method="post" className="w-full">
+          <fetcher.Form method="post" className="w-full pt-1">
             <Button
               variant="outline"
               size="sm"
               className="w-full"
               disabled={fetcher.state !== "idle"}
             >
-              {fetcher.state !== "idle" ? "Generating..." : "Generate More"}
+              {fetcher.state !== "idle" ? "Generating…" : "Generate more"}
             </Button>
           </fetcher.Form>
         </div>
 
-        <ul className="space-y-2 text-sm font-medium">
-          {filteredHypotheses.map((hypothesis) => (
-            <NavLink
-              prefetch="intent"
-              to={`/dashboard/${deliberationId}/hypotheses/${
-                hypothesis.fromId
-              }/${hypothesis.toId}/${encodeString(hypothesis.contextId)}`}
-              key={`${hypothesis.fromId}-${hypothesis.toId}-${hypothesis.contextId}`}
-              className={({ isActive, isPending }) =>
-                cn(
-                  "block rounded-lg hover:bg-muted",
-                  isPending && "bg-muted",
-                  isActive && "bg-muted"
-                )
-              }
-            >
-              <li className="px-3 py-2">
-                <div
-                  className="font-medium truncate"
-                  title={hypothesis.from!.title}
+        <div className="flex-1 overflow-y-auto">
+          <ul className="divide-y divide-border">
+            {filteredHypotheses.map((hypothesis) => (
+              <li
+                key={`${hypothesis.fromId}-${hypothesis.toId}-${hypothesis.contextId}`}
+              >
+                <NavLink
+                  prefetch="intent"
+                  to={`/dashboard/${deliberationId}/hypotheses/${
+                    hypothesis.fromId
+                  }/${hypothesis.toId}/${encodeString(hypothesis.contextId)}`}
+                  className={({ isActive, isPending }) =>
+                    cn(
+                      "relative block px-4 py-3 hover:bg-muted/60 transition-colors",
+                      (isPending || isActive) && "bg-secondary/60",
+                      isActive &&
+                        "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-primary"
+                    )
+                  }
                 >
-                  {hypothesis.from!.title} → {hypothesis.to!.title}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {new Date(hypothesis.createdAt).toLocaleDateString()}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {hypothesis.contextId}
-                </div>
+                  <div
+                    className="text-sm font-medium leading-snug truncate"
+                    title={`${hypothesis.from!.title} → ${hypothesis.to!.title}`}
+                  >
+                    {hypothesis.from!.title}{" "}
+                    <span className="text-muted-foreground">→</span>{" "}
+                    {hypothesis.to!.title}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {new Date(hypothesis.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className="font-mono text-[11px] text-muted-foreground truncate">
+                      · {hypothesis.contextId}
+                    </span>
+                  </div>
+                </NavLink>
               </li>
-            </NavLink>
-          ))}
-        </ul>
-      </div>
+            ))}
+          </ul>
+        </div>
+      </aside>
 
       <div className="flex-1 overflow-y-auto">
         <div className="p-6">
