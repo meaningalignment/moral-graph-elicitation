@@ -7,37 +7,38 @@ import { db } from "~/config.server"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import va from "@vercel/analytics"
-import { Skeleton } from "~/components/ui/skeleton"
-import { useCurrentDeliberation } from "~/root"
 
 export async function loader({ params }: LoaderFunctionArgs) {
-  const { deliberationId } = params
-  // Awaited directly — defer() doesn't stream on Vercel's Node runtime, so the
-  // page would 500 with the deferred chunk never arriving. The query is small
-  // (take: 12) and fast.
-  const carouselValues = await db.canonicalValuesCard.findMany({
-    where: { deliberationId: Number(deliberationId), isArchived: false },
-    take: 12,
-    include: {
-      edgesFrom: true,
-      valuesCards: {
-        select: { chat: { select: { userId: true } } },
+  const id = Number(params.deliberationId)
+  // Fetch the deliberation locally instead of leaning on useCurrentDeliberation()
+  // (which reads root-loader data). On Vercel the root loader's deliberation
+  // value occasionally arrives null even though the URL has a valid id, leaving
+  // the page stuck on a skeleton title.
+  const [deliberation, carouselValues] = await Promise.all([
+    db.deliberation.findFirst({ where: { id } }),
+    db.canonicalValuesCard.findMany({
+      where: { deliberationId: id, isArchived: false },
+      take: 12,
+      include: {
+        edgesFrom: true,
+        valuesCards: {
+          select: { chat: { select: { userId: true } } },
+        },
+        _count: { select: { edgesFrom: true } },
       },
-      _count: { select: { edgesFrom: true } },
-    },
-    orderBy: { edgesFrom: { _count: "desc" } },
-  })
+      orderBy: { edgesFrom: { _count: "desc" } },
+    }),
+  ])
 
-  return json({ carouselValues })
+  return json({ deliberation, carouselValues })
 }
 
 export default function StartPage() {
   const { deliberationId } = useParams()
-  const deliberation = useCurrentDeliberation()
   const [isLoading, setIsLoading] = useState(false)
-  const { carouselValues } = useLoaderData<typeof loader>()
+  const { deliberation, carouselValues } = useLoaderData<typeof loader>()
 
-  const title = deliberation?.title
+  const title = deliberation?.title ?? "Deliberation"
   const description =
     deliberation?.welcomeText ||
     "Welcome! This process takes around 10-15 minutes."
@@ -48,7 +49,7 @@ export default function StartPage() {
       <div className="grid flex-grow place-items-center py-12">
         <div className="flex flex-col items-center mx-auto max-w-2xl text-center px-8">
           <h1 className="font-serif text-4xl font-semibold leading-tight tracking-tight mb-6">
-            {title ?? <Skeleton className="h-10 w-72" />}
+            {title}
           </h1>
           <p className="text-base text-muted-foreground mb-10 leading-relaxed">
             {description}
