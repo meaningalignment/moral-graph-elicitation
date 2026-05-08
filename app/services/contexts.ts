@@ -72,8 +72,7 @@ export async function findDuplicateContext(
 }
 
 export const findNewContexts = inngest.createFunction(
-  { id: "find-new-contexts" },
-  { event: "find-new-contexts" },
+  { id: "find-new-contexts", triggers: { event: "find-new-contexts" } },
   async ({ event, step, logger }) => {
     logger.info(`Starting graph generation for deliberation`)
 

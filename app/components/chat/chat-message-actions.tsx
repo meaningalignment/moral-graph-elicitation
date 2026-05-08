@@ -1,4 +1,4 @@
-import { type Message } from "ai"
+import { type UIMessage } from "ai"
 
 import { Button } from "~/components/ui/button"
 import { IconCheck, IconCopy } from "~/components/ui/icons"
@@ -7,12 +7,14 @@ import { useCopyToClipboard } from "~/hooks/use-copy-to-clipboard"
 import { cn } from "~/lib/utils"
 
 interface ChatMessageActionsProps extends React.ComponentProps<"div"> {
-  message: Message
-  onDelete?: (message: Message) => void
+  message: UIMessage
+  text: string
+  onDelete?: (message: UIMessage) => void
 }
 
 export function ChatMessageActions({
   message,
+  text,
   className,
   ...props
 }: ChatMessageActionsProps) {
@@ -20,7 +22,7 @@ export function ChatMessageActions({
 
   const onCopy = () => {
     if (isCopied) return
-    copyToClipboard(message.content)
+    copyToClipboard(text)
   }
 
   const onDelete = () => {

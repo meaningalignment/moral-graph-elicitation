@@ -51,8 +51,8 @@ export default function StaticChatMessage({
         hideActions={true}
         message={{
           id: "1",
-          content: currentText,
           role: role ?? "assistant",
+          parts: [{ type: "text", text: currentText }],
         }}
       />
     </div>

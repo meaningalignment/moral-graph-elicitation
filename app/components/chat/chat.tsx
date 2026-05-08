@@ -1,12 +1,13 @@
 import React from "react"
-import { useAssistant, type Message } from "ai/react"
+import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport, type UIMessage } from "ai"
 import { cn } from "~/lib/utils"
 import { ChatList } from "./chat-list"
 import { ChatPanel } from "./chat-panel"
 import { ChatScrollAnchor } from "./chat-scroll-anchor"
 
 export interface ChatProps extends React.ComponentProps<"div"> {
-  oldMessages?: Message[]
+  oldMessages?: UIMessage[]
   threadId: string
   deliberationId: number
   questionId: number
@@ -19,23 +20,25 @@ export function Chat({
   oldMessages,
   className,
 }: ChatProps) {
-  const {
-    messages: newMessages,
-    append,
-    input,
-    setInput,
-    status,
-  } = useAssistant({
-    api: "/api/chat-assistant",
-    threadId,
-    body: { questionId, deliberationId },
+  const { messages, sendMessage, status } = useChat({
+    id: threadId,
+    transport: new DefaultChatTransport({
+      api: "/api/chat-assistant",
+      body: { threadId, questionId, deliberationId },
+    }),
+    messages: oldMessages,
   })
 
-  const messages = [...(oldMessages ?? []), ...newMessages]
-  const hasValuesCard =
-    messages.filter(
-      (message) => message.data && (message.data as any).type === "values_card"
-    ).length > 0
+  const hasValuesCard = messages.some((m) =>
+    m.parts.some(
+      (p: any) =>
+        typeof p.type === "string" &&
+        p.type === "tool-submit_values_card" &&
+        p.state === "output-available"
+    )
+  )
+
+  const isStreaming = status === "streaming" || status === "submitted"
 
   return (
     <>
@@ -43,17 +46,16 @@ export function Chat({
         <ChatList
           threadId={threadId}
           messages={messages}
-          isLoading={status === "in_progress"}
+          isLoading={isStreaming}
         />
-        <ChatScrollAnchor trackVisibility={status === "in_progress"} />
+        <ChatScrollAnchor trackVisibility={isStreaming} />
       </div>
       <ChatPanel
-        status={status}
+        isLoading={isStreaming}
         isFinished={hasValuesCard}
-        append={append}
-        messages={messages}
-        input={input}
-        setInput={setInput}
+        onSubmit={async (text) => {
+          await sendMessage({ text })
+        }}
       />
     </>
   )

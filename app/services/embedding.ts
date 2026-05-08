@@ -111,8 +111,7 @@ export async function embedContext(contextId: string): Promise<number[]> {
 //
 
 export const embedCards = inngest.createFunction(
-  { id: "Embed cards" },
-  { event: "embed-cards" },
+  { id: "Embed cards", triggers: { event: "embed-cards" } },
   async ({ event, step, logger }) => {
     const deliberationId = Number(event.data.deliberationId)
     const cardType = (event.data.cardType ?? "all") as
@@ -163,8 +162,7 @@ export const embedCards = inngest.createFunction(
 )
 
 export const embedContexts = inngest.createFunction(
-  { id: "embed-contexts" },
-  { event: "embed-contexts" },
+  { id: "embed-contexts", triggers: { event: "embed-contexts" } },
   async ({ event, step, logger }) => {
     const deliberationId = Number(event.data.deliberationId)
 

@@ -1,4 +1,4 @@
-import { Message } from "ai"
+import { type UIMessage } from "ai"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
 import { cn } from "~/lib/utils"
@@ -8,68 +8,16 @@ import { IconOpenAI, IconUser } from "../ui/icons"
 import { ChatMessageActions } from "./chat-message-actions"
 
 export interface ChatMessageProps {
-  message: Message
+  message: UIMessage
   hideActions?: boolean
-  onDelete?: (message: Message) => void
+  onDelete?: (message: UIMessage) => void
 }
 
-function MessageContent({ message }: { message: Message }) {
-  if (message.role === "function") {
-    return (
-      <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-        {message.content}
-      </pre>
-    )
-  } else if (message.function_call) {
-    return (
-      <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-        {JSON.stringify(message)}
-      </pre>
-    )
-  } else
-    return (
-      <MemoizedReactMarkdown
-        className="prose break-words  prose-p:leading-relaxed prose-pre:p-0"
-        remarkPlugins={[remarkGfm, remarkMath]}
-        components={{
-          p({ children }) {
-            return <p className="mb-2 last:mb-0">{children}</p>
-          },
-          code({ node, inline, className, children, ...props }) {
-            if (children.length) {
-              if (children[0] == "▍") {
-                return (
-                  <span className="mt-1 animate-pulse cursor-default">▍</span>
-                )
-              }
-
-              children[0] = (children[0] as string).replace("`▍`", "▍")
-            }
-
-            const match = /language-(\w+)/.exec(className || "")
-
-            if (inline) {
-              return (
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              )
-            }
-
-            return (
-              <CodeBlock
-                key={Math.random()}
-                language={(match && match[1]) || ""}
-                value={String(children).replace(/\n$/, "")}
-                {...props}
-              />
-            )
-          },
-        }}
-      >
-        {message.content}
-      </MemoizedReactMarkdown>
-    )
+function getText(message: UIMessage): string {
+  return (message.parts as any[])
+    .filter((p) => p.type === "text" && typeof p.text === "string")
+    .map((p) => p.text)
+    .join("\n")
 }
 
 export function ChatMessage({
@@ -77,6 +25,9 @@ export function ChatMessage({
   hideActions,
   ...props
 }: ChatMessageProps) {
+  const text = getText(message)
+  if (!text) return null
+
   return (
     <div
       className={cn("group relative mb-4 flex items-start md:-ml-12")}
@@ -93,9 +44,52 @@ export function ChatMessage({
         {message.role === "user" ? <IconUser /> : <IconOpenAI />}
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
-        <MessageContent message={message} />
+        <MemoizedReactMarkdown
+          className="prose break-words prose-p:leading-relaxed prose-pre:p-0"
+          remarkPlugins={[remarkGfm, remarkMath]}
+          components={{
+            p({ children }) {
+              return <p className="mb-2 last:mb-0">{children}</p>
+            },
+            code({ node, inline, className, children, ...props }) {
+              if (children.length) {
+                if (children[0] == "▍") {
+                  return (
+                    <span className="mt-1 animate-pulse cursor-default">▍</span>
+                  )
+                }
+                children[0] = (children[0] as string).replace("`▍`", "▍")
+              }
+
+              const match = /language-(\w+)/.exec(className || "")
+
+              if (inline) {
+                return (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                )
+              }
+
+              return (
+                <CodeBlock
+                  key={Math.random()}
+                  language={(match && match[1]) || ""}
+                  value={String(children).replace(/\n$/, "")}
+                  {...props}
+                />
+              )
+            },
+          }}
+        >
+          {text}
+        </MemoizedReactMarkdown>
         {!hideActions && (
-          <ChatMessageActions message={message} onDelete={props.onDelete} />
+          <ChatMessageActions
+            message={message}
+            text={text}
+            onDelete={props.onDelete}
+          />
         )}
       </div>
     </div>
