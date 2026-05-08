@@ -82,7 +82,7 @@
     "tailwind-merge": "^2.6.1",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.1",
-    "values-tools": "https://github.com/meaningalignment/values-tools/tarball/main",
+    "values-tools": "github:meaningalignment/values-tools#78d75e0e66eb1ac39e5efeca50affec9f32d6de6",
     "ws": "^8.20.0",
     "zod": "^3.25.76"
   },
