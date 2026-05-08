@@ -1,14 +1,14 @@
+// Connection URLs live in prisma.config.ts (required as of Prisma 7).
 datasource db {
-  provider          = "postgres"
-  url               = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl         = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING_SHADOW") // used for migrations
-  extensions        = [pgvector(map: "vector")] // Add the pgvector extension
+  provider   = "postgresql"
+  extensions = [pgvector(map: "vector")] // Add the pgvector extension
 }
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions", "driverAdapters"]
+  // driverAdapters is stable in Prisma 7; postgresqlExtensions is still
+  // gated even though @prisma/config has experimental.extensions=true.
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 model User {

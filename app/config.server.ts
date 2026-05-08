@@ -14,31 +14,24 @@ configureValuesTools({
   defaultTemperature: 1,
   cache: new PromptCache(),
 })
-import { Pool, neonConfig } from "@neondatabase/serverless"
+import { neonConfig } from "@neondatabase/serverless"
 import { PrismaNeon } from "@prisma/adapter-neon"
 import ws from "ws"
 
 /**
- * Build a Prisma client. When USE_NEON_HTTP_DRIVER is truthy we use Neon's
- * HTTPS/WS-based driver via @prisma/adapter-neon. This makes the app deployable
- * on edge runtimes and lets scripts run from environments where raw 5432/tcp is
- * blocked (CI sandboxes). Default keeps the original behaviour to avoid
- * regressing the running deployment.
+ * Prisma 7 made driver adapters mandatory and stable; we always go through
+ * the Neon adapter now. The opt-in fetch transport (USE_NEON_HTTP_DRIVER)
+ * stays so scripts in sandboxes that block raw 5432/tcp can still run.
  */
-function makeDb(): PrismaClient {
-  if (process.env.USE_NEON_HTTP_DRIVER === "true") {
-    if (typeof WebSocket === "undefined") neonConfig.webSocketConstructor = ws
-    // Route pool queries via fetch (HTTPS) instead of WebSocket. Required when
-    // the runtime can talk HTTPS but not WS (some sandboxes / edge runtimes).
-    neonConfig.poolQueryViaFetch = true
-    const pool = new Pool({ connectionString: process.env.POSTGRES_URL })
-    const adapter = new PrismaNeon(pool)
-    return new PrismaClient({ adapter } as any)
-  }
-  return new PrismaClient()
+if (typeof WebSocket === "undefined") neonConfig.webSocketConstructor = ws
+if (process.env.USE_NEON_HTTP_DRIVER === "true") {
+  neonConfig.poolQueryViaFetch = true
 }
 
-export const db = makeDb()
+const adapter = new PrismaNeon({
+  connectionString: process.env.POSTGRES_URL!,
+})
+export const db = new PrismaClient({ adapter })
 
 export const auth = cowpunkify({
   site: "Moral Graph Elicitation",
