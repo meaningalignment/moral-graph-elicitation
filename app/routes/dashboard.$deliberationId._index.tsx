@@ -522,7 +522,6 @@ function DeliberationDashboard({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{question.question}</p>
             <div
               className="flex items-center justify-between mb-2 cursor-pointer hover:bg-muted rounded-md p-2 transition-colors duration-200"
               onClick={() => toggleQuestionDropdown(question.id)}
@@ -654,12 +653,14 @@ function SimulationProgressPanel({
     }
   }, [deliberationId, simulating])
 
-  // Tick a clock for the elapsed-time and progress-bar render.
+  // Tick a clock for the elapsed-time and progress-bar render. Only when we
+  // actually have a progress object to show — otherwise we'd re-render the
+  // null-returning panel every second for nothing.
   useEffect(() => {
-    if (!simulating) return
+    if (!simulating || !progress) return
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
-  }, [simulating])
+  }, [simulating, progress])
 
   // When the run reaches a terminal state, revalidate the route loader once
   // so the summary counts (values, upgrades, etc.) refresh.
@@ -672,7 +673,31 @@ function SimulationProgressPanel({
     onFinished?.()
   }, [progress, onFinished, lastTerminalRunId])
 
-  if (!progress) return null
+  if (!progress) {
+    // Polling is firing but KV hasn't been populated yet (Inngest function
+    // is queued or KV write hasn't landed). Show a placeholder so the user
+    // sees feedback that matches the spinning button.
+    if (!simulating) return null
+    return (
+      <div
+        className="rounded-lg border-2 border-primary/40 bg-card p-5 sm:p-6 shadow-sm"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <div>
+            <div className="text-base sm:text-lg font-semibold leading-tight">
+              Simulating participants
+            </div>
+            <div className="text-sm text-muted-foreground mt-0.5">
+              Starting…
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   // Hide done/failed progress if the deliberation isn't currently simulating
   // and the last run finished more than 30s ago — keeps the UI clean.
   if (
