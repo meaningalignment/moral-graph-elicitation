@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { MoralGraph } from "~/components/moral-graph"
-import { Loader2 } from "lucide-react"
+import { Loader2, Settings as SettingsIcon, X } from "lucide-react"
 import MoralGraphSettings, {
   GraphSettings,
   defaultGraphSettings,
@@ -9,6 +9,7 @@ import { useLoaderData, useParams, useSearchParams } from "@remix-run/react"
 import { LoaderFunctionArgs } from "@remix-run/node"
 import { db } from "~/config.server"
 import { Question } from "@prisma/client"
+import { cn } from "~/lib/utils"
 
 function LoadingScreen() {
   return (
@@ -63,6 +64,7 @@ export default function GraphPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [graph, setGraph] = useState<any>(null)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const { deliberationId } = useParams()
 
   useEffect(() => {
@@ -102,11 +104,11 @@ export default function GraphPage() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "row" }}>
+    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-x-hidden relative">
       {/* Graph */}
-      <div className="grow">
+      <div className="grow min-w-0">
         {graph && graph.values.length < 2 && graph.edges.length < 2 && (
-          <div className="h-screen w-full flex items-center justify-center">
+          <div className="h-screen w-full flex items-center justify-center px-6">
             <div>
               <h1 className="font-serif text-2xl font-semibold tracking-tight text-center">
                 Not Enough Data
@@ -130,11 +132,41 @@ export default function GraphPage() {
         )}
       </div>
 
-      <div className="md:block flex-shrink-0 max-w-sm">
+      {/* Mobile toggle button */}
+      <button
+        type="button"
+        aria-label="Toggle graph settings"
+        onClick={() => setSettingsOpen((s) => !s)}
+        className="md:hidden fixed top-4 right-4 z-40 rounded-full border border-border bg-card shadow p-2 text-foreground"
+      >
+        {settingsOpen ? (
+          <X className="h-5 w-5" />
+        ) : (
+          <SettingsIcon className="h-5 w-5" />
+        )}
+      </button>
+
+      {/* Mobile overlay */}
+      {settingsOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-30"
+          onClick={() => setSettingsOpen(false)}
+        />
+      )}
+
+      <div
+        className={cn(
+          "shrink-0 w-full md:w-80 md:max-w-sm bg-card md:static fixed inset-y-0 right-0 z-40 transition-transform duration-200 md:translate-x-0",
+          settingsOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"
+        )}
+      >
         <MoralGraphSettings
           key={JSON.stringify(settings)}
           initialSettings={settings}
-          onUpdateSettings={fetchData}
+          onUpdateSettings={(s) => {
+            fetchData(s)
+            setSettingsOpen(false)
+          }}
           contexts={contexts}
         />
       </div>

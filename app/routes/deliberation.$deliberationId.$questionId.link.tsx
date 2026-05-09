@@ -137,14 +137,14 @@ export default function LinkScreen() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       <Header />
-      <div className="grid flex-grow place-items-center space-y-8 py-12 px-8">
+      <div className="grid flex-grow place-items-center space-y-8 py-8 sm:py-12 px-4 sm:px-8">
         <h1 className="text-muted-foreground mb-2">{`User Story ${index + 1}/${
           draw.length
         }`}</h1>
         <div className="w-full max-w-2xl">
-          <h1 className="text-md font-bold mb-2 pl-12 md:pl-0">
+          <h1 className="text-md font-bold mb-2 md:pl-0">
             {draw[index].contextId}
           </h1>
           <StaticChatMessage
@@ -201,7 +201,7 @@ export default function LinkScreen() {
         </div>
         <div
           className={cn(
-            "transition-opacity ease-in duration-500 flex flex-col items-center justify-center w-full max-w-xs",
+            "transition-opacity ease-in duration-500 flex flex-col items-center justify-center w-full max-w-md",
             showCards ? "opacity-100" : "opacity-0",
             `delay-${150}`
           )}

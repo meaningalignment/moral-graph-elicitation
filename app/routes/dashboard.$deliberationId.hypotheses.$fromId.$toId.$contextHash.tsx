@@ -52,20 +52,20 @@ export default function HypothesisView() {
   const { hypothesis, relatedEdges } = useLoaderData<typeof loader>()
 
   return (
-    <div className="grid place-items-center space-y-4 py-12 px-8">
+    <div className="grid place-items-center space-y-4 py-8 sm:py-12 px-2 sm:px-8">
       <div className="w-full max-w-2xl mb-6">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 pl-12 md:pl-0">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 md:pl-0">
           {hypothesis.context.id}
         </p>
         <p className="text-foreground leading-relaxed">{hypothesis.story}</p>
       </div>
       <div
         className={cn(
-          `grid grid-cols-1 md:grid-cols-3 mx-auto gap-4 items-center justify-items-center md:grid-cols-[max-content,min-content,max-content] mb-4`
+          `grid grid-cols-1 mx-auto gap-4 items-center justify-items-center md:grid-cols-[max-content,min-content,max-content] mb-4 w-full`
         )}
       >
         <ValuesCard card={hypothesis.from!} />
-        <IconArrowDown className="h-8 w-8 mx-auto" />
+        <IconArrowDown className="h-8 w-8 mx-auto rotate-0" />
         <ValuesCard card={hypothesis.to!} />
       </div>
       <div className={cn(`w-full flex items-center justify-center py-8`)}>
@@ -73,7 +73,7 @@ export default function HypothesisView() {
       </div>
 
       {/* Related edges section */}
-      <div className="transition-opacity ease-in duration-500 flex flex-col items-center justify-center w-full max-w-xs">
+      <div className="transition-opacity ease-in duration-500 flex flex-col items-center justify-center w-full max-w-md">
         <h2 className="text-base font-semibold tracking-tight mr-auto">
           User responses
         </h2>

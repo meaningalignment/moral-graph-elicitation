@@ -49,8 +49,8 @@ export default function Carousel({ cards }: { cards: CardWithCounts[] }) {
     <div className="relative z-0 w-full">
       <div ref={carouselRef} className="flex hide-scrollbar space-x-4">
         {cards.map((card) => (
-          <div key={card.id} className="flex flex-col">
-            <div className="flex-grow w-96">
+          <div key={card.id} className="flex flex-col shrink-0">
+            <div className="flex-grow w-[80vw] sm:w-96 max-w-sm">
               <ValuesCard card={card} />
             </div>
             <p className="mx-8 mt-2 text-sm text-muted-foreground">
@@ -60,8 +60,8 @@ export default function Carousel({ cards }: { cards: CardWithCounts[] }) {
         ))}
       </div>
 
-      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-20"></div>
-      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-20"></div>
+      <div className="absolute inset-y-0 left-0 w-12 sm:w-32 bg-gradient-to-r from-background to-transparent z-20 pointer-events-none"></div>
+      <div className="absolute inset-y-0 right-0 w-12 sm:w-32 bg-gradient-to-l from-background to-transparent z-20 pointer-events-none"></div>
     </div>
   )
 }

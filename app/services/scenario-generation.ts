@@ -1,4 +1,4 @@
-import { genObj } from "values-tools"
+import { genObj } from "~/lib/values-tools"
 import { z } from "zod"
 
 export const schema = z.object({

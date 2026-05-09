@@ -51,7 +51,7 @@ export default function ChatScreen() {
     (navigation.state as string) !== "idle"
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       <Header />
       <Chat
         deliberationId={Number(deliberationId)}
@@ -64,7 +64,7 @@ export default function ChatScreen() {
       <Form
         method="post"
         action="/api/dev/seed-card"
-        className="fixed bottom-2 right-3 z-[60]"
+        className="fixed top-20 right-3 z-[60]"
       >
         <input type="hidden" name="threadId" value={threadId} />
         <input type="hidden" name="deliberationId" value={deliberationId} />

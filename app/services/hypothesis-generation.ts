@@ -3,9 +3,9 @@ import { db, inngest } from "~/config.server"
 import {
   generateUpgrades,
   generateUpgradesToValue,
-  Upgrade,
-} from "values-tools"
-import { Value } from "values-tools/src/types"
+  type Upgrade,
+  type Value,
+} from "~/lib/values-tools"
 
 export async function upsertUpgradesInDb(
   upgrades: Upgrade[],

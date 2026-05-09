@@ -1,9 +1,8 @@
 import { z } from "zod"
 import {
-  deduplicateContexts,
   generateValueFromContext,
   genObj,
-} from "values-tools"
+} from "~/lib/values-tools"
 import { db, inngest } from "~/config.server"
 import { Question } from "@prisma/client"
 import type { Logger } from "inngest"
@@ -11,6 +10,20 @@ import {
   generateScenario,
   ScenarioGenerationSchema,
 } from "./scenario-generation"
+
+// Simple normalised-string clustering for seed contexts. Whitespace + case
+// only — the seed flow generates short "When ..." clauses where exact match
+// is enough; per-chat dedup uses an LLM in `findDuplicateContext`.
+function clusterContexts(contexts: string[]): string[][] {
+  const groups = new Map<string, string[]>()
+  for (const ctx of contexts) {
+    const key = ctx.trim().toLowerCase().replace(/\s+/g, " ")
+    const bucket = groups.get(key)
+    if (bucket) bucket.push(ctx)
+    else groups.set(key, [ctx])
+  }
+  return Array.from(groups.values())
+}
 
 export async function generateQuestions(
   topic: string,
@@ -106,7 +119,7 @@ async function upsertContextsInDb(
 ) {
   const contextIds = [...new Set(contexts.map((c) => c.context))]
   logger.info(`Deduplicating ${contextIds.length} contexts`)
-  const clusters = await deduplicateContexts(contextIds, false)
+  const clusters = clusterContexts(contextIds)
   logger.info(`After deduplication: ${clusters.length} unique contexts`)
   const questionIds = [...new Set(contexts.map((c) => c.questionId))]
 

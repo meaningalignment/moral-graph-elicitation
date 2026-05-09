@@ -6,14 +6,17 @@ import { Button } from "~/components/ui/button"
 import { LoaderFunctionArgs, ActionFunction, json } from "@remix-run/node"
 import { auth, db } from "~/config.server"
 import { useLoaderData, Link, useParams, useFetcher } from "@remix-run/react"
-import { MoralGraph } from "values-tools"
+import {
+  type MoralGraph,
+  type MoralGraphEdge,
+  type MoralGraphValue,
+} from "~/lib/values-tools"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip"
-import { MoralGraphEdge, MoralGraphValue } from "values-tools/src/types"
 import { Intervention, InterventionPrecedence } from "@prisma/client"
 import { contextDisplayName, getFavicon } from "~/lib/utils"
 import { updateInterventionText } from "~/services/interventions"

@@ -50,7 +50,7 @@ function QuestionCard({ questionData }: { questionData: Question }) {
     <div
       key={questionData.id}
       className={
-        "border border-border rounded-xl px-6 py-6 max-w-xs min-h-xs h-full bg-card flex flex-col gap-4"
+        "border border-border rounded-xl px-6 py-6 w-full max-w-xs min-h-[10rem] h-full bg-card flex flex-col gap-4"
       }
     >
       <p className="font-serif text-xl font-semibold leading-tight">{questionData.title}</p>
@@ -80,9 +80,9 @@ export default function QuestionSelectScreen() {
   const [selected, setSelected] = useState<Question | null>(null)
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       <Header />
-      <div className="grid flex-grow place-items-center space-y-8 py-12 mx-8">
+      <div className="grid flex-grow place-items-center space-y-8 py-8 sm:py-12 mx-4 sm:mx-8">
         <StaticChatMessage
           onFinished={() => {
             setShowQuestions(true)
@@ -90,7 +90,7 @@ export default function QuestionSelectScreen() {
           isFinished={showQuestions}
           text={text ?? "Choose a question to answer."}
         />
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 mx-auto gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 mx-auto gap-4 w-full max-w-5xl place-items-center">
           {questions.map((c, i) => (
             <div
               key={c.id}

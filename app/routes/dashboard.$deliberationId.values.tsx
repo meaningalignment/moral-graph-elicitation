@@ -49,8 +49,8 @@ export default function ValuesView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="p-6">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight mb-6">Values</h1>
+      <div className="p-2 sm:p-6">
+        <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight mb-6">Values</h1>
         <ValuesContent values={values} questions={questions} contexts={contexts} />
       </div>
     </div>
@@ -119,9 +119,9 @@ function ValuesContent({
 
   return (
     <>
-      <div className="flex gap-4 mb-6 items-center">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-6 sm:items-center">
         <Select value={selectedQuestion} onValueChange={setSelectedQuestion}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Select Question" />
           </SelectTrigger>
           <SelectContent>
@@ -135,7 +135,7 @@ function ValuesContent({
         </Select>
 
         <Select value={selectedContext} onValueChange={setSelectedContext}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Select Context" />
           </SelectTrigger>
           <SelectContent>

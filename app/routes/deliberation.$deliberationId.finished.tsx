@@ -65,11 +65,11 @@ export default function FinishedScreen() {
   } = useLoaderData<typeof loader>()
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       <Header />
-      <div className="grid flex-grow place-items-center py-12">
-        <div className="flex flex-col items-center mx-auto max-w-xl text-center px-8">
-          <h1 className="font-serif text-4xl font-semibold tracking-tight mb-8">Thank you</h1>
+      <div className="grid flex-grow place-items-center py-8 sm:py-12">
+        <div className="flex flex-col items-center mx-auto max-w-xl text-center px-6 sm:px-8">
+          <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-8">Thank you</h1>
 
           <p>
             You've contributed{" "}
@@ -98,7 +98,7 @@ export default function FinishedScreen() {
           </div>
         )}
 
-        <div className="overflow-x-hidden w-screen h-full flex justify-center mt-16">
+        <div className="overflow-x-hidden w-full h-full flex justify-center mt-16">
           <Carousel cards={carouselValues as any[]} />
         </div>
       </div>

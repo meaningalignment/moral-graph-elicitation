@@ -27,7 +27,6 @@
     "fixtures:transitions": "tsx scripts/build-transitions-fixture.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.76",
     "@ai-sdk/openai": "^3.0.63",
     "@ai-sdk/react": "^3.0.178",
     "@neondatabase/serverless": "^1.1.0",
@@ -80,7 +79,6 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
-    "values-tools": "github:meaningalignment/values-tools#78d75e0e66eb1ac39e5efeca50affec9f32d6de6",
     "ws": "^8.20.0",
     "zod": "^3.25.76"
   },

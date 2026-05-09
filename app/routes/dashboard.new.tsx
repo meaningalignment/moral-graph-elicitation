@@ -134,8 +134,8 @@ export default function NewDeliberation() {
   const canSubmit = title.trim().length > 0 && validQuestions.length > 0
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-12 px-4">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight mb-3">
+    <div className="w-full max-w-2xl mx-auto mt-6 sm:mt-12 px-2 sm:px-4">
+      <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight mb-3">
         Create new deliberation
       </h1>
       <p className="text-base text-muted-foreground mb-10 leading-relaxed">
@@ -249,7 +249,7 @@ export default function NewDeliberation() {
           </p>
         </div>
 
-        <div className="flex justify-between pt-4">
+        <div className="flex flex-col sm:flex-row justify-between pt-4 gap-3">
           <Button
             type="button"
             variant="outline"

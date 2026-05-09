@@ -15,7 +15,7 @@
  * both code paths.
  */
 import { z } from "zod"
-import { genObj } from "values-tools"
+import { genObj } from "~/lib/values-tools"
 import { DEDUPLICATE_VALUES_PROMPT } from "./judge-prompt"
 
 export type CardLike = {

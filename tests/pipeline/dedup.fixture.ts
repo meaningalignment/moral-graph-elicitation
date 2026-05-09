@@ -16,20 +16,14 @@ import "dotenv/config"
 import path from "node:path"
 import fs from "node:fs"
 import url from "node:url"
-import { configureValuesTools, PromptCache } from "values-tools"
 import { c, head, pass, fail, warn } from "../helpers/colors"
 import { judgeAreEquivalent } from "~/services/deduplication/in-repo-judge"
 import { partitionValues } from "~/services/deduplication/prompt-dedup"
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
-// Pin to OpenAI so the fixture works without an ANTHROPIC_API_KEY.
-// gpt-5 / reasoning models require temperature=1, so set it here.
-configureValuesTools({
-  defaultModel: process.env.VALUES_TOOLS_MODEL ?? "gpt-5",
-  defaultTemperature: 1,
-  cache: new PromptCache(),
-})
+// values-tools is now in-repo at `app/lib/values-tools` and routes through
+// OpenAI; nothing to configure here.
 
 type FixtureCard = {
   id: string

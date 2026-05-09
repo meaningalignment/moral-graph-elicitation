@@ -39,10 +39,10 @@ function DetailsList({ card }: { card: ValuesCardData }) {
 
 export default function ValuesCard({ card, header, editButton }: Props) {
   return (
-    <div className="border border-border rounded-xl px-8 pt-8 pb-6 max-w-sm h-full bg-card flex flex-col">
+    <div className="border border-border rounded-xl px-6 sm:px-8 pt-6 sm:pt-8 pb-6 w-full max-w-sm h-full bg-card flex flex-col">
       {header && header}
       {editButton ? (
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex flex-row justify-between items-center gap-2">
           <p className="font-serif text-lg font-semibold leading-tight tracking-tight">
             {card.title}
           </p>
@@ -54,7 +54,7 @@ export default function ValuesCard({ card, header, editButton }: Props) {
         </p>
       )}
       <p className="mt-1 text-md text-muted-foreground">{card.description}</p>
-      <div className="px-4 py-3 -mx-4 mt-4 place-self-stretch bg-secondary rounded-md">
+      <div className="px-4 py-3 -mx-2 sm:-mx-4 mt-4 place-self-stretch bg-secondary rounded-md">
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
           Where my attention goes
         </p>

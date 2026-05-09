@@ -282,9 +282,9 @@ function DeliberationDashboard({
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-2xl space-y-6">
+    <div className="container mx-auto py-4 sm:py-6 max-w-2xl space-y-6">
       {deliberation.topic && (
-        <h1 className="font-serif text-3xl font-semibold leading-tight tracking-tight mb-8">
+        <h1 className="font-serif text-2xl sm:text-3xl font-semibold leading-tight tracking-tight mb-8">
           {deliberation.topic}
         </h1>
       )}
@@ -404,7 +404,7 @@ function DeliberationDashboard({
             deliberationId={Number(deliberationId)}
             simulating={deliberation.setupStatus === "generating_graph"}
           />
-          <div className="mt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="mt-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
             <Link
               to={`/deliberation/${deliberationId}/graph`}
               prefetch="intent"
@@ -561,7 +561,7 @@ function DeliberationDashboard({
           </CardContent>
         </Card>
       ))}
-      <div className="mt-12 flex justify-between">
+      <div className="mt-12 flex flex-col sm:flex-row justify-between gap-3">
         <LoadingButton
           variant="outline"
           onClick={handleResetDeliberation}

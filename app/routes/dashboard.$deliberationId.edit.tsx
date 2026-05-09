@@ -103,7 +103,7 @@ export default function EditDeliberation() {
             This is the topic that participants will deliberate about.
           </p>
         </div>
-        <div className="flex justify-between mt-6">
+        <div className="flex flex-col sm:flex-row justify-between mt-6 gap-3">
           <Button variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>

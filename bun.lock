@@ -5,7 +5,6 @@
     "": {
       "name": "mge",
       "dependencies": {
-        "@ai-sdk/anthropic": "^3.0.76",
         "@ai-sdk/openai": "^3.0.63",
         "@ai-sdk/react": "^3.0.178",
         "@neondatabase/serverless": "^1.1.0",
@@ -37,7 +36,6 @@
         "cowpunk-auth": "^0.0.7",
         "csv-parser": "^3.2.0",
         "d3": "^7.9.0",
-        "density-clustering": "^1.3.0",
         "dotenv": "^17.4.2",
         "eslint": "^8.57.1",
         "inngest": "^4.3.0",
@@ -59,7 +57,6 @@
         "sonner": "^1.7.4",
         "tailwind-merge": "^3.5.0",
         "tailwindcss-animate": "^1.0.7",
-        "values-tools": "github:meaningalignment/values-tools#78d75e0e66eb1ac39e5efeca50affec9f32d6de6",
         "ws": "^8.20.0",
         "zod": "^3.25.76",
       },
@@ -73,7 +70,6 @@
         "@testing-library/react": "^16.3.2",
         "@types/bun": "^1.3.13",
         "@types/d3": "^7.4.3",
-        "@types/density-clustering": "^1.3.3",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
         "@types/react-syntax-highlighter": "^15.5.13",
@@ -95,8 +91,6 @@
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.4.4", "", {}, "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg=="],
-
-    "@ai-sdk/anthropic": ["@ai-sdk/anthropic@3.0.76", "", { "dependencies": { "@ai-sdk/provider": "3.0.10", "@ai-sdk/provider-utils": "4.0.27" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-kOuvT9e6PygFvgYpkr4v9gjvmcMPfJp79jaXjeRl9Gpoj2OXdtc3ero7o1ic+tiSBw5IMubxXFO68BCA/axGJA=="],
 
     "@ai-sdk/gateway": ["@ai-sdk/gateway@3.0.111", "", { "dependencies": { "@ai-sdk/provider": "3.0.10", "@ai-sdk/provider-utils": "4.0.27", "@vercel/oidc": "3.2.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-gzdRuEH9Mqeuu8zG6j4of3EH3fFJUI0UIubyeaA8gep6KzhCJF7uaTfagSE7x2vLAf381g/NrxsXhhH7Hon9iA=="],
 
@@ -822,8 +816,6 @@
 
     "@types/debug": ["@types/debug@4.1.13", "", { "dependencies": { "@types/ms": "*" } }, "sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw=="],
 
-    "@types/density-clustering": ["@types/density-clustering@1.3.3", "", {}, "sha512-p2zEz57kHxWVg39XZ9QQVW6ity4rC3/1cCeLqm2eqqomvOrf8CFYaw7jO8gdYuchO4532ak0Z0f/vBr9irwG/w=="],
-
     "@types/estree": ["@types/estree@1.0.8", "", {}, "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w=="],
 
     "@types/estree-jsx": ["@types/estree-jsx@1.0.5", "", { "dependencies": { "@types/estree": "*" } }, "sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg=="],
@@ -1245,8 +1237,6 @@
     "delayed-stream": ["delayed-stream@1.0.0", "", {}, "sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ=="],
 
     "denque": ["denque@2.1.0", "", {}, "sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw=="],
-
-    "density-clustering": ["density-clustering@1.3.0", "", {}, "sha512-icpmBubVTwLnsaor9qH/4tG5+7+f61VcqMN3V3pm9sxxSCt2Jcs0zWOgwZW9ARJYaKD3FumIgHiMOcIMRRAzFQ=="],
 
     "depd": ["depd@2.0.0", "", {}, "sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw=="],
 
@@ -2545,8 +2535,6 @@
     "validate-npm-package-name": ["validate-npm-package-name@7.0.2", "", {}, "sha512-hVDIBwsRruT73PbK7uP5ebUt+ezEtCmzZz3F59BSr2F6OVFnJ/6h8liuvdLrQ88Xmnk6/+xGGuq+pG9WwTuy3A=="],
 
     "validator": ["validator@13.15.35", "", {}, "sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw=="],
-
-    "values-tools": ["values-tools@github:meaningalignment/values-tools#78d75e0", { "dependencies": { "@types/density-clustering": "^1.3.3", "density-clustering": "^1.3.0", "zod": "^3.25.76", "zod-to-json-schema": "^3.24.6" }, "peerDependencies": { "@ai-sdk/anthropic": ">=3", "@ai-sdk/openai": ">=3", "ai": ">=3 <7", "bun": "latest", "react": "latest" }, "optionalPeers": ["bun", "react"] }, "meaningalignment-values-tools-78d75e0", "sha512-lZmKbrcd+r9Y6bWMLe7K93J3kML8tSqAkXX2fo4TU3jj3oNMEqG8liVU+bWJ4H/5dez2I/WDP5g38bQKyeTemQ=="],
 
     "vary": ["vary@1.1.2", "", {}, "sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg=="],
 

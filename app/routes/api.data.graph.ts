@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs } from "@remix-run/node"
-import { summarizeGraph } from "values-tools"
+import { summarizeGraph } from "~/lib/values-tools"
 import { db } from "~/config.server"
 
 export async function loader({ request }: LoaderFunctionArgs) {
