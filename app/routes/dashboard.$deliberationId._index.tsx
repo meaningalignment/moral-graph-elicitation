@@ -300,12 +300,6 @@ function DeliberationDashboard({
         </h1>
       )}
 
-      <SimulationProgressPanel
-        deliberationId={Number(deliberationId)}
-        simulating={deliberation.setupStatus === "generating_graph"}
-        onFinished={() => revalidator.revalidate()}
-      />
-
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Options</CardTitle>
@@ -417,7 +411,25 @@ function DeliberationDashboard({
                 </AlertDescription>
               </Alert>
             )}
-          <div className="mt-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
+          <div className="mt-6 space-y-3">
+            <SimulationProgressPanel
+              deliberationId={Number(deliberationId)}
+              simulating={deliberation.setupStatus === "generating_graph"}
+              onFinished={() => revalidator.revalidate()}
+            />
+            {(deliberation.setupStatus === "generating_contexts" ||
+              deliberation.setupStatus === "generating_questions") && (
+              <div className="rounded-md border bg-muted/40 p-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>
+                  {deliberation.setupStatus === "generating_contexts"
+                    ? "Generating value contexts… you can simulate participants once this finishes."
+                    : "Generating questions… you can simulate participants once this finishes."}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
             <Link
               to={`/deliberation/${deliberationId}/graph`}
               prefetch="intent"
@@ -432,7 +444,9 @@ function DeliberationDashboard({
               className="w-full sm:w-auto"
               disabled={
                 fetcher.state !== "idle" ||
-                deliberation.setupStatus === "generating_graph"
+                deliberation.setupStatus === "generating_graph" ||
+                deliberation.setupStatus === "generating_contexts" ||
+                deliberation.setupStatus === "generating_questions"
               }
               onClick={() => setSimulateDialogOpen(true)}
             >
