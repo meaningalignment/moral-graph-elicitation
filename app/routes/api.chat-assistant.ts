@@ -1,6 +1,7 @@
 import { ActionFunctionArgs } from "@remix-run/node"
 import { streamText, tool, convertToModelMessages, UIMessage } from "ai"
-import { openai as aiOpenai } from "@ai-sdk/openai"
+import { createOpenAI } from "@ai-sdk/openai"
+import { fetch as undiciFetch } from "undici"
 import { z } from "zod"
 import { ensureLoggedIn } from "~/config.server"
 import {
@@ -17,6 +18,20 @@ export const config = { maxDuration: 300 }
 const MODEL_ID =
   process.env.OPENAI_ARTICULATION_MODEL ?? "gpt-5"
 const isReasoningModel = /^gpt-5|^o\d/.test(MODEL_ID)
+
+// Pin undici as the provider's fetch instead of going through globalThis.
+// @vercel/remix/server.js side-effect-imports ./globals.js, which calls
+// @remix-run/node's installGlobals() without nativeFetch — that swaps
+// globalThis.fetch for @remix-run/web-fetch, whose Response.body is a
+// web-streams-polyfill ReadableStream. ai@6's SSE parser then does
+// `body.pipeThrough(new TextDecoderStream())` and the polyfill rejects
+// the native TransformStream ("First parameter has member 'readable'
+// that is not a ReadableStream"). Doing it via createOpenAI sidesteps
+// the global state regardless of bundle/module load order.
+const aiOpenai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  fetch: undiciFetch as unknown as typeof globalThis.fetch,
+})
 
 export async function action({ request }: ActionFunctionArgs) {
   const authorId = await ensureLoggedIn(request)

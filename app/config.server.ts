@@ -1,14 +1,3 @@
-import { installGlobals } from "@remix-run/node"
-
-// vite.config.ts only runs at build/dev time, so its installGlobals call does
-// not reach the deployed Vercel function. Without this runtime call, Remix's
-// default `@remix-run/web-fetch` polyfill stays installed and Response.body is
-// a web-streams-polyfill ReadableStream — pipeThrough'ing it with a native
-// TextDecoderStream (what ai@6 does for SSE) throws "First parameter has
-// member 'readable' that is not a ReadableStream" and breaks streamText in
-// /api/chat-assistant.
-installGlobals({ nativeFetch: true })
-
 import { PrismaClient, Prisma } from "@prisma/client"
 import { cowpunkify } from "cowpunk-auth"
 import { Inngest } from "inngest"
