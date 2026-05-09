@@ -224,10 +224,10 @@ export const simulateDeliberation = inngest.createFunction(
       await failAndRethrow(e, "run context init")
       return
     }
-    // Rough budget: ~45s/persona articulation, ~60s dedup, ~90s hypothesize,
-    // ~30s/persona voting, plus a fudge factor.
-    const estimatedSeconds =
-      personas.length * 45 + 60 + 90 + (articulateOnly ? 0 : personas.length * 30) + 30
+    // Personas now articulate + vote in parallel, so wall-clock is bounded
+    // by the slowest persona (~60s articulate, ~40s vote) plus dedup (~60s)
+    // and hypothesize (~90s), not the sum across personas.
+    const estimatedSeconds = 60 + 60 + 90 + (articulateOnly ? 0 : 40) + 30
 
     await step.run("init progress", async () =>
       writeProgress(deliberationId, {
@@ -256,47 +256,56 @@ export const simulateDeliberation = inngest.createFunction(
     const userIds = new Map<string, number>()
 
     try {
-    // Stage 1: articulate
+    // Stage 1: articulate — personas run in parallel; each updates progress
+    // independently as it finishes. Inngest supports parallel `step.run` via
+    // Promise.all (each step is still independently checkpointed/retried).
     await step.run("progress: articulating", async () =>
       writeProgress(deliberationId, {
         stage: "articulating",
         message: `Personas articulating values (0/${personas.length})`,
       })
     )
-    for (let i = 0; i < personas.length; i++) {
-      const persona = personas[i]
-      const row: any = { persona: persona.slug }
-      try {
-        const user = await step.run(
-          `ensure user for ${persona.slug}`,
-          async () => ensureSimulatedUser(persona)
-        )
-        row.userId = user.id
-        userIds.set(persona.slug, user.id)
+    let articulatedCount = 0
+    const articulationRows = await Promise.all(
+      personas.map(async (persona) => {
+        const row: any = { persona: persona.slug }
+        try {
+          const user = await step.run(
+            `ensure user for ${persona.slug}`,
+            async () => ensureSimulatedUser(persona)
+          )
+          row.userId = user.id
+          userIds.set(persona.slug, user.id)
 
-        const articulation = await step.run(
-          `articulate ${persona.slug}`,
-          async () =>
-            simulatePersonaArticulation({
-              persona,
-              deliberationId,
-              ctx,
-            })
+          const articulation = await step.run(
+            `articulate ${persona.slug}`,
+            async () =>
+              simulatePersonaArticulation({
+                persona,
+                deliberationId,
+                ctx,
+              })
+          )
+          Object.assign(row, articulation)
+        } catch (e: any) {
+          row.error = e.message
+          logger.error(
+            `Persona ${persona.slug} articulation failed: ${e.message}`
+          )
+        }
+        articulatedCount++
+        const at = articulatedCount
+        await step.run(`progress: articulated ${persona.slug}`, async () =>
+          writeProgress(deliberationId, {
+            stage: "articulating",
+            message: `Personas articulating values (${at}/${personas.length})`,
+            personasArticulated: at,
+          })
         )
-        Object.assign(row, articulation)
-      } catch (e: any) {
-        row.error = e.message
-        logger.error(`Persona ${persona.slug} articulation failed: ${e.message}`)
-      }
-      summary.push(row)
-      await step.run(`progress: articulated ${i + 1}`, async () =>
-        writeProgress(deliberationId, {
-          stage: "articulating",
-          message: `Personas articulating values (${i + 1}/${personas.length})`,
-          personasArticulated: i + 1,
-        })
-      )
-    }
+        return row
+      })
+    )
+    summary.push(...articulationRows)
 
     // Stage 2: dedup
     await step.run("progress: deduping", async () =>
@@ -340,7 +349,8 @@ export const simulateDeliberation = inngest.createFunction(
       logger.error(`hypothesize chain failed/timed out: ${e.message}`)
     }
 
-    // Stage 4: vote — only now do EdgeHypothesis rows exist to vote on.
+    // Stage 4: vote — also parallel per persona (voting within a persona
+    // remains sequential per-hypothesis inside castSimulatedEdgeVotes).
     if (!articulateOnly) {
       await step.run("progress: voting", async () =>
         writeProgress(deliberationId, {
@@ -348,34 +358,40 @@ export const simulateDeliberation = inngest.createFunction(
           message: `Personas voting on transitions (0/${personas.length})`,
         })
       )
-      for (let i = 0; i < personas.length; i++) {
-        const persona = personas[i]
-        try {
-          const voted = await step.run(
-            `vote ${persona.slug}`,
-            async () =>
-              castSimulatedEdgeVotes({
-                persona,
-                deliberationId,
-                ctx,
-                limit: voteLimit,
-              })
+      let votedCount = 0
+      await Promise.all(
+        personas.map(async (persona) => {
+          try {
+            const voted = await step.run(
+              `vote ${persona.slug}`,
+              async () =>
+                castSimulatedEdgeVotes({
+                  persona,
+                  deliberationId,
+                  ctx,
+                  limit: voteLimit,
+                })
+            )
+            Object.assign(
+              summary.find((s) => s.persona === persona.slug) ?? {},
+              voted
+            )
+          } catch (e: any) {
+            logger.error(
+              `Persona ${persona.slug} voting failed: ${e.message}`
+            )
+          }
+          votedCount++
+          const at = votedCount
+          await step.run(`progress: voted ${persona.slug}`, async () =>
+            writeProgress(deliberationId, {
+              stage: "voting",
+              message: `Personas voting on transitions (${at}/${personas.length})`,
+              personasVoted: at,
+            })
           )
-          Object.assign(
-            summary.find((s) => s.persona === persona.slug) ?? {},
-            voted
-          )
-        } catch (e: any) {
-          logger.error(`Persona ${persona.slug} voting failed: ${e.message}`)
-        }
-        await step.run(`progress: voted ${i + 1}`, async () =>
-          writeProgress(deliberationId, {
-            stage: "voting",
-            message: `Personas voting on transitions (${i + 1}/${personas.length})`,
-            personasVoted: i + 1,
-          })
-        )
-      }
+        })
+      )
     }
 
     // Always reset setupStatus and mark done.
