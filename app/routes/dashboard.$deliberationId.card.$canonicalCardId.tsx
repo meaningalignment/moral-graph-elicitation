@@ -2,14 +2,10 @@ import {
   ActionFunctionArgs,
   json,
   LoaderFunctionArgs,
-  SerializeFrom,
 } from "@remix-run/node"
 import { Link, useLoaderData, useParams } from "@remix-run/react"
-import { CanonicalValuesCard } from "@prisma/client"
-import ValuesCard from "~/components/values-card"
 import { db } from "~/config.server"
 import { runTaskFromForm, updateCardFromForm } from "~/services/critique"
-// import { embeddingService } from "~/values-tools/embedding"
 import { ValuesCardEditor } from "~/components/values-card-editor"
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -24,8 +20,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     },
   })
   if (!card) throw new Error("Card not found")
-  const similar: any[] = [] //await embeddingService.getSimilarCards(card)
-  return json({ card, similar })
+  return json({ card })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -63,47 +58,13 @@ function Chats() {
   )
 }
 
-function SimilarCards({
-  similar,
-  deliberationId,
-}: {
-  similar: SerializeFrom<CanonicalValuesCard[]>
-  deliberationId: number
-}) {
-  return (
-    <div>
-      <h1 className="text-xl font-semibold tracking-tight my-8 text-center">Similar cards</h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
-        {similar.map((card) => (
-          <Link
-            prefetch="intent"
-            to={`/dashboard/${deliberationId}/card/${card.id}`}
-            className="mb-6"
-          >
-            <ValuesCard
-              detailsInline
-              key={card.id}
-              card={card as any as CanonicalValuesCard}
-            />
-            <div className="text-sm text-muted-foreground text-center">
-              Distance: {(card as any)._distance}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export default function EditCardPage() {
-  const { card, similar } = useLoaderData<typeof loader>()
-  const { deliberationId } = useParams()
+  const { card } = useLoaderData<typeof loader>()
 
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <ValuesCardEditor card={card} cardType="canonical" />
       <Chats />
-      <SimilarCards similar={similar} deliberationId={Number(deliberationId)} />
     </div>
   )
 }

@@ -5,7 +5,6 @@ export type Value = {
   policies: string[]
   title?: string
   description?: string
-  embedding?: number[]
 }
 
 export type Edge = {

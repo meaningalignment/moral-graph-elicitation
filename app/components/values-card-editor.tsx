@@ -83,15 +83,6 @@ export function ValuesCardEditor({
           {/* <Button> Improve </Button> */}
         </div>
         <div className="flex items-end justify-end gap-2">
-          <BackgroundTaskButton
-            task={{
-              task: "reembed",
-              cardId: card.id!.toString(),
-            }}
-            onData={() => alert("done!")}
-          >
-            Re-embed
-          </BackgroundTaskButton>
           <Button className="mt-4" type="submit">
             {nav.state === "submitting" ? (
               <IconSpinner className="h-5 w-5 animate-spin mr-2" />
