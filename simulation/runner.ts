@@ -10,8 +10,19 @@ import {
 } from "~/services/articulation/chat"
 import { Persona, emailFor } from "./personas/schema"
 
-const TRANSCRIPT_DIR = path.join(process.cwd(), "simulation", "transcripts")
 const MAX_PERSONA_TURNS = 10
+
+/**
+ * On Vercel/AWS Lambda, only `/tmp` is writable — `process.cwd()` resolves to
+ * `/var/task` which is a read-only deploy bundle. Pick `/tmp` automatically
+ * in those environments so transcripts don't blow up the whole simulation.
+ */
+function transcriptBaseDir(): string {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return path.join("/tmp", "simulation", "transcripts")
+  }
+  return path.join(process.cwd(), "simulation", "transcripts")
+}
 
 export type SimulationRunContext = {
   runId: string
@@ -21,17 +32,37 @@ export type SimulationRunContext = {
 }
 
 export function createRunContext(runId?: string): SimulationRunContext {
-  const id = runId ?? `run-${new Date().toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 6)}`
-  const dir = path.join(TRANSCRIPT_DIR, id)
-  fs.mkdirSync(dir, { recursive: true })
+  const id =
+    runId ??
+    `run-${new Date().toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 6)}`
+
+  // Transcript files are best-effort debug aids. If we can't open the dir
+  // (read-only FS, permissions, ENOSPC), fall back to a no-op logger rather
+  // than failing the whole simulation.
+  let dir: string | null = null
+  try {
+    dir = path.join(transcriptBaseDir(), id)
+    fs.mkdirSync(dir, { recursive: true })
+  } catch (e) {
+    console.warn(
+      `[simulation] transcript dir unavailable, continuing without on-disk logs: ${(e as Error).message}`
+    )
+    dir = null
+  }
 
   const log = (entry: Record<string, unknown>) => {
-    const personaSlug = (entry.persona as string) ?? "_run"
-    const file = path.join(dir, `${personaSlug}.jsonl`)
-    fs.appendFileSync(
-      file,
-      JSON.stringify({ t: new Date().toISOString(), ...entry }) + "\n"
-    )
+    if (!dir) return
+    try {
+      const personaSlug = (entry.persona as string) ?? "_run"
+      const file = path.join(dir, `${personaSlug}.jsonl`)
+      fs.appendFileSync(
+        file,
+        JSON.stringify({ t: new Date().toISOString(), ...entry }) + "\n"
+      )
+    } catch (e) {
+      // One-shot warning per failure; never throw from logging.
+      console.warn(`[simulation] transcript write failed: ${(e as Error).message}`)
+    }
   }
 
   return {

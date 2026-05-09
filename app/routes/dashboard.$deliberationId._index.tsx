@@ -245,10 +245,17 @@ function DeliberationDashboard({
   const [openQuestionId, setOpenQuestionId] = useState<number | null>(null)
   const [simulateDialogOpen, setSimulateDialogOpen] = useState(false)
 
-  // Poll for setup status if the deliberation is not ready
+  // Poll for setup status if the deliberation is in a non-simulation setup
+  // phase (generating contexts/questions). For full simulation runs we let
+  // SimulationProgressPanel poll its dedicated endpoint instead — full-route
+  // revalidation every 5s causes the page content to reflow, which makes the
+  // user's scroll position jump while the run is in progress.
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null
-    if (deliberation.setupStatus !== "ready") {
+    const inSetupNonSim =
+      deliberation.setupStatus === "generating_contexts" ||
+      deliberation.setupStatus === "generating_questions"
+    if (inSetupNonSim) {
       intervalId = setInterval(() => {
         revalidator.revalidate()
       }, 5000)
@@ -260,7 +267,6 @@ function DeliberationDashboard({
 
   // Revalidate when the fetcher data changes
   useEffect(() => {
-    console.log(fetcher.data)
     if (fetcher.data && (fetcher.data as any)?.refetch) {
       revalidator.revalidate()
     }
@@ -293,6 +299,12 @@ function DeliberationDashboard({
           {deliberation.topic}
         </h1>
       )}
+
+      <SimulationProgressPanel
+        deliberationId={Number(deliberationId)}
+        simulating={deliberation.setupStatus === "generating_graph"}
+        onFinished={() => revalidator.revalidate()}
+      />
 
       <Card>
         <CardHeader className="pb-3">
@@ -405,10 +417,6 @@ function DeliberationDashboard({
                 </AlertDescription>
               </Alert>
             )}
-          <SimulationProgressPanel
-            deliberationId={Number(deliberationId)}
-            simulating={deliberation.setupStatus === "generating_graph"}
-          />
           <div className="mt-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
             <Link
               to={`/deliberation/${deliberationId}/graph`}
@@ -461,15 +469,6 @@ function DeliberationDashboard({
               </Button>
             </Link>
           </div>
-          {(fetcher.data as any)?.simulationStarted && (
-            <Alert className="mt-4 bg-muted">
-              <AlertTitle>Simulation queued</AlertTitle>
-              <AlertDescription>
-                Simulated participants are being run in the background. The
-                progress bar above shows the current stage.
-              </AlertDescription>
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
@@ -604,17 +603,21 @@ type SimulationProgress = {
   estimatedSeconds: number
   message: string
   runId: string
+  error?: string
 }
 
 function SimulationProgressPanel({
   deliberationId,
   simulating,
+  onFinished,
 }: {
   deliberationId: number
   simulating: boolean
+  onFinished?: () => void
 }) {
   const [progress, setProgress] = useState<SimulationProgress | null>(null)
   const [now, setNow] = useState(() => Date.now())
+  const lastTerminalRunId = useState<{ runId: string | null }>({ runId: null })[0]
 
   // Poll the progress endpoint every 3s while simulating, plus once on mount
   // so we surface stale "done" progress from the last run.
@@ -643,6 +646,17 @@ function SimulationProgressPanel({
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [simulating])
+
+  // When the run reaches a terminal state, revalidate the route loader once
+  // so the summary counts (values, upgrades, etc.) refresh.
+  useEffect(() => {
+    if (!progress) return
+    if (progress.stage !== "done" && progress.stage !== "failed") return
+    if (!progress.runId) return
+    if (lastTerminalRunId.runId === progress.runId) return
+    lastTerminalRunId.runId = progress.runId
+    onFinished?.()
+  }, [progress, onFinished, lastTerminalRunId])
 
   if (!progress) return null
   // Hide done/failed progress if the deliberation isn't currently simulating
@@ -680,39 +694,110 @@ function SimulationProgressPanel({
   const pct = Math.round(refined * 100)
 
   const eta = Math.max(0, progress.estimatedSeconds - elapsedSec)
+  const isFailed = progress.stage === "failed"
+  const isDone = progress.stage === "done"
 
   return (
-    <div className="mt-6 mb-2 rounded-md border bg-muted p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {progress.stage === "done" ? (
-            <span className="inline-block h-3 w-3 rounded-full bg-emerald-500" />
-          ) : progress.stage === "failed" ? (
-            <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+    <div
+      className={`rounded-lg border-2 p-5 sm:p-6 shadow-sm ${
+        isFailed
+          ? "border-red-300 bg-red-50"
+          : isDone
+          ? "border-emerald-300 bg-emerald-50"
+          : "border-primary/40 bg-card"
+      }`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          {isDone ? (
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold">
+              ✓
+            </span>
+          ) : isFailed ? (
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold">
+              !
+            </span>
           ) : (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           )}
-          <span className="text-sm font-medium">
-            {STAGE_LABELS[progress.stage]}
-          </span>
+          <div>
+            <div className="text-base sm:text-lg font-semibold leading-tight">
+              {isFailed
+                ? "Simulation failed"
+                : isDone
+                ? "Simulation complete"
+                : "Simulating participants"}
+            </div>
+            <div className="text-sm text-muted-foreground mt-0.5">
+              {STAGE_LABELS[progress.stage]}
+              {progress.personasTotal > 0 && !isFailed && !isDone && (
+                <> · {progress.personasTotal} personas</>
+              )}
+            </div>
+          </div>
         </div>
-        <span className="text-xs text-muted-foreground tabular-nums">
-          {progress.stage === "done"
-            ? `done in ${formatDuration(elapsedSec)}`
-            : `${formatDuration(elapsedSec)} elapsed · ~${formatDuration(eta)} left`}
-        </span>
+        <div className="text-right text-xs sm:text-sm tabular-nums">
+          {isFailed ? (
+            <span className="text-red-700 font-medium">
+              after {formatDuration(elapsedSec)}
+            </span>
+          ) : isDone ? (
+            <span className="text-emerald-700 font-medium">
+              done in {formatDuration(elapsedSec)}
+            </span>
+          ) : (
+            <>
+              <div className="font-semibold text-foreground">
+                {pct}%
+              </div>
+              <div className="text-muted-foreground">
+                ~{formatDuration(eta)} left
+              </div>
+              <div className="text-muted-foreground">
+                {formatDuration(elapsedSec)} elapsed
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      <div className="mt-3 h-2 w-full overflow-hidden rounded bg-muted">
+
+      <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-muted">
         <div
           className={`h-full transition-all duration-500 ${
-            progress.stage === "failed" ? "bg-red-500" : "bg-emerald-500"
+            isFailed ? "bg-red-500" : "bg-emerald-500"
           }`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <div className="mt-2 text-xs text-muted-foreground">
-        {progress.message}
-      </div>
+
+      {!isFailed && (
+        <div className="mt-3 text-sm text-muted-foreground">
+          {progress.message}
+        </div>
+      )}
+
+      {isFailed && (
+        <div className="mt-4 rounded-md border border-red-200 bg-white/70 p-3">
+          <div className="text-sm font-medium text-red-900">
+            {progress.message || "The simulation did not finish."}
+          </div>
+          {progress.error && (
+            <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs text-red-800">
+              {progress.error}
+            </pre>
+          )}
+          <div className="mt-3 text-xs text-red-900/80">
+            You can press <b>Simulate Participants</b> below to try again. If
+            this keeps happening, check the Inngest logs for run{" "}
+            <code className="rounded bg-red-100 px-1 py-0.5">
+              {progress.runId || "(no run id)"}
+            </code>
+            .
+          </div>
+        </div>
+      )}
     </div>
   )
 }
