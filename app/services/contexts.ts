@@ -5,37 +5,30 @@ import generateContextsPrompt from "~/services/prompts/generate-contexts-prompt.
 
 async function generateContextsFromTranscript(
   transcript: { role: "user" | "assistant"; content: string }[],
-  numContexts = 5
+  existingContexts: string[]
 ) {
   return genObj({
     prompt: generateContextsPrompt,
-    data: { transcript },
+    data: { transcript, existingContexts },
     schema: z.object({
-      factors: z
+      rationale: z
+        .string()
+        .describe(
+          `1-2 sentences: which existing contexts cover the user's situation, and whether anything is genuinely uncovered. Default reasoning is that everything is already covered.`
+        ),
+      newContexts: z
         .array(
-          z.object({
-            situationalContext: z
-              .string()
-              .describe(
-                `Describe in 1-2 sentences an aspect of the situation that that affects what's wise to do with regards to the user's situation.`
-              ),
-            factor: z
-              .string()
-              .describe(
-                `The factor from the situational context, in as few words as possible. For example, "The little girl is in distress". Should be phrased in a way such that it is possible to append it to the words: "What's wise to do when ...".`
-              ),
-            generalizedFactor: z
-              .string()
-              .describe(
-                `The factor where any unnecessary information is removed, but the meaning is preserved. For example, "The little girl is in distress" could be generalized as "A person is in distress". The fact that she is a girl does not change the values one should approach the distress with. However, don't generalize away detail that do change the values one should approach the question with. For example, "The girl considering an abortion is a christian" should not be generalized to "A religious person is considering an abortion". The fact that she is a christian is relevant, as the christian faith has specific views on abortion.`
-              ),
-          })
+          z
+            .string()
+            .describe(
+              `A short "When ..." clause, 4-9 words, no period. Phrased to complete "What's wise to do ___?". E.g. "When assisting a family facing eviction".`
+            )
         )
         .describe(
-          `${numContexts} of the most important factors of the situation the user is in.`
+          `New contexts that are NOT already covered by any existing context. Default to an empty list. Only include a clause when no existing context fits.`
         ),
     }),
-  }).then((res) => res.factors.map((f) => f.generalizedFactor))
+  }).then((res) => res.newContexts)
 }
 
 /**
@@ -46,23 +39,27 @@ async function generateContextsFromTranscript(
  */
 export async function findDuplicateContext(
   deliberationId: number,
-  context: string
+  context: string,
+  existingContexts?: string[]
 ): Promise<string | null> {
-  const existing = await db.context.findMany({
-    where: { deliberationId },
-    select: { id: true },
-  })
+  const existing =
+    existingContexts ??
+    (
+      await db.context.findMany({
+        where: { deliberationId },
+        select: { id: true },
+      })
+    ).map((c) => c.id)
   if (existing.length === 0) return null
 
   // Cheap exact-match shortcut, before paying for an LLM call.
-  const exact = existing.find((c) => c.id === context)
-  if (exact) return exact.id
+  if (existing.includes(context)) return context
 
   const result = await genObj({
     prompt: `You are deduplicating short "When ..." context clauses for a deliberation. Two contexts are duplicates only if they pick out the SAME morally-relevant slice of a situation — same actor, same stake, same tension. Different actors, scopes, or framings make them distinct. Surface vocabulary overlap is not enough.`,
     data: {
       candidate: context,
-      existingContexts: existing.map((c) => c.id),
+      existingContexts: existing,
     },
     schema: z.object({
       rationale: z
@@ -78,8 +75,7 @@ export async function findDuplicateContext(
   })
   if (result.duplicateOf === null) return null
   // Defence: model might return a paraphrase rather than an exact id.
-  const matched = existing.find((c) => c.id === result.duplicateOf)
-  return matched?.id ?? null
+  return existing.includes(result.duplicateOf) ? result.duplicateOf : null
 }
 
 export const findNewContexts = inngest.createFunction(
@@ -107,15 +103,32 @@ export const findNewContexts = inngest.createFunction(
       .filter((t) => t.role === "user" || t.role === "assistant")
       .map((t) => ({ role: t.role, content: t.content }))
 
-    // Generate contexts from transcript
-    const contexts = await step.run(
-      "Generating contexts from transcript",
-      async () => generateContextsFromTranscript(transcript)
+    const existingContexts = await step.run(
+      "Loading existing contexts",
+      async () =>
+        (
+          await db.context.findMany({
+            where: { deliberationId },
+            select: { id: true },
+          })
+        ).map((c) => c.id)
     )
 
-    // For each context, see if any duplicates already exist in db.
+    // Generate contexts from transcript, biased toward reusing existing ones.
+    const contexts = await step.run(
+      "Generating contexts from transcript",
+      async () => generateContextsFromTranscript(transcript, existingContexts)
+    )
+
+    // For each context, see if any duplicates already exist in db. The
+    // generation step is reuse-aware, but this is a safety net for the cases
+    // where it still surfaces something already covered.
     const duplicates = await step.run("Finding duplicate contexts", async () =>
-      Promise.all(contexts.map((c) => findDuplicateContext(deliberationId, c)))
+      Promise.all(
+        contexts.map((c) =>
+          findDuplicateContext(deliberationId, c, existingContexts)
+        )
+      )
     )
 
     // Two LLM-generated contexts in this batch can resolve to the same target
