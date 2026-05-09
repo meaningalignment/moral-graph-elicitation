@@ -40,7 +40,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   // Awaited directly. defer() doesn't stream on Vercel's Node runtime.
   const [deliberation, firstIntervention, interventionsCount] =
     await Promise.all([
-      db.deliberation.findFirstOrThrow({
+      db.deliberation.findFirst({
         where: { id: deliberationId },
         include: {
           questions: {
@@ -79,6 +79,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
         where: { deliberationId, shouldDisplay: true },
       }),
     ])
+
+  if (!deliberation) {
+    throw redirect("/dashboard")
+  }
+
   return json({
     deliberation,
     interventionsCount,
