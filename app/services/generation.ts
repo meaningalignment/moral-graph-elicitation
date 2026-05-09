@@ -7,7 +7,6 @@ import {
 import { db, inngest } from "~/config.server"
 import { Question } from "@prisma/client"
 import type { Logger } from "inngest"
-import { embedContext } from "./embedding"
 import {
   generateScenario,
   ScenarioGenerationSchema,
@@ -168,8 +167,6 @@ async function upsertContextsForQuestionInDb(
       },
     })
 
-    // Embed the context.
-    await embedContext(context)
   }
 }
 

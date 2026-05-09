@@ -5,11 +5,6 @@ import {
   generateUpgradesToValue,
   Upgrade,
 } from "values-tools"
-import {
-  getCanonicalCardsWithEmbedding,
-  getContextEmbedding,
-} from "./embedding"
-import { cosineDistance } from "values-tools/src/utils"
 import { Value } from "values-tools/src/types"
 
 export async function upsertUpgradesInDb(
@@ -86,33 +81,31 @@ async function getContextsWithLinksToValues(deliberationId: number) {
   })
 }
 
-async function getClosestValues(
-  values: (CanonicalValuesCard & { embedding: number[] })[],
-  context: Omit<
-    Awaited<ReturnType<typeof getContextsWithLinksToValues>>[0],
-    "createdAt" | "updatedAt"
-  >,
-  limit: number = 10
+/**
+ * Pick canonical-value candidates for upgrade-story generation in a given
+ * context. We only include cards that were articulated for one of the
+ * context's questions (the same eligibility filter the previous embedding
+ * implementation used) and cap the list at `limit`. The downstream
+ * `generateUpgrades` step is itself an LLM that will pick which pairs
+ * actually make sense as upgrades — there is no cosine-distance benefit
+ * here.
+ */
+function getCandidateValues(
+  values: CanonicalValuesCard[],
+  context: {
+    ContextsForQuestions: {
+      question: { ValuesCard: { canonicalCardId: number | null }[] }
+    }[]
+  },
+  limit: number = 12
 ) {
-  const contextEmbedding = await getContextEmbedding(context.id)
-
-  return (
-    values
-      // Only include canonical cards where one of the original cards
-      // was articulated for a relevant context.
-      .filter((cc) =>
-        context.ContextsForQuestions.some((c) =>
-          c.question.ValuesCard.some((vc) => vc.canonicalCardId === cc.id)
-        )
+  return values
+    .filter((cc) =>
+      context.ContextsForQuestions.some((c) =>
+        c.question.ValuesCard.some((vc) => vc.canonicalCardId === cc.id)
       )
-      // Find closest values to context using cosine distance
-      .map((value) => ({
-        ...value,
-        distance: cosineDistance(contextEmbedding, value.embedding),
-      }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, limit)
-  )
+    )
+    .slice(0, limit)
 }
 
 async function generateReversedUpgrades(
@@ -191,17 +184,6 @@ export const hypothesize = inngest.createFunction(
     const deliberationId = event.data!.deliberationId as number
     logger.info(`Running hypothetical links generation`)
 
-    // Make sure all canonical cards are embedded first.
-    await step.sendEvent("embed-cards", {
-      name: "embed-cards",
-      data: { deliberationId, cardType: "canonical" },
-    })
-    await step.waitForEvent("embed-cards-finished", {
-      timeout: "15m",
-      event: "embed-cards-finished",
-      match: "data.deliberationId",
-    })
-
     // Get contexts, and for which cards they apply
     const contexts = await step.run("Fetching contexts", async () =>
       getContextsWithLinksToValues(deliberationId)
@@ -213,10 +195,11 @@ export const hypothesize = inngest.createFunction(
         .join(", ")}`
     )
 
-    // Get canonical values, and their embeddings
-    const values = (await step.run("Fetching values", async () =>
-      getCanonicalCardsWithEmbedding(deliberationId)
-    )) as any as (CanonicalValuesCard & { embedding: number[] })[]
+    const values = (await step.run("Fetching canonical values", async () =>
+      db.canonicalValuesCard.findMany({
+        where: { deliberationId, isArchived: false },
+      })
+    )) as unknown as CanonicalValuesCard[]
 
     //
     // Generate plausible upgrades for each context.
@@ -225,9 +208,7 @@ export const hypothesize = inngest.createFunction(
     const allUpgrades: Upgrade[] = []
 
     for (const context of contexts) {
-      const closestValues = await step.run("Get closest values", async () =>
-        getClosestValues(values, context, 12)
-      )
+      const closestValues = getCandidateValues(values, context, 12)
 
       const plausibleUpgrades = await step.run(
         `Generate upgrades for context ${context.id} from ${closestValues.length} values`,

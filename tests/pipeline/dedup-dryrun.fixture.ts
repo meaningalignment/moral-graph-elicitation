@@ -1,8 +1,8 @@
 /**
  * Dedup dry-run.
  *
- * Reads ValuesCards from a deliberation, runs the EXACT clustering function
- * (`deduplicateValues` from values-tools — same one the production cron uses),
+ * Reads ValuesCards from a deliberation, runs the EXACT partitioner the
+ * production cron uses (`partitionValues` from `~/services/deduplication/prompt-dedup`),
  * and then asks an in-repo discriminator judge whether each resulting cluster
  * actually makes sense under the 5-criterion rubric.
  *
@@ -15,17 +15,13 @@
  */
 import "dotenv/config"
 import url from "node:url"
-import path from "node:path"
 import { neon } from "@neondatabase/serverless"
-import {
-  configureValuesTools,
-  PromptCache,
-  deduplicateValues,
-} from "values-tools"
+import { configureValuesTools, PromptCache } from "values-tools"
 import {
   judgeCluster,
   ClusterVerdict,
 } from "~/services/deduplication/in-repo-judge"
+import { partitionValues } from "~/services/deduplication/prompt-dedup"
 import { c, head, pass, fail, warn } from "../helpers/colors"
 
 configureValuesTools({
@@ -60,7 +56,6 @@ export type DryRunSummary = {
 export async function runDedupDryRun(opts: {
   deliberationId: number
   limit?: number
-  useDbScan?: boolean
   pgUrl?: string
 }): Promise<DryRunSummary> {
   const details: string[] = []
@@ -95,16 +90,17 @@ export async function runDedupDryRun(opts: {
     }
   }
 
-  // useDbScan mirrors production: only when N>20.
-  const useDbScan = opts.useDbScan ?? cards.length > 20
-  details.push(
-    `Clustering with deduplicateValues (useDbScan=${useDbScan})...`
+  details.push(`Clustering with partitionValues (prompt-only)...`)
+  const { clusters: partition } = await partitionValues({
+    candidates: cards,
+    existingCanonicals: [],
+  })
+  // Re-hydrate Card objects from the returned ids so the rest of the dry-run
+  // can keep operating on Card[][].
+  const cardById = new Map(cards.map((c) => [c.id, c]))
+  const clusters: Card[][] = partition.map((cluster) =>
+    cluster.memberIds.map((id) => cardById.get(id)!).filter(Boolean)
   )
-  const clusters = (await deduplicateValues<Card>(
-    cards,
-    null,
-    useDbScan
-  )) as Card[][]
   details.push(`Pipeline produced ${clusters.length} clusters`)
 
   const perCluster: DryRunSummary["perCluster"] = []
