@@ -1,14 +1,12 @@
-import { Value } from "values-tools/src/types"
+import { type Value } from "../app/lib/values-tools"
 import {
   generateContextsFromQuestion,
   generateQuestions,
 } from "../app/services/generation"
 import {
-  configureValuesTools,
   generateUpgrades,
   generateValueFromContext,
-  PromptCache,
-} from "values-tools"
+} from "../app/lib/values-tools"
 import fs from "fs/promises"
 
 type Upgrade = {
@@ -16,11 +14,6 @@ type Upgrade = {
   toId: number
   context: string
 }
-
-// Use local cache for prompts.
-configureValuesTools({
-  cache: new PromptCache(),
-})
 
 export async function generateGraph(
   topic: string,

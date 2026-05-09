@@ -56,8 +56,10 @@ Subsequent endeavors will focus on fine-tuning the LLM based on these values.
 ## Output
 
 - **Database schema**: [schema.prisma](./schema.prisma).
-- **Moral graph summarisation, embedding, dedup, transition story generation**: live in the
-  [`values-tools`](https://github.com/meaningalignment/values-tools) package, used here as a dependency.
+- **Moral graph summarisation, dedup, transition story generation**: live in
+  [`app/lib/values-tools`](./app/lib/values-tools). These were vendored from
+  [`values-tools`](https://github.com/meaningalignment/values-tools) so the app
+  has no upstream LLM-helper dependency and routes everything through OpenAI.
 - **Data export**: a moral graph can be exported in JSON format via the
   `/data/graph` endpoint (see `app/routes/api.data.graph.ts`).
 

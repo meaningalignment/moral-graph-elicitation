@@ -1,6 +1,8 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node"
-import { summarizeGraph } from "values-tools"
-import { usPoliticalAffiliationSummarizer } from "values-tools/src/services/moral-graph"
+import {
+  summarizeGraph,
+  usPoliticalAffiliationSummarizer,
+} from "~/lib/values-tools"
 import { db } from "~/config.server"
 
 export async function loader({ params, request }: LoaderFunctionArgs) {

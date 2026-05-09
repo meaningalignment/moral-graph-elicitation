@@ -1,4 +1,4 @@
-import { genObj } from "values-tools"
+import { genObj } from "~/lib/values-tools"
 import { z } from "zod"
 import { db, inngest } from "~/config.server"
 import generateContextsPrompt from "~/services/prompts/generate-contexts-prompt.md?raw" with { type: "text" }

@@ -16,7 +16,6 @@
 import "dotenv/config"
 import url from "node:url"
 import { neon } from "@neondatabase/serverless"
-import { configureValuesTools, PromptCache } from "values-tools"
 import {
   judgeCluster,
   ClusterVerdict,
@@ -24,11 +23,7 @@ import {
 import { partitionValues } from "~/services/deduplication/prompt-dedup"
 import { c, head, pass, fail, warn } from "../helpers/colors"
 
-configureValuesTools({
-  defaultModel: process.env.VALUES_TOOLS_MODEL ?? "gpt-5",
-  defaultTemperature: 1,
-  cache: new PromptCache(),
-})
+// values-tools is now in-repo at `app/lib/values-tools`; nothing to wire up.
 
 type Card = {
   id: number

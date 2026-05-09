@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node"
 import { db } from "../config.server"
-import { genText } from "values-tools"
+import { genText } from "~/lib/values-tools"
 
 export const definitionOfASourceOfMeaning = `
 A "source of meaning" is a concept similar to a value – it is a way of living that is important to you. Something that you pay attention to in a choice. They are more specific than words like "honesty" or "authenticity". They specify a particular *kind* of honesty and authenticity, specified as a path of attention.

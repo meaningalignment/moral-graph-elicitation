@@ -5,11 +5,16 @@ import {
   Intervention,
   User,
 } from "@prisma/client"
-import { genObj, summarizeGraph } from "values-tools"
+import {
+  genObj,
+  summarizeGraph,
+  usPoliticalAffiliationSummarizer,
+  type MoralGraph,
+  type MoralGraphValue,
+  type Value,
+} from "~/lib/values-tools"
 import { db, perplexity } from "~/config.server"
 import { z } from "zod"
-import { MoralGraph, MoralGraphValue, Value } from "values-tools/src/types"
-import { usPoliticalAffiliationSummarizer } from "values-tools/src/services/moral-graph"
 
 async function getContextsForDeliberation(
   deliberationId: number,

@@ -3,17 +3,6 @@ import { cowpunkify } from "cowpunk-auth"
 import { Inngest } from "inngest"
 import { OpenAI } from "openai"
 import { redirect } from "@remix-run/node"
-import { configureValuesTools, PromptCache } from "values-tools"
-
-// values-tools defaults to Claude. Pin it to the project-wide model so
-// there's a single knob and we don't silently require an ANTHROPIC_API_KEY.
-configureValuesTools({
-  defaultModel: process.env.VALUES_TOOLS_MODEL ?? "gpt-5",
-  // gpt-5 only supports temperature=1; setting it here so values-tools'
-  // genObj/genText don't get rejected.
-  defaultTemperature: 1,
-  cache: new PromptCache(),
-})
 import { neonConfig } from "@neondatabase/serverless"
 import { PrismaNeon } from "@prisma/adapter-neon"
 import ws from "ws"

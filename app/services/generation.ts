@@ -2,7 +2,7 @@ import { z } from "zod"
 import {
   generateValueFromContext,
   genObj,
-} from "values-tools"
+} from "~/lib/values-tools"
 import { db, inngest } from "~/config.server"
 import { Question } from "@prisma/client"
 import type { Logger } from "inngest"
@@ -11,10 +11,9 @@ import {
   ScenarioGenerationSchema,
 } from "./scenario-generation"
 
-// Simple string-equality clustering. Avoids reaching into values-tools'
-// deduplicateContexts, which can route through Anthropic regardless of the
-// configured defaultModel. We normalise whitespace + case so trivially
-// equivalent contexts collapse.
+// Simple normalised-string clustering for seed contexts. Whitespace + case
+// only — the seed flow generates short "When ..." clauses where exact match
+// is enough; per-chat dedup uses an LLM in `findDuplicateContext`.
 function clusterContexts(contexts: string[]): string[][] {
   const groups = new Map<string, string[]>()
   for (const ctx of contexts) {

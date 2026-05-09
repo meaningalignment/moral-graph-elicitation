@@ -1,6 +1,6 @@
 import { CanonicalValuesCard, EdgeHypothesis } from "@prisma/client"
 import { db } from "~/config.server"
-import { Upgrade } from "values-tools"
+import { Upgrade } from "~/lib/values-tools"
 
 type SelectionCriteria = "popular" | "convergence" | "sparse"
 

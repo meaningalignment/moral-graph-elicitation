@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import ValuesCard from "./values-card"
 import * as d3 from "d3"
-import { MoralGraph as MoralGraphSummary } from "values-tools"
+import { MoralGraph as MoralGraphSummary } from "~/lib/values-tools"
 import { GraphSettings } from "./moral-graph-settings"
 import { CanonicalValuesCard } from "@prisma/client"
 
