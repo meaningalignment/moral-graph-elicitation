@@ -20,13 +20,19 @@ export function useCopyToClipboard({
       return
     }
 
-    navigator.clipboard.writeText(value).then(() => {
-      setIsCopied(true)
+    navigator.clipboard
+      .writeText(value)
+      .then(() => {
+        setIsCopied(true)
 
-      setTimeout(() => {
-        setIsCopied(false)
-      }, timeout)
-    })
+        setTimeout(() => {
+          setIsCopied(false)
+        }, timeout)
+      })
+      .catch(() => {
+        // Clipboard permission can be denied; swallow rather than throw an
+        // unhandled rejection. The button just won't switch to the copied state.
+      })
   }
 
   return { isCopied, copyToClipboard }

@@ -52,12 +52,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     totalRelationships,
     carouselValues,
     prolificId: user.prolificId,
+    prolificCompletionCode: process.env.PROLIFIC_COMPLETION_CODE ?? null,
   })
 }
 
 export default function FinishedScreen() {
   const {
     prolificId,
+    prolificCompletionCode,
     userValuesCount,
     totalValuesCount,
     totalRelationships,
@@ -85,12 +87,12 @@ export default function FinishedScreen() {
           </p>
         </div>
 
-        {prolificId && (
+        {prolificId && prolificCompletionCode && (
           <div className="my-16">
             <Button
               size="lg"
               onClick={() => {
-                window.location.href = `https://app.prolific.com/submissions/complete?cc=CXW439N1`
+                window.location.href = `https://app.prolific.com/submissions/complete?cc=${prolificCompletionCode}`
               }}
             >
               Complete Study

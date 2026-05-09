@@ -45,10 +45,12 @@ export function ValuesCardEditor({
             Suggest
           </BackgroundTaskButton>
         </div>
-        {titleIdeas ? (
-          <div className="text-sm text-muted-foreground text-center">
-            {titleIdeas}
-          </div>
+        {titleIdeas && titleIdeas.length > 0 ? (
+          <ul className="text-sm text-muted-foreground text-center list-none p-0">
+            {titleIdeas.map((title) => (
+              <li key={title}>{title}</li>
+            ))}
+          </ul>
         ) : null}
 
         <Label>

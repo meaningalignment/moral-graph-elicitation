@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json } from "@remix-run/node"
-import { db } from "~/config.server"
+import { auth, db } from "~/config.server"
 import type { ChatMessage } from "~/services/articulation/chat"
 
 // Export for tests.
@@ -36,6 +36,9 @@ export function removeLastMatchAndPrecedingToolCalls(
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  const user = await auth.getCurrentUser(request)
+  if (!user) throw new Response("Unauthorized", { status: 401 })
+
   const body = await request.json()
   let { message, chatId } = body as {
     message: ChatMessage
@@ -45,7 +48,10 @@ export async function action({ request }: ActionFunctionArgs) {
   const chat = await db.chat.findUnique({ where: { id: chatId } })
 
   if (!chat) {
-    throw new Error(`No chat with id ${chatId}`)
+    throw new Response(`No chat with id ${chatId}`, { status: 404 })
+  }
+  if (chat.userId !== user.id && !user.isAdmin) {
+    throw new Response("Forbidden", { status: 403 })
   }
 
   const messages = chat.transcript as any as ChatMessage[]
@@ -60,8 +66,6 @@ export async function action({ request }: ActionFunctionArgs) {
     messages,
     (m) => m.content === message.content && m.role === message.role
   )
-
-  console.log(`Removed messages from chat ${chatId}.`)
 
   await db.chat.update({
     where: { id: chatId },

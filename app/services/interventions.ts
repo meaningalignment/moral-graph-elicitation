@@ -91,22 +91,11 @@ async function getEdgesForContext(
     .filter((edge) => !excludeUsersWithoutDemographics || edge.demographics)
 }
 
-function printTopValues(values: any[], count = 5) {
-  console.log(`\nTop ${count} values by PageRank:`)
-  values.slice(0, count).forEach((value, index) => {
-    console.log(
-      `${index + 1}. "${value.title}" - PageRank: ${value.pageRank?.toFixed(3)}`
-    )
-  })
-}
-
 async function generateInterventionText(context: string, value: Value) {
   const question = `What should be done in the US about abortion policy, specifically when considering christian girls thinking about having an abortion, who are ${context.replace(
     "When ",
     ""
   )}?`
-
-  console.log(question)
 
   return await genObj({
     prompt: `
@@ -150,12 +139,7 @@ Each attention policy centers on something precise that can be attended to, not 
           `An expansion of the best intervention idea. This should be a short (1-2 sentences long) description of how to concretely implement the intervention. Should not have any special formatting or markdown.`
         ),
     }),
-  })
-    .then((response) => {
-      console.log(`Intervention generated: ${JSON.stringify(response)}`)
-      return response
-    })
-    .then((response) => response.intervention)
+  }).then((response) => response.intervention)
 }
 
 function getWinningValue(graph: MoralGraph): Value {
@@ -206,8 +190,6 @@ ${question}
 # Intervention
 ${intervention}`.trim()
 
-  console.log(prompt)
-
   const messages = [
     {
       role: "user" as const,
@@ -228,18 +210,15 @@ ${intervention}`.trim()
   const citeIndex = getLastBracketNumber(text)
   const citation = citeIndex ? citations[citeIndex] : undefined
   if (!citation || !description) {
-    console.log("No precedence found.")
     return
-  } else {
-    console.log(`Precedence found: ${description}`)
-    await db.interventionPrecedence.create({
-      data: {
-        interventionId,
-        description,
-        link: citation,
-      },
-    })
   }
+  await db.interventionPrecedence.create({
+    data: {
+      interventionId,
+      description,
+      link: citation,
+    },
+  })
 }
 
 export async function generateInterventions(
@@ -252,11 +231,7 @@ export async function generateInterventions(
     ? ctxts
     : await getContextsForDeliberation(deliberationId, questionId)
 
-  console.log("Processing contexts:", contexts)
-
   for (const context of contexts) {
-    console.log(`\n=== Processing Context: ${context.id} ===\n`)
-
     const values = await getValuesForDeliberation(deliberationId, questionId)
     const edges = await getEdgesForContext(
       deliberationId,
@@ -265,17 +240,11 @@ export async function generateInterventions(
       excludeUsersWithoutDemographics
     )
 
-    console.log(`Found ${values.length} values and ${edges.length} edges`)
-
     const graph = await summarizeGraph(values, edges, {
       includePageRank: true,
       includeDemographics: true,
       demographicsSummarizer: usPoliticalAffiliationSummarizer,
     })
-
-    console.log(
-      `Graph processed with ${graph.values.length} values and ${graph.edges.length} edges`
-    )
 
     if (graph.values?.length > 0) {
       const sortedValues = [...graph.values].sort(
@@ -283,10 +252,6 @@ export async function generateInterventions(
       )
       const winningValue = sortedValues[0]
       const text = await generateInterventionText(context.id, winningValue)
-
-      printTopValues(sortedValues)
-      console.log("\nHighest ranked value details:", winningValue)
-      console.log(`\nSuggested Intervention: ${text}`)
 
       await db.intervention.create({
         data: {
@@ -297,8 +262,6 @@ export async function generateInterventions(
           text,
         },
       })
-    } else {
-      console.log("No values available in the graph.")
     }
   }
 }
