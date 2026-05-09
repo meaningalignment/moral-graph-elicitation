@@ -128,7 +128,6 @@ export async function generateUpgrades(
   theme?: string
 ): Promise<Upgrade[]> {
   if (values.length < 2) {
-    console.log("Not enough values.")
     return []
   }
 

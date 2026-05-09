@@ -13,10 +13,6 @@ export async function upsertUpgradesInDb(
   contextId: string,
   deliberationId: number
 ): Promise<void> {
-  console.log(
-    `Upserting ${upgrades.length} upgrades to the database for deliberation ${deliberationId} and context ${contextId}`
-  )
-
   for (const upgrade of upgrades) {
     await db.edgeHypothesis.upsert({
       where: {
@@ -294,18 +290,11 @@ export async function hypothesizeManual(
       const upgrades = [forwardUpgrade, reverseUpgrade].filter(Boolean)
 
       if (upgrades.length > 0) {
-        console.log(
-          `Upserting upgrades for pair ${sourceValue.id} <-> ${targetValue.id} in db`
-        )
         await upsertUpgradesInDb(
           upgrades,
           runId,
           pair.contextId,
           deliberationId
-        )
-      } else {
-        console.error(
-          `No upgrades found for pair ${sourceValue.id} <-> ${targetValue.id}`
         )
       }
     }

@@ -1,14 +1,22 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node"
-import { db } from "~/config.server"
+import { auth, db } from "~/config.server"
 import type { ChatMessage } from "~/services/articulation/chat"
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const user = await auth.getCurrentUser(request)
+  if (!user) throw new Response("Unauthorized", { status: 401 })
+
   const chatId = params.chatId
   const chat = await db.chat.findUnique({
     where: { id: chatId },
+    select: { userId: true, transcript: true },
   })
-  const messages = (chat?.transcript as any as ChatMessage[]) ?? []
+  if (!chat) throw new Response("Not found", { status: 404 })
+  if (chat.userId !== user.id && !user.isAdmin) {
+    throw new Response("Forbidden", { status: 403 })
+  }
 
+  const messages = (chat.transcript as any as ChatMessage[]) ?? []
   return json({ messages })
 }
 
@@ -30,6 +38,9 @@ function mergeMessages(
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  const user = await auth.getCurrentUser(request)
+  if (!user) throw new Response("Unauthorized", { status: 401 })
+
   const body = await request.json()
   let { messages, chatId } = body
   messages = (messages as ChatMessage[]).filter(
@@ -37,7 +48,11 @@ export async function action({ request }: ActionFunctionArgs) {
   )
 
   const chat = await db.chat.findUnique({ where: { id: chatId } })
-  if (!chat) throw new Error(`No chat with id ${chatId}`)
+  if (!chat) throw new Response(`No chat with id ${chatId}`, { status: 404 })
+  if (chat.userId !== user.id && !user.isAdmin) {
+    throw new Response("Forbidden", { status: 403 })
+  }
+
   const prevMessages = chat.transcript as any as ChatMessage[]
   const mergedMessages = mergeMessages(prevMessages, messages)
 

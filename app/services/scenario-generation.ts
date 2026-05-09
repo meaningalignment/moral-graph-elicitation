@@ -30,29 +30,6 @@ export const schema = z.object({
 
 export type ScenarioGenerationSchema = z.infer<typeof schema>
 
-export function parseScenarioGenerationData(
-  data: unknown
-): ScenarioGenerationSchema | null {
-  try {
-    return schema.parse(data)
-  } catch (error) {
-    console.error(error)
-    return null
-  }
-}
-
-export function allContexts(data: ScenarioGenerationSchema): string[] {
-  return [
-    ...new Set(
-      Object.values(data.categories).flatMap((category) =>
-        category.options
-          .filter((option) => !option.redundant)
-          .map((option) => option.text)
-      )
-    ),
-  ]
-}
-
 export function getRepresentativeContexts(
   data: ScenarioGenerationSchema
 ): string[] {

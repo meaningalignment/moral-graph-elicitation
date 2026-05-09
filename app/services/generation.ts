@@ -442,9 +442,9 @@ export const generateSeedContexts = inngest.createFunction(
       )
     }
 
-    await step.run("Deduplicate contexts", async () => {
+    await step.run("Deduplicate contexts", async () =>
       upsertContextsInDb(deliberationId, contexts, logger)
-    })
+    )
 
     await step.run(`Marking setup as finished`, async () =>
       resetDeliberationStatus(deliberationId)

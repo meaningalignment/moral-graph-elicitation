@@ -27,7 +27,7 @@ model Demographic {
   age                    Int?
   sex                    String?
   usPoliticalAffiliation String?
-  user                   User    @relation(fields: [userId], references: [id])
+  user                   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId])
 }
@@ -117,12 +117,12 @@ model Chat {
   copiedFromId   String? // In order to filter out copied chats from analytics and other queries.
   questionId     Int
   ValuesCard     ValuesCard?
-  user           User         @relation(fields: [userId], references: [id])
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   copiedFrom     Chat?        @relation("ChatToCopiedFrom", fields: [copiedFromId], references: [id], onDelete: Cascade)
   copies         Chat[]       @relation("ChatToCopiedFrom")
   deliberationId Int
   deliberation   Deliberation @relation(fields: [deliberationId], references: [id], onDelete: Cascade)
-  Question       Question     @relation(fields: [questionId], references: [id])
+  Question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 enum EdgeType {
@@ -141,10 +141,10 @@ model Edge {
   comment        String?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
-  user           User                @relation(fields: [userId], references: [id])
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   from           CanonicalValuesCard @relation("FromValueRelation", fields: [fromId], references: [id], onDelete: Cascade)
   to             CanonicalValuesCard @relation("ToValueRelation", fields: [toId], references: [id], onDelete: Cascade)
-  context        Context             @relation(fields: [contextId, deliberationId], references: [id, deliberationId])
+  context        Context             @relation(fields: [contextId, deliberationId], references: [id, deliberationId], onDelete: Cascade)
   deliberationId Int
   deliberation   Deliberation        @relation(fields: [deliberationId], references: [id], onDelete: Cascade)
 
@@ -162,7 +162,7 @@ model EdgeHypothesis {
   isArchived      Boolean              @default(false)
   from            CanonicalValuesCard? @relation("FromHypothesizedValueRelation", fields: [fromId], references: [id], onDelete: Cascade)
   to              CanonicalValuesCard? @relation("ToHypothesizedValueRelation", fields: [toId], references: [id], onDelete: Cascade)
-  context         Context              @relation(fields: [contextId, deliberationId], references: [id, deliberationId])
+  context         Context              @relation(fields: [contextId, deliberationId], references: [id, deliberationId], onDelete: Cascade)
   deliberationId  Int
   deliberation    Deliberation         @relation(fields: [deliberationId], references: [id], onDelete: Cascade)
 
