@@ -65,6 +65,8 @@ export type SimulationProgress = {
   /** Last log line. */
   message: string
   runId: string
+  /** Set when stage === "failed". Surfaced to the dashboard so admins see why. */
+  error?: string
 }
 
 const STAGE_INDEX: Record<SimulationStage, number> = {
@@ -151,18 +153,77 @@ export const simulateDeliberation = inngest.createFunction(
       ? Number(event.data.voteLimit)
       : undefined
 
-    const personas = resolvePersonas({
-      inlinePersonas: event.data.inlinePersonas as Persona[] | undefined,
-      spec: personasSpec,
-      diskDir: path.join(process.cwd(), "simulation", "personas"),
-    })
+    // Always publish a "starting" state immediately so the UI shows something.
+    // Done before resolvePersonas/createRunContext, both of which can throw.
+    const startedAt = Date.now()
+    await step.run("init progress (queued)", async () =>
+      writeProgress(deliberationId, {
+        stage: "starting",
+        message: "Starting simulation…",
+        personasTotal: 0,
+        personasArticulated: 0,
+        personasVoted: 0,
+        startedAt,
+        estimatedSeconds: 60,
+        runId: "",
+      })
+    )
+
+    const failAndRethrow = async (e: unknown, where: string) => {
+      const msg = e instanceof Error ? e.message : String(e)
+      logger.error(`Simulation failed in ${where}: ${msg}`)
+      // Best-effort: clear setupStatus + write failure to KV so the UI sees it.
+      try {
+        await step.run(`fail: reset setupStatus (${where})`, async () =>
+          db.deliberation.update({
+            where: { id: deliberationId },
+            data: { setupStatus: "ready" },
+          })
+        )
+      } catch {}
+      try {
+        await step.run(`fail: write progress (${where})`, async () =>
+          writeProgress(deliberationId, {
+            stage: "failed",
+            message: `Simulation failed during ${where}`,
+            error: msg,
+          })
+        )
+      } catch {}
+      throw e
+    }
+
+    let personas: Persona[]
+    try {
+      personas = resolvePersonas({
+        inlinePersonas: event.data.inlinePersonas as Persona[] | undefined,
+        spec: personasSpec,
+        diskDir: path.join(process.cwd(), "simulation", "personas"),
+      })
+    } catch (e) {
+      await failAndRethrow(e, "persona resolution")
+      return
+    }
     if (personas.length === 0) {
       logger.warn(`No personas matched`)
+      await step.run("no-personas progress", async () =>
+        writeProgress(deliberationId, {
+          stage: "failed",
+          message: "No personas matched",
+          error:
+            "No personas matched the given selection. Pick at least one persona and try again.",
+        })
+      )
       return { message: "no personas matched" }
     }
 
-    const ctx = createRunContext()
-    const startedAt = Date.now()
+    let ctx: ReturnType<typeof createRunContext>
+    try {
+      ctx = createRunContext()
+    } catch (e) {
+      await failAndRethrow(e, "run context init")
+      return
+    }
     // Rough budget: ~45s/persona articulation, ~60s dedup, ~90s hypothesize,
     // ~30s/persona voting, plus a fudge factor.
     const estimatedSeconds =
@@ -194,6 +255,7 @@ export const simulateDeliberation = inngest.createFunction(
     const summary: any[] = []
     const userIds = new Map<string, number>()
 
+    try {
     // Stage 1: articulate
     await step.run("progress: articulating", async () =>
       writeProgress(deliberationId, {
@@ -331,5 +393,8 @@ export const simulateDeliberation = inngest.createFunction(
     )
 
     return { runId: ctx.runId, summary }
+    } catch (e) {
+      await failAndRethrow(e, "main pipeline")
+    }
   }
 )
