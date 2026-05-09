@@ -84,8 +84,17 @@ async function writeProgress(
   deliberationId: number,
   patch: Partial<SimulationProgress> & { stage: SimulationStage; message: string }
 ) {
-  const existing = (await kv.get<SimulationProgress>(progressKey(deliberationId))) ?? {
-    stage: "starting" as const,
+  // KV is best-effort progress reporting only. If it's down or rate-limited,
+  // don't fail the whole Inngest step (which would otherwise retry the
+  // simulation and waste LLM credits).
+  let existing: SimulationProgress | null = null
+  try {
+    existing = (await kv.get<SimulationProgress>(progressKey(deliberationId))) ?? null
+  } catch (e) {
+    console.warn("KV get failed (non-fatal):", (e as Error).message)
+  }
+  const base: SimulationProgress = existing ?? {
+    stage: "starting",
     stageIndex: 0,
     stageCount: 5,
     personasTotal: 0,
@@ -97,12 +106,16 @@ async function writeProgress(
     runId: "",
   }
   const next: SimulationProgress = {
-    ...existing,
+    ...base,
     ...patch,
     stageIndex: STAGE_INDEX[patch.stage],
   }
   // 1h TTL so stale progress doesn't haunt later runs
-  await kv.set(progressKey(deliberationId), JSON.stringify(next), { ex: 3600 })
+  try {
+    await kv.set(progressKey(deliberationId), JSON.stringify(next), { ex: 3600 })
+  } catch (e) {
+    console.warn("KV set failed (non-fatal):", (e as Error).message)
+  }
   return next
 }
 

@@ -12,7 +12,20 @@ import { embedValue } from "values-tools"
 async function createCanonicalCard(
   valuesCard: ValuesCard
 ): Promise<CanonicalValuesCard> {
-  // Create a canonical values card.
+  // Schema has @@unique([title, description, policies]). The LLM judge in the
+  // similarity step can disagree with that constraint (different phrasing of
+  // the same value, or — more often — identical text after the seed-card dev
+  // helper or repeated runs). Find the existing row first to avoid a hard
+  // UniqueConstraintViolation that would fail the dedup step.
+  const existing = await db.canonicalValuesCard.findFirst({
+    where: {
+      deliberationId: valuesCard.deliberationId,
+      title: valuesCard.title,
+      description: valuesCard.description,
+      policies: { equals: valuesCard.policies },
+    },
+  })
+  if (existing) return existing as CanonicalValuesCard
   const canonical = await db.canonicalValuesCard.create({
     data: {
       title: valuesCard.title,

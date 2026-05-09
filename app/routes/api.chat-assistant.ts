@@ -31,8 +31,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Persist the articulated card via the canonical write path (DB upsert,
   // embedding, KV mirror, find-new-contexts Inngest event). The transcript
-  // we record is what the user has typed up to and including the turn that
-  // triggered the tool call.
+  // we record is the conversation up to the user's last turn PLUS a synthetic
+  // assistant tool_call + tool result for submit_values_card — `messages` is
+  // the inbound POST body and does not yet contain the assistant response
+  // we're streaming, so persisting it as-is would leave the saved transcript
+  // missing the tool call. Without that, reloading the chat thread doesn't
+  // re-render the values card and the "Continue" button stays hidden.
   const submitValuesCard = tool({
     description:
       "Submit the articulated values card once it has been jointly developed with the user.",
@@ -41,8 +45,31 @@ export async function action({ request }: ActionFunctionArgs) {
       description: z.string(),
       policies: z.array(z.string()),
     }),
-    execute: async (card) => {
-      const transcript: ChatMessage[] = uiMessagesToChatMessages(messages)
+    execute: async (card, { toolCallId }) => {
+      const baseTranscript = uiMessagesToChatMessages(messages)
+      const transcript: ChatMessage[] = [
+        ...baseTranscript,
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: toolCallId,
+              type: "function",
+              function: {
+                name: "submit_values_card",
+                arguments: JSON.stringify(card),
+              },
+            },
+          ],
+        },
+        {
+          role: "tool",
+          tool_call_id: toolCallId,
+          name: "submit_values_card",
+          content: JSON.stringify({ ok: true }),
+        },
+      ]
       await persistArticulatedCard({
         authorId,
         threadId,
