@@ -1,4 +1,4 @@
-import { CanonicalValuesCard, ValuesCard } from "@prisma/client"
+import { CanonicalValuesCard, Prisma, ValuesCard } from "@prisma/client"
 import { db, inngest } from "~/config.server"
 import {
   partitionValues,
@@ -40,32 +40,40 @@ function toCardLike(c: {
   }
 }
 
-/**
- * Pre-link safety net: the unique constraint @@unique([title, description, policies])
- * on CanonicalValuesCard fires when seed-card or repeated runs produce a
- * representative whose shape is byte-identical to an existing canonical.
- * Look it up first instead of hitting a hard UCV inside the dedup step.
- */
+// The unique constraint @@unique([title, description, policies]) is global
+// (no deliberationId), so the lookup must be global too — scoping by
+// deliberationId here would miss byte-identical canonicals in other
+// deliberations and the create would then violate the constraint.
 async function createOrFetchCanonicalCard(
   rep: ValuesCard
 ): Promise<CanonicalValuesCard> {
-  const existing = await db.canonicalValuesCard.findFirst({
-    where: {
-      deliberationId: rep.deliberationId,
-      title: rep.title,
-      description: rep.description,
-      policies: { equals: rep.policies },
-    },
-  })
+  const where = {
+    title: rep.title,
+    description: rep.description,
+    policies: { equals: rep.policies },
+  }
+  const existing = await db.canonicalValuesCard.findFirst({ where })
   if (existing) return existing
-  return db.canonicalValuesCard.create({
-    data: {
-      title: rep.title,
-      description: rep.description,
-      policies: rep.policies,
-      deliberationId: rep.deliberationId,
-    },
-  })
+  try {
+    return await db.canonicalValuesCard.create({
+      data: {
+        title: rep.title,
+        description: rep.description,
+        policies: rep.policies,
+        deliberationId: rep.deliberationId,
+      },
+    })
+  } catch (e) {
+    // Concurrent insert beat us to it; re-fetch the row that won.
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      const found = await db.canonicalValuesCard.findFirst({ where })
+      if (found) return found
+    }
+    throw e
+  }
 }
 
 async function linkClusterToCanonicalCard(
