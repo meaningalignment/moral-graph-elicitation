@@ -1,9 +1,7 @@
-import { deduplicateContexts, embedText, genObj } from "values-tools"
+import { genObj } from "values-tools"
 import { z } from "zod"
 import { db, inngest } from "~/config.server"
-import { searchSimilarContexts } from "./deduplication"
-import { embedContext } from "./embedding"
-import generateContextsPrompt from '~/services/prompts/generate-contexts-prompt.md?raw' with { type: "text" }
+import generateContextsPrompt from "~/services/prompts/generate-contexts-prompt.md?raw" with { type: "text" }
 
 async function generateContextsFromTranscript(
   transcript: { role: "user" | "assistant"; content: string }[],
@@ -40,35 +38,48 @@ async function generateContextsFromTranscript(
   }).then((res) => res.factors.map((f) => f.generalizedFactor))
 }
 
+/**
+ * Match a candidate context string against the existing contexts in a
+ * deliberation. Pure prompt — no embeddings, no pre-filtering. The set of
+ * existing contexts in any single deliberation is small enough (max a few
+ * hundred short strings) to fit in one structured-output call.
+ */
 export async function findDuplicateContext(
   deliberationId: number,
   context: string
 ): Promise<string | null> {
-  // Get similar contexts from DB
-  const embedding = await embedText(context)
-  const similarContexts = await searchSimilarContexts(deliberationId, embedding)
-  if (!similarContexts.length) return null
+  const existing = await db.context.findMany({
+    where: { deliberationId },
+    select: { id: true },
+  })
+  if (existing.length === 0) return null
 
-  // If there's a near identical context, don't use our prompt unnecessarily.
-  const nearIdenticalContext = similarContexts.find((c) => c._distance < 0.01)
-  if (nearIdenticalContext) {
-    return nearIdenticalContext.id
-  }
+  // Cheap exact-match shortcut, before paying for an LLM call.
+  const exact = existing.find((c) => c.id === context)
+  if (exact) return exact.id
 
-  // Check if any similar contexts are duplicates
-  const deduped = await deduplicateContexts([
-    context,
-    ...similarContexts.map((c) => c.id),
-  ])
-
-  // Find first duplicate
-  const duplicate = deduped
-    .find((group) => group.length > 1 && group.includes(context))
-    ?.find((c) => c !== context)
-  if (!duplicate) return null
-
-  // Return the duplicate context
-  return similarContexts.find((c) => c.id === duplicate)?.id ?? null
+  const result = await genObj({
+    prompt: `You are deduplicating short "When ..." context clauses for a deliberation. Two contexts are duplicates only if they pick out the SAME morally-relevant slice of a situation — same actor, same stake, same tension. Different actors, scopes, or framings make them distinct. Surface vocabulary overlap is not enough.`,
+    data: {
+      candidate: context,
+      existingContexts: existing.map((c) => c.id),
+    },
+    schema: z.object({
+      rationale: z
+        .string()
+        .describe("1 sentence noting whether the candidate is a duplicate of any existing context, and why."),
+      duplicateOf: z
+        .string()
+        .nullable()
+        .describe(
+          "The exact existing context string the candidate duplicates, or null if it is a new context."
+        ),
+    }),
+  })
+  if (result.duplicateOf === null) return null
+  // Defence: model might return a paraphrase rather than an exact id.
+  const matched = existing.find((c) => c.id === result.duplicateOf)
+  return matched?.id ?? null
 }
 
 export const findNewContexts = inngest.createFunction(
@@ -124,7 +135,7 @@ export const findNewContexts = inngest.createFunction(
       Promise.all(
         writePlan.map(async ({ isNew, targetId }) => {
           if (isNew) {
-            // We're dealing with a new context! Create it, embed it, and link it to the question.
+            // We're dealing with a new context! Create it and link it to the question.
             logger.info(`Creating new context: ${targetId}`)
             // Concurrent find-new-contexts runs (one per chat) can race on the
             // same generated context name; upsert keeps that idempotent.
@@ -154,7 +165,6 @@ export const findNewContexts = inngest.createFunction(
                 questionId,
               },
             })
-            await embedContext(context.id)
           } else {
             // Duplicate context already exist in the deliberation! However, it could be from a different question. Link it to the current question (if not already linked).
             logger.info(`Linking context ${targetId} to question ${questionId}`)

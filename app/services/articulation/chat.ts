@@ -1,6 +1,5 @@
 import { OpenAI } from "openai"
 import { db, openai, inngest } from "~/config.server"
-import { embedNonCanonicalCard } from "~/services/embedding"
 import { kv } from "@vercel/kv"
 import {
   ARTICULATION_SYSTEM_PROMPT,
@@ -206,8 +205,6 @@ export async function persistArticulatedCard(args: {
     },
     where: { chatId: chat.id },
   })
-
-  await embedNonCanonicalCard(valuesCard)
 
   // Mirror the legacy KV write so the front-end keeps showing the card on reloads.
   const kvData = {

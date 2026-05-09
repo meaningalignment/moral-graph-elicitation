@@ -1,121 +1,71 @@
-import { CanonicalValuesCard, Context, ValuesCard } from "@prisma/client"
+import { CanonicalValuesCard, ValuesCard } from "@prisma/client"
 import { db, inngest } from "~/config.server"
 import {
-  deduplicateValues,
-  getExistingDuplicateValue,
-  getExistingDuplicateContext,
-  getRepresentativeValue,
-} from "values-tools"
-import { embedCanonicalCard } from "./embedding"
-import { embedValue } from "values-tools"
+  partitionValues,
+  findCanonicalDuplicate,
+  CardLike,
+} from "./deduplication/prompt-dedup"
+import { findDuplicateContext as findDuplicateContextPrompt } from "./contexts"
 
-async function createCanonicalCard(
-  valuesCard: ValuesCard
+async function fetchNonCanonicalizedValues(
+  deliberationId: number,
+  limit: number = 100
+): Promise<ValuesCard[]> {
+  return db.valuesCard.findMany({
+    where: { canonicalCardId: null, deliberationId },
+    take: limit,
+  })
+}
+
+async function fetchCanonicals(
+  deliberationId: number
+): Promise<CanonicalValuesCard[]> {
+  return db.canonicalValuesCard.findMany({
+    where: { deliberationId, isArchived: false },
+  })
+}
+
+// Narrow type so callers can pass either Prisma rows or Inngest's JsonifyObject<row>.
+function toCardLike(c: {
+  id: number
+  title: string
+  description: string
+  policies: string[]
+}): CardLike {
+  return {
+    id: c.id,
+    title: c.title,
+    description: c.description,
+    policies: c.policies,
+  }
+}
+
+/**
+ * Pre-link safety net: the unique constraint @@unique([title, description, policies])
+ * on CanonicalValuesCard fires when seed-card or repeated runs produce a
+ * representative whose shape is byte-identical to an existing canonical.
+ * Look it up first instead of hitting a hard UCV inside the dedup step.
+ */
+async function createOrFetchCanonicalCard(
+  rep: ValuesCard
 ): Promise<CanonicalValuesCard> {
-  // Schema has @@unique([title, description, policies]). The LLM judge in the
-  // similarity step can disagree with that constraint (different phrasing of
-  // the same value, or — more often — identical text after the seed-card dev
-  // helper or repeated runs). Find the existing row first to avoid a hard
-  // UniqueConstraintViolation that would fail the dedup step.
   const existing = await db.canonicalValuesCard.findFirst({
     where: {
-      deliberationId: valuesCard.deliberationId,
-      title: valuesCard.title,
-      description: valuesCard.description,
-      policies: { equals: valuesCard.policies },
+      deliberationId: rep.deliberationId,
+      title: rep.title,
+      description: rep.description,
+      policies: { equals: rep.policies },
     },
   })
-  if (existing) return existing as CanonicalValuesCard
-  const canonical = await db.canonicalValuesCard.create({
+  if (existing) return existing
+  return db.canonicalValuesCard.create({
     data: {
-      title: valuesCard.title,
-      description: valuesCard.description,
-      policies: valuesCard.policies,
-      deliberationId: valuesCard.deliberationId,
+      title: rep.title,
+      description: rep.description,
+      policies: rep.policies,
+      deliberationId: rep.deliberationId,
     },
   })
-  // Embed the canonical values card.
-  await embedCanonicalCard(canonical as any)
-  return canonical
-}
-
-export async function searchSimilarCards(
-  deliberationId: number,
-  embeddingArray: number[],
-  limit: number = 10,
-  minimumDistance: number = 0.1
-): Promise<Array<CanonicalValuesCard & { _distance: number }>> {
-  const query = `SELECT DISTINCT cvc.id, cvc.title, cvc."description", cvc."policies", cvc.embedding <=> '${JSON.stringify(
-    embeddingArray
-  )}'::vector as "_distance"
-    FROM "CanonicalValuesCard" cvc
-    WHERE cvc."deliberationId" = ${deliberationId} AND cvc.embedding IS NOT NULL
-    ORDER BY "_distance" ASC
-    LIMIT ${limit};`
-
-  const result = await db.$queryRawUnsafe<
-    Array<CanonicalValuesCard & { _distance: number }>
-  >(query)
-
-  return result.filter((r) => r._distance <= minimumDistance)
-}
-
-export async function searchSimilarContexts(
-  deliberationId: number,
-  embeddingArray: number[],
-  limit: number = 10,
-  minimumDistance: number = 0.5
-): Promise<Array<Context & { _distance: number }>> {
-  const query = `SELECT DISTINCT c.id, c."deliberationId", c.embedding <=> '${JSON.stringify(
-    embeddingArray
-  )}'::vector as "_distance"
-    FROM "Context" c
-    WHERE c."deliberationId" = ${deliberationId} AND c.embedding IS NOT NULL
-    ORDER BY "_distance" ASC
-    LIMIT ${limit};`
-
-  const result = await db.$queryRawUnsafe<
-    Array<Context & { _distance: number }>
-  >(query)
-
-  return result.filter((r) => r._distance <= minimumDistance)
-}
-
-async function fetchSimilarCanonicalCard(
-  deliberationId: number,
-  candidate: ValuesCard,
-  limit: number = 5
-): Promise<CanonicalValuesCard | null> {
-  console.log(
-    `Fetching similar canonical card, candidate: ${JSON.stringify(candidate)}`
-  )
-
-  // Embed the candidate.
-  const cardEmbeddings = await embedValue(candidate)
-
-  console.log("Got card embeddings, fetching canonical card.")
-
-  // Fetch `limit` canonical cards for the case based on similarity.
-  const canonical = await searchSimilarCards(
-    deliberationId,
-    cardEmbeddings,
-    limit,
-    0.1
-  )
-
-  console.log(`Got ${canonical.length} canonical cards`)
-
-  // If we have no canonical cards, we can't deduplicate.
-  if (canonical.length === 0) {
-    console.log("No canonical cards found for candidate.")
-    return null
-  }
-
-  // Use a prompt to see if any of the canonical cards are the same value
-  return getExistingDuplicateValue<ValuesCard, CanonicalValuesCard>(
-    candidate,
-    canonical
-  )
 }
 
 async function linkClusterToCanonicalCard(
@@ -123,38 +73,43 @@ async function linkClusterToCanonicalCard(
   canonicalCard: CanonicalValuesCard
 ) {
   await db.valuesCard.updateMany({
-    where: {
-      id: { in: cluster.map((c) => c.id) },
-    },
+    where: { id: { in: cluster.map((c) => c.id) } },
     data: { canonicalCardId: canonicalCard.id },
   })
 }
 
-async function fetchNonCanonicalizedValues(
+/**
+ * Online dedup helper. Used by the articulation chat path to find an
+ * existing canonical that matches a freshly-submitted ValuesCard. No
+ * embeddings, no DBSCAN — just one structured LLM call against all
+ * canonicals in the deliberation.
+ */
+export async function fetchSimilarCanonicalCard(
   deliberationId: number,
-  limit: number = 50
-) {
-  return (await db.valuesCard.findMany({
-    where: {
-      canonicalCardId: null,
-      deliberationId: deliberationId,
-    },
-    take: limit,
-  })) as ValuesCard[]
+  candidate: ValuesCard
+): Promise<CanonicalValuesCard | null> {
+  const canonicals = await fetchCanonicals(deliberationId)
+  if (!canonicals.length) return null
+  const { canonicalId } = await findCanonicalDuplicate({
+    candidate: toCardLike(candidate),
+    existingCanonicals: canonicals.map(toCardLike),
+  })
+  if (canonicalId === null) return null
+  return canonicals.find((c) => c.id === canonicalId) ?? null
 }
 
+/**
+ * Re-export findDuplicateContext from contexts.ts for backwards compatibility.
+ * Existing callers (e.g. `services/generation.ts`) use `fetchDuplicateContext`.
+ */
 export async function fetchDuplicateContext(
   context: string,
   deliberationId: number
 ): Promise<string | null> {
-  const contexts = await db.context.findMany({ where: { deliberationId } })
-  return getExistingDuplicateContext(
-    context,
-    contexts.map((c) => c.id)
-  )
+  return findDuplicateContextPrompt(deliberationId, context)
 }
 
-// Cron function
+// Cron function — kicks the per-deliberation dedup event for every deliberation.
 export const deduplicateCron = inngest.createFunction(
   {
     id: "deduplicate-cron",
@@ -163,105 +118,107 @@ export const deduplicateCron = inngest.createFunction(
   },
   async ({ step, logger }) => {
     logger.info("Running deduplication cron job.")
-
-    // Get all deliberations
     const deliberations = await step.run(
       "Fetching all deliberations",
-      async () => {
-        return db.deliberation.findMany()
-      }
+      async () => db.deliberation.findMany()
     )
-
     for (const deliberation of deliberations) {
-      // Trigger deduplication for each deliberation
       await step.sendEvent("deduplicate", {
         name: "deduplicate",
         data: { deliberationId: deliberation.id },
       })
     }
-
-    return {
-      message: "Triggered deduplication for all deliberations.",
-    }
+    return { message: "Triggered deduplication for all deliberations." }
   }
 )
 
-// Deduplication function for a specific deliberation
+/**
+ * Per-deliberation dedup. One structured LLM call partitions all
+ * non-canonicalized cards and (in the same pass) maps each cluster to an
+ * existing canonical when one applies. The remaining clusters become new
+ * canonicals via createOrFetchCanonicalCard.
+ */
 export const deduplicate = inngest.createFunction(
   { id: "deduplicate", triggers: { event: "deduplicate" } },
   async ({ event, step, logger }) => {
     const deliberationId = event.data.deliberationId as number
-    logger.info(`Running deduplication for deliberation ${deliberationId}.`)
+    logger.info(`Running prompt-based deduplication for deliberation ${deliberationId}.`)
 
-    // Get all non-canonicalized submitted values cards for this deliberation.
     const cards = (await step.run(
       `Get non-canonicalized cards for deliberation ${deliberationId}`,
       async () => fetchNonCanonicalizedValues(deliberationId, 100)
-    )) as any as ValuesCard[]
-
+    )) as unknown as ValuesCard[]
     if (cards.length === 0) {
       logger.info(`No cards to deduplicate for deliberation ${deliberationId}.`)
-      // Always emit a finished event so any waiter (the simulation orchestrator)
-      // doesn't hang for the full timeout.
+      // Always emit the finished event so the simulation orchestrator never hangs.
       await step.sendEvent("deduplicate-finished", {
         name: "deduplicate-finished",
         data: { deliberationId },
       })
-      return {
-        message: `No cards to deduplicate for deliberation ${deliberationId}.`,
-      }
+      return { message: `No cards to deduplicate for deliberation ${deliberationId}.` }
     }
 
-    // Cluster the non-canonicalized cards with a prompt / dbscan.
-    const clusters = (await step.run(`Cluster cards using prompt`, async () => {
-      const useDbScan = cards.length > 20 // Only use dbscan when we're dealing with a lot of cards.
-      return deduplicateValues<ValuesCard>(cards, null, useDbScan) // @TODO: take context into account here.
-    })) as any as ValuesCard[][]
+    const canonicals = (await step.run(
+      `Get existing canonicals for deliberation ${deliberationId}`,
+      async () => fetchCanonicals(deliberationId)
+    )) as unknown as CanonicalValuesCard[]
 
-    logger.info(
-      `Found ${clusters.length} clusters for deliberation ${deliberationId}.`
+    const partition = await step.run(
+      `Partition ${cards.length} cards into clusters`,
+      async () =>
+        partitionValues({
+          candidates: cards.map(toCardLike),
+          existingCanonicals: canonicals.map(toCardLike),
+        })
     )
 
-    //
-    // For each deduplicated non-canonical card, find canonical cards that are essentially
-    // the same value and link them.
-    //
-    // If no such cards exist, canonicalize the duplicated non-canonical card and link the cluster
-    // to the new canonical card.
-    //
+    logger.info(
+      `Partition produced ${partition.clusters.length} clusters for deliberation ${deliberationId}.`
+    )
+
     let i = 0
-    for (const cluster of clusters) {
-      logger.info(`Deduplicating cluster ${++i} of ${cluster.length} cards.`)
+    for (const cluster of partition.clusters) {
+      i++
+      const memberCards = cards.filter((c) => cluster.memberIds.includes(c.id))
+      if (memberCards.length === 0) continue
 
-      const representative = (await step.run(
-        "Get best values card from cluster",
-        async () => getRepresentativeValue<ValuesCard>(cluster)
-      )) as any as ValuesCard
-
-      const existingCanonicalDuplicate = (await step.run(
-        "Fetch canonical duplicate",
-        async () => fetchSimilarCanonicalCard(deliberationId, representative)
-      )) as any as CanonicalValuesCard | null
-
-      if (existingCanonicalDuplicate) {
-        await step.run("Link cluster to existing canonical card", async () =>
-          linkClusterToCanonicalCard(cluster, existingCanonicalDuplicate)
+      let canonical: CanonicalValuesCard
+      if (cluster.existingCanonicalId !== null) {
+        const existing = canonicals.find(
+          (c) => c.id === cluster.existingCanonicalId
         )
+        if (existing) {
+          canonical = existing
+          logger.info(
+            `Cluster ${i} (${memberCards.length} cards) → existing canonical #${existing.id}`
+          )
+        } else {
+          // Hallucinated id; fall back to creating a new canonical.
+          logger.warn(
+            `Cluster ${i} referenced unknown canonical #${cluster.existingCanonicalId}; creating a new canonical.`
+          )
+          canonical = (await step.run(
+            `Create canonical for cluster ${i}`,
+            async () => createOrFetchCanonicalCard(memberCards[0])
+          )) as unknown as CanonicalValuesCard
+        }
       } else {
-        const newCanonicalDuplicate = (await step.run(
-          "Canonicalize representative",
-          async () => createCanonicalCard(representative)
-        )) as any as CanonicalValuesCard
-
-        await step.run(
-          "Link cluster to newly created canonical card",
-          async () => linkClusterToCanonicalCard(cluster, newCanonicalDuplicate)
+        canonical = (await step.run(
+          `Create canonical for cluster ${i}`,
+          async () => createOrFetchCanonicalCard(memberCards[0])
+        )) as unknown as CanonicalValuesCard
+        logger.info(
+          `Cluster ${i} (${memberCards.length} cards) → new canonical #${canonical.id} ("${canonical.title}")`
         )
       }
+
+      await step.run(`Link cluster ${i} to canonical #${canonical.id}`, async () =>
+        linkClusterToCanonicalCard(memberCards, canonical)
+      )
     }
 
     logger.info(
-      `Done. Deduplicated ${cards.length} cards for deliberation ${deliberationId}.`
+      `Done. Deduplicated ${cards.length} cards into ${partition.clusters.length} clusters for deliberation ${deliberationId}.`
     )
 
     await step.sendEvent("deduplicate-finished", {
@@ -270,7 +227,7 @@ export const deduplicate = inngest.createFunction(
     })
 
     return {
-      message: `Deduplicated ${cards.length} cards for deliberation ${deliberationId}.`,
+      message: `Deduplicated ${cards.length} cards into ${partition.clusters.length} clusters for deliberation ${deliberationId}.`,
     }
   }
 )

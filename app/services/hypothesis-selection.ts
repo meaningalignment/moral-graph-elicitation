@@ -1,7 +1,6 @@
 import { CanonicalValuesCard, EdgeHypothesis } from "@prisma/client"
 import { db } from "~/config.server"
 import { Upgrade } from "values-tools"
-import { getUserEmbedding } from "./embedding"
 
 type SelectionCriteria = "popular" | "convergence" | "sparse"
 

@@ -1,14 +1,10 @@
 // Connection URLs live in prisma.config.ts (required as of Prisma 7).
 datasource db {
-  provider   = "postgresql"
-  extensions = [pgvector(map: "vector")] // Add the pgvector extension
+  provider = "postgresql"
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  // driverAdapters is stable in Prisma 7; postgresqlExtensions is still
-  // gated even though @prisma/config has experimental.extensions=true.
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -85,10 +81,9 @@ model ValuesCard {
   questionId          Int
   seedGenerationRunId String? // Present if the card was generated as a seed value.
   chatId              String?                      @unique // Present if the card was articulated in a chat.
-  chat                Chat?                        @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  question            Question                     @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  canonicalCard       CanonicalValuesCard?         @relation(fields: [canonicalCardId], references: [id], onDelete: SetNull)
-  embedding           Unsupported("vector(1536)")?
+  chat                Chat?                @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  question            Question             @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  canonicalCard       CanonicalValuesCard? @relation(fields: [canonicalCardId], references: [id], onDelete: SetNull)
   deliberationId      Int
   deliberation        Deliberation                 @relation(fields: [deliberationId], references: [id], onDelete: Cascade)
 }
@@ -98,10 +93,9 @@ model CanonicalValuesCard {
   title              String
   description        String
   policies           String[]
-  isArchived         Boolean                      @default(false)
-  createdAt          DateTime                     @default(now())
-  updatedAt          DateTime                     @updatedAt
-  embedding          Unsupported("vector(1536)")?
+  isArchived         Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   valuesCards        ValuesCard[]
   edgesFrom          Edge[]                       @relation("FromValueRelation")
   edgesTo            Edge[]                       @relation("ToValueRelation")
@@ -178,14 +172,13 @@ model EdgeHypothesis {
 model Context {
   id                   String
   deliberationId       Int
-  embedding            Unsupported("vector(1536)")?
   createdInChatId      String? // If the context comes from a user's chat.
-  deliberation         Deliberation                 @relation(fields: [deliberationId], references: [id], onDelete: Cascade)
+  deliberation         Deliberation           @relation(fields: [deliberationId], references: [id], onDelete: Cascade)
   ContextsForQuestions ContextsForQuestions[]
   Edge                 Edge[]
   EdgeHypothesis       EdgeHypothesis[]
-  createdAt            DateTime                     @default(now())
-  updatedAt            DateTime                     @updatedAt
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
   Intervention         Intervention[]
 
   @@id([id, deliberationId])
