@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.63",
-    "@ai-sdk/react": "^3.0.178",
+    "@ai-sdk/react": "^3.0.179",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.8.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -52,7 +52,7 @@
     "@types/ws": "^8.18.1",
     "@vercel/analytics": "^1.6.1",
     "@vercel/kv": "^1.0.1",
-    "ai": "^6.0.176",
+    "ai": "^6.0.177",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cowpunk-auth": "^0.0.7",
