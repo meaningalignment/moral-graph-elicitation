@@ -105,8 +105,10 @@ The ${numContexts} contexts should each pick out a DIFFERENT slice of the questi
               ),
           })
         )
+        .min(numContexts)
+        .max(numContexts)
         .describe(
-          `${numContexts} of the most morally distinct situations to consider when answering the question wisely.`
+          `Exactly ${numContexts} of the most morally distinct situations to consider when answering the question wisely.`
         ),
     }),
   }).then((res) => res.factors.map((f) => f.factor))
@@ -443,7 +445,7 @@ export const generateSeedContexts = inngest.createFunction(
     }
 
     await step.run("Deduplicate contexts", async () => {
-      upsertContextsInDb(deliberationId, contexts, logger)
+      await upsertContextsInDb(deliberationId, contexts, logger)
     })
 
     await step.run(`Marking setup as finished`, async () =>
