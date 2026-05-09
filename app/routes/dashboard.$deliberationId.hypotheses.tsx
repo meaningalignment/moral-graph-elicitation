@@ -1,15 +1,17 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
+  Link,
   NavLink,
   Outlet,
   useLoaderData,
+  useLocation,
   useParams,
   useFetcher,
 } from "@remix-run/react"
 import { db, inngest } from "~/config.server"
 import { cn, encodeString } from "~/lib/utils"
 import { Alert, AlertTitle, AlertDescription } from "~/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -84,10 +86,16 @@ function HypothesesView({
   }
 }) {
   const { deliberationId } = useParams()
+  const params = useParams()
+  const location = useLocation()
   const fetcher = useFetcher()
   const [selectedQuestion, setSelectedQuestion] = useState<string>("all")
   const [selectedContext, setSelectedContext] = useState<string>("all")
   const [selectedRunId, setSelectedRunId] = useState<string>("all")
+  const isChildRouteActive = Boolean(
+    params.fromId ||
+      location.pathname.replace(/\/$/, "").split("/").length > 4
+  )
 
   // Filter hypotheses based on selected question/context
   const filteredHypotheses = data.hypotheses.filter((hypothesis) => {
@@ -138,7 +146,12 @@ function HypothesesView({
 
   return (
     <div className="flex h-[calc(100vh-4rem)] -mt-4 -mx-4 sm:-mx-6">
-      <aside className="w-80 shrink-0 border-r border-border bg-card flex flex-col">
+      <aside
+        className={cn(
+          "w-full md:w-80 md:shrink-0 border-r border-border bg-card flex-col",
+          isChildRouteActive ? "hidden md:flex" : "flex"
+        )}
+      >
         <div className="px-4 pt-5 pb-3 border-b border-border">
           <h2 className="text-base font-semibold tracking-tight">Hypotheses</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -245,8 +258,25 @@ function HypothesesView({
         </div>
       </aside>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-6">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto min-w-0",
+          isChildRouteActive ? "block" : "hidden md:block"
+        )}
+      >
+        {isChildRouteActive && (
+          <div className="md:hidden sticky top-0 bg-card border-b border-border px-4 py-2 z-10">
+            <Link
+              to={`/dashboard/${deliberationId}/hypotheses`}
+              prefetch="intent"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to hypotheses
+            </Link>
+          </div>
+        )}
+        <div className="p-4 sm:p-6">
           {filteredHypotheses.length === 0 ? (
             <Alert className="bg-muted">
               <div className="flex flex-row space-x-2">

@@ -10,11 +10,14 @@ export interface ChatPanelProps {
 
 export function ChatPanel({ isLoading, isFinished, onSubmit }: ChatPanelProps) {
   return (
-    <div className="fixed inset-x-0 bottom-0 light:bg-gradient-to-b from-muted/10 from-10% to-muted/30 to-50%">
+    <div
+      className="fixed inset-x-0 bottom-0 light:bg-gradient-to-b from-muted/10 from-10% to-muted/30 to-50%"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <ButtonScrollToBottom />
       <div className="mx-auto sm:max-w-2xl sm:px-4">
-        <div className="flex mb-2 h-10 items-center justify-center"></div>
-        <div className="space-y-4 border-t bg-card px-4 py-2 shadow-lg sm:rounded-t-xl sm:border pb-8 md:py-4">
+        <div className="flex mb-2 h-6 sm:h-10 items-center justify-center"></div>
+        <div className="space-y-4 border-t bg-card px-3 sm:px-4 py-2 shadow-lg sm:rounded-t-xl sm:border pb-4 md:py-4">
           <PromptForm
             onSubmit={onSubmit}
             isLoading={isLoading}

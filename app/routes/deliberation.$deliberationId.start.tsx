@@ -44,11 +44,11 @@ export default function StartPage() {
     "Welcome! This process takes around 10-15 minutes."
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       <Header />
-      <div className="grid flex-grow place-items-center py-12">
-        <div className="flex flex-col items-center mx-auto max-w-2xl text-center px-8">
-          <h1 className="font-serif text-4xl font-semibold leading-tight tracking-tight mb-6">
+      <div className="grid flex-grow place-items-center py-8 sm:py-12">
+        <div className="flex flex-col items-center mx-auto max-w-2xl text-center px-6 sm:px-8">
+          <h1 className="font-serif text-3xl sm:text-4xl font-semibold leading-tight tracking-tight mb-6">
             {title}
           </h1>
           <p className="text-base text-muted-foreground mb-10 leading-relaxed">
@@ -72,7 +72,7 @@ export default function StartPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-hidden w-screen h-full flex justify-center pt-12">
+        <div className="overflow-x-hidden w-full h-full flex justify-center pt-12">
           <Carousel cards={carouselValues as any[]} />
         </div>
       </div>

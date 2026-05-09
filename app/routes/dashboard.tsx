@@ -247,13 +247,14 @@ export default function Deliberations() {
           </div>
         </div>
       </aside>
-      <main className="lg:ml-64 flex-1">
+      <main className="lg:ml-64 flex-1 min-w-0">
         {params.deliberationId && (
-          <nav className="sticky top-0 z-10 px-6 py-4 flex-none border-b border-border bg-card">
-            <div className="flex items-center">
+          <nav className="sticky top-0 z-10 px-4 sm:px-6 py-3 sm:py-4 flex-none border-b border-border bg-card">
+            <div className="flex items-center min-w-0">
               <button
                 type="button"
-                className="lg:hidden -ml-2 mr-2 p-2 rounded-md text-muted-foreground hover:bg-muted"
+                aria-label="Toggle sidebar"
+                className="lg:hidden -ml-2 mr-2 p-2 rounded-md text-muted-foreground hover:bg-muted shrink-0"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               >
                 <svg
@@ -280,18 +281,19 @@ export default function Deliberations() {
                   )}
                 </svg>
               </button>
-              <ol className="flex items-center text-sm">
-                <li className="font-medium text-foreground">
+              <ol className="flex items-center text-sm min-w-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
+                <li className="font-medium text-foreground shrink-0 max-w-[40vw] sm:max-w-none truncate">
                   <NavLink
                     prefetch="render"
                     to={`/dashboard/${params.deliberationId}`}
-                    className="hover:text-muted-foreground transition-colors"
+                    className="hover:text-muted-foreground transition-colors block truncate"
+                    title={currentDeliberation?.title}
                   >
                     {currentDeliberation?.title}
                   </NavLink>
                 </li>
                 {pathSegments.map((segment, index) => (
-                  <li key={segment} className="flex items-center">
+                  <li key={segment} className="flex items-center shrink-0">
                     <span className="mx-2 text-muted-foreground">/</span>
                     <NavLink
                       prefetch="intent"

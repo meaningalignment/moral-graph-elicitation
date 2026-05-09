@@ -21,7 +21,7 @@ export function ValuesCardEditor({
   return (
     <div key={card.id}>
       <ValuesCard detailsInline card={card as any as CanonicalValuesCard} />
-      <Form method="post" className="mt-8 w-96 flex flex-col gap-4">
+      <Form method="post" className="mt-8 w-full max-w-sm flex flex-col gap-4">
         <h1 className="font-serif text-3xl font-semibold tracking-tight my-8 text-center">Edit your card</h1>
         <input type="hidden" name="cardId" value={card.id!} />
         <input type="hidden" name="cardType" value={cardType} />

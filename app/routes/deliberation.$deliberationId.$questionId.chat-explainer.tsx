@@ -10,9 +10,9 @@ export default function ChatExplainerScreen() {
   const [showNext, setShowNext] = useState(false)
 
   return (
-    <div className="flex flex-col h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       <Header />
-      <div className="flex flex-col items-center space-y-8 py-12 mx-8">
+      <div className="flex flex-col items-center space-y-8 py-8 sm:py-12 mx-4 sm:mx-8">
         <StaticChatMessage
           onFinished={() => {
             setShowNext(true)

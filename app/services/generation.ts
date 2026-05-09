@@ -1,6 +1,5 @@
 import { z } from "zod"
 import {
-  deduplicateContexts,
   generateValueFromContext,
   genObj,
 } from "values-tools"
@@ -11,6 +10,21 @@ import {
   generateScenario,
   ScenarioGenerationSchema,
 } from "./scenario-generation"
+
+// Simple string-equality clustering. Avoids reaching into values-tools'
+// deduplicateContexts, which can route through Anthropic regardless of the
+// configured defaultModel. We normalise whitespace + case so trivially
+// equivalent contexts collapse.
+function clusterContexts(contexts: string[]): string[][] {
+  const groups = new Map<string, string[]>()
+  for (const ctx of contexts) {
+    const key = ctx.trim().toLowerCase().replace(/\s+/g, " ")
+    const bucket = groups.get(key)
+    if (bucket) bucket.push(ctx)
+    else groups.set(key, [ctx])
+  }
+  return Array.from(groups.values())
+}
 
 export async function generateQuestions(
   topic: string,
@@ -106,7 +120,7 @@ async function upsertContextsInDb(
 ) {
   const contextIds = [...new Set(contexts.map((c) => c.context))]
   logger.info(`Deduplicating ${contextIds.length} contexts`)
-  const clusters = await deduplicateContexts(contextIds, false)
+  const clusters = clusterContexts(contextIds)
   logger.info(`After deduplication: ${clusters.length} unique contexts`)
   const questionIds = [...new Set(contexts.map((c) => c.questionId))]
 

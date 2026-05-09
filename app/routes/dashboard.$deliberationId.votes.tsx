@@ -1,14 +1,16 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node"
 import {
+  Link,
   NavLink,
   Outlet,
   useLoaderData,
+  useLocation,
   useParams,
 } from "@remix-run/react"
 import { db } from "~/config.server"
 import { cn } from "~/lib/utils"
 import { Alert, AlertTitle, AlertDescription } from "~/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -94,8 +96,14 @@ function VotesView({
   data: { edges: any[]; questions: any[]; contexts: any[] }
 }) {
   const { deliberationId } = useParams()
+  const params = useParams()
+  const location = useLocation()
   const [selectedQuestion, setSelectedQuestion] = useState<string>("all")
   const [selectedContext, setSelectedContext] = useState<string>("all")
+  const isChildRouteActive = Boolean(
+    params.userId ||
+      location.pathname.replace(/\/$/, "").split("/").length > 4
+  )
 
   // Filter edges based on selected question/context
   const filteredEdges = data.edges.filter((edge) => {
@@ -117,7 +125,12 @@ function VotesView({
 
   return (
     <div className="flex h-[calc(100vh-4rem)] -mt-4 -mx-4 sm:-mx-6">
-      <aside className="w-80 shrink-0 border-r border-border bg-card flex flex-col">
+      <aside
+        className={cn(
+          "w-full md:w-80 md:shrink-0 border-r border-border bg-card flex-col",
+          isChildRouteActive ? "hidden md:flex" : "flex"
+        )}
+      >
         <div className="px-4 pt-5 pb-3 border-b border-border">
           <h2 className="text-base font-semibold tracking-tight">Votes</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -189,8 +202,25 @@ function VotesView({
         </div>
       </aside>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-6">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto min-w-0",
+          isChildRouteActive ? "block" : "hidden md:block"
+        )}
+      >
+        {isChildRouteActive && (
+          <div className="md:hidden sticky top-0 bg-card border-b border-border px-4 py-2 z-10">
+            <Link
+              to={`/dashboard/${deliberationId}/votes`}
+              prefetch="intent"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to votes
+            </Link>
+          </div>
+        )}
+        <div className="p-4 sm:p-6">
           {filteredEdges.length === 0 ? (
             <Alert className="bg-muted">
               <div className="flex flex-row space-x-2">

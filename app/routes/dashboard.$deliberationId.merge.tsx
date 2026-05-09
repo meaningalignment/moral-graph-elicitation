@@ -154,15 +154,15 @@ export default function SelectScreen() {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="grid flex-grow place-items-center space-y-8 py-12 mx-3">
+      <div className="grid flex-grow place-items-center space-y-8 py-8 sm:py-12 mx-2 sm:mx-3">
         <div className="flex flex-col justify-center items-center">
-          <h1 className="text-3xl text-center">
+          <h1 className="text-2xl sm:text-3xl text-center">
             <MemoizedReactMarkdown>
               {text().replace(/"/g, "**")}
             </MemoizedReactMarkdown>
           </h1>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto gap-4 justify-items-center">
           {values.map((value) => (
             <div
               key={value.id}

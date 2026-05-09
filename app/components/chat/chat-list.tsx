@@ -47,7 +47,7 @@ export function ChatList({ threadId: _threadId, messages, isLoading }: ChatList)
     isLoading && (!lastMessage || lastMessage.role === "user")
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4">
+    <div className="relative mx-auto max-w-2xl px-3 sm:px-4">
       {messages.map((message, i) => {
         const card = getValuesCard(message)
         const showText =
