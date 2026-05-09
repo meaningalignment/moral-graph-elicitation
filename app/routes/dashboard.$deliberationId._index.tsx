@@ -672,7 +672,22 @@ function SimulationProgressPanel({
     onFinished?.()
   }, [progress, onFinished, lastTerminalRunId])
 
-  if (!progress) return null
+  // If the deliberation is in generating_graph but we have no KV record yet
+  // (Inngest just queued, KV cold, or KV unavailable), still show a callout
+  // so the user knows something is happening — the button alone isn't enough.
+  if (!progress) {
+    if (!simulating) return null
+    return (
+      <div
+        className="rounded-md border bg-muted/40 p-3 flex items-center gap-2 text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Simulation queued… waiting for the first stage to start.</span>
+      </div>
+    )
+  }
   // Hide done/failed progress if the deliberation isn't currently simulating
   // and the last run finished more than 30s ago — keeps the UI clean.
   if (
