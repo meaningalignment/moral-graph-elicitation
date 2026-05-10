@@ -8,18 +8,20 @@ generator client {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  prolificId   String?
-  name         String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  role         String[]       @default(["USER"])
-  isAdmin      Boolean        @default(false)
-  chats        Chat[]
-  edges        Edge[]
-  Deliberation Deliberation[]
-  Demographic  Demographic?
+  id                Int            @id @default(autoincrement())
+  email             String         @unique
+  prolificId        String?
+  name              String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  role              String[]       @default(["USER"])
+  isAdmin           Boolean        @default(false)
+  chats             Chat[]
+  edges             Edge[]
+  Deliberation      Deliberation[]
+  Demographic       Demographic?
+  agentsRepresented Agent[]        @relation("AgentRepresentative")
+  agentsOwned       Agent[]        @relation("AgentOwner")
 }
 
 model Demographic {
@@ -235,4 +237,84 @@ model ContextsForQuestions {
   updatedAt      DateTime @updatedAt
 
   @@id([contextId, questionId, deliberationId])
+}
+
+// --- Agent API ----------------------------------------------------------------
+// An Agent represents a programmatic participant. Each Agent has its own User
+// row (role=["AGENT"]) used as the author for cards, votes, and chats; this
+// mirrors the existing role=["SIMULATED"] pattern used by simulation/runner.ts.
+// A claimed Agent has humanUserId set to the human owner's User row.
+//
+// Self-deliberation: when a logged-in human mints a key for themselves we set
+// representativeUserId == humanUserId (== that human's User.id) so the writes
+// appear under the human's own identity rather than a synthetic AGENT user.
+
+model Agent {
+  id                   String             @id @default(cuid())
+  name                 String
+  description          String?
+  apiKeyHash           String             @unique
+  apiKeyPrefix         String
+  representativeUserId Int
+  representativeUser   User               @relation("AgentRepresentative", fields: [representativeUserId], references: [id], onDelete: Cascade)
+  humanUserId          Int?
+  humanUser            User?              @relation("AgentOwner", fields: [humanUserId], references: [id], onDelete: SetNull)
+  claimToken           String?            @unique
+  claimedAt            DateTime?
+  revokedAt            DateTime?
+  lastSeenAt           DateTime?
+  lastHeartbeatAt      DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  disapprovals         AgentDisapproval[]
+
+  @@index([humanUserId])
+  @@index([representativeUserId])
+}
+
+enum AgentActionType {
+  articulate_values
+  vote_on_upgrades
+  revise_values
+  create_deliberation
+  other
+}
+
+enum AgentDisapprovalStatus {
+  pending
+  corrected
+  dismissed
+}
+
+model AgentDisapproval {
+  id                String                 @id @default(cuid())
+  agentId           String
+  agent             Agent                  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  actionType        AgentActionType
+  deliberationId    Int?
+  // Loose pointer: chatId | "fromId:toId:contextId" | cardId. Not FK-checked
+  // because the target shape varies per actionType; disapprovals are an
+  // append-only audit log so the loss of referential integrity is acceptable.
+  targetKey         String?
+  reason            String
+  status            AgentDisapprovalStatus @default(pending)
+  correctedAt       DateTime?
+  correctionSummary String?
+  createdBy         Int
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@index([agentId, status])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  agentId   String?
+  userId    Int?
+  category  String?
+  text      String
+  context   Json?
+  createdAt DateTime @default(now())
+
+  @@index([agentId])
 }

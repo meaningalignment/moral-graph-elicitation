@@ -8,7 +8,7 @@ import {
   useNavigation,
 } from "@remix-run/react"
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node"
-import { auth, db } from "~/config.server"
+import { auth } from "~/config.server"
 import ValuesCard from "~/components/values-card"
 import { useEffect, useState } from "react"
 import { IconArrowRight } from "~/components/ui/icons"
@@ -21,6 +21,7 @@ import { Label } from "~/components/ui/label"
 import { Textarea } from "~/components/ui/textarea"
 import va from "@vercel/analytics"
 import { drawFreceny } from "~/services/hypothesis-selection"
+import { castEdgeVote } from "~/services/voting.server"
 
 type Relationship = "upgrade" | "no_upgrade" | "not_sure"
 
@@ -40,36 +41,15 @@ export async function action({ request }: ActionFunctionArgs) {
     `Submitting edge from ${edge.from.id} to ${edge.to.id} as ${relationship}`
   )
 
-  await db.edge.upsert({
-    where: {
-      userId_fromId_toId: {
-        userId,
-        fromId: edge.from.id,
-        toId: edge.to.id,
-      },
-    },
-    create: {
-      comment,
-      type: relationship,
-      story: edge.story,
-      user: { connect: { id: userId } },
-      to: { connect: { id: edge.to.id } },
-      from: { connect: { id: edge.from.id } },
-      context: {
-        connect: {
-          id_deliberationId: {
-            id: edge.contextId,
-            deliberationId: edge.deliberationId,
-          },
-        },
-      },
-      deliberation: { connect: { id: edge.deliberationId } },
-    },
-    update: {
-      comment,
-      type: relationship,
-      story: edge.story,
-    },
+  await castEdgeVote({
+    userId,
+    deliberationId: edge.deliberationId,
+    fromId: edge.from.id,
+    toId: edge.to.id,
+    contextId: edge.contextId,
+    type: relationship,
+    story: edge.story,
+    comment,
   })
 
   return json({})

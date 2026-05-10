@@ -5,7 +5,8 @@ import {
   useNavigate,
 } from "@remix-run/react"
 import { useEffect, useState } from "react"
-import { auth, db, inngest } from "~/config.server"
+import { auth } from "~/config.server"
+import { createDeliberation } from "~/services/deliberations.server"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
@@ -21,79 +22,29 @@ import {
 } from "~/components/ui/select"
 import { Plus, X } from "lucide-react"
 
-/** Smart-truncate a question into a 2-5 word title.
- *  "What should SF do about homelessness?" -> "What should SF do…" or similar */
-function titleFromQuestion(q: string): string {
-  const cleaned = q.trim().replace(/^["“]|["”]$/g, "").replace(/[?.!]+$/, "")
-  // First clause (before comma/em-dash/semicolon) capped at ~40 chars.
-  const firstClause = cleaned.split(/[,;—]/)[0]
-  if (firstClause.length <= 40) return firstClause
-  // Otherwise first 4-5 words.
-  const words = firstClause.split(/\s+/).slice(0, 5).join(" ")
-  return words.length <= 40 ? words : words.slice(0, 40)
-}
-
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
   const user = await auth.getCurrentUser(request)
   if (!user) return redirect("/auth/login")
 
-  const title = (formData.get("title") as string)?.trim()
+  const title = (formData.get("title") as string)?.trim() ?? ""
   const welcomeText = (formData.get("welcomeText") as string)?.trim() || null
   const numContexts = parseInt(
     (formData.get("numContexts") || "5") as string,
     10
   )
-  // Questions arrive as repeated `questions[]` form fields. Filter out empty ones.
   const rawQuestions = (formData.getAll("questions") as string[])
     .map((s) => s.trim())
     .filter(Boolean)
 
-  if (!title) {
-    return json({ error: "Title is required" }, { status: 400 })
-  }
-  if (rawQuestions.length === 0) {
-    return json({ error: "At least one question is required" }, { status: 400 })
-  }
-
   try {
-    // Create deliberation + question rows synchronously. The slow part —
-    // generating contexts via the LLM — is handed to Inngest so it survives
-    // the lambda termination. (A fire-and-forget Promise here would get cut
-    // off the moment we redirect on Vercel's Node runtime.)
-    const deliberation = await db.deliberation.create({
-      data: {
-        title,
-        welcomeText,
-        // The first question doubles as the deliberation's "topic" so we keep
-        // the existing schema field meaningful.
-        topic: rawQuestions[0],
-        setupStatus: "generating_contexts",
-        user: { connect: { id: user.id } },
-      },
+    const { deliberation } = await createDeliberation({
+      creatorId: user.id,
+      title,
+      welcomeText,
+      questions: rawQuestions,
+      numContexts,
     })
-
-    const createdQuestions = await db.$transaction(
-      rawQuestions.map((question) =>
-        db.question.create({
-          data: {
-            question,
-            title: titleFromQuestion(question),
-            deliberationId: deliberation.id,
-          },
-        })
-      )
-    )
-
-    await inngest.send({
-      name: "gen-seed-contexts",
-      data: {
-        deliberationId: deliberation.id,
-        questionIds: createdQuestions.map((q) => q.id),
-        numContexts,
-      },
-    })
-
     return redirect(`/dashboard/${deliberation.id}`)
   } catch (error) {
     return json(
