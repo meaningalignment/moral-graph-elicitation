@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { ActionFunctionArgs, json } from "@remix-run/node"
-import { Form, useActionData, useSearchParams } from "@remix-run/react"
+import { Form, Link, useActionData, useSearchParams } from "@remix-run/react"
 import { auth } from "~/config.server"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
@@ -47,6 +47,11 @@ export default function LoginScreen() {
           <h1 className="text-2xl font-semibold tracking-tight">Get Started</h1>
           <p className="text-sm text-muted-foreground">
             We'll send you an email with a login code.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <Link to="/explanation" className="underline hover:no-underline">
+              What's this?
+            </Link>
           </p>
         </div>
         <div className="grid gap-6">
