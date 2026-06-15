@@ -10,26 +10,27 @@ import { ExternalLink } from "~/components/external-link"
  * Content mirrors the Notion walkthrough:
  * https://humsys.notion.site/Moral-Graph-Elicitation-Walkthrough-27fc5bada1d0804695e5fb6af25af249
  *
- * MEDIA: The video / GIFs / screenshots are hosted in the "blobby" Vercel Blob
- * store on the moral-graph project. Empty values fall back to a labeled
- * placeholder.
+ * MEDIA: The video / clips / screenshots are hosted in the "blobby" Vercel
+ * Blob store on the moral-graph project. The original walkthrough GIFs were
+ * re-encoded as muted looping MP4s (~4x smaller); they autoplay inline like a
+ * GIF. Screenshots stay as images. Empty values fall back to a placeholder.
  */
 const BLOB = "https://gkm8jz8uprwxyd65.public.blob.vercel-storage.com"
 
 const MEDIA = {
   walkthroughVideo: `${BLOB}/Moral_Graph_Elicitation_Walkthrough.mp4`,
   // Process steps
-  chatbot: `${BLOB}/chatbot.gif`,
-  edge: `${BLOB}/edge.gif`,
+  chatbot: `${BLOB}/chatbot.mp4`,
+  edge: `${BLOB}/edge.mp4`,
   graph: `${BLOB}/graph.png`,
-  policyInterventions: `${BLOB}/policy-interventions.gif`,
+  policyInterventions: `${BLOB}/policy-interventions.mp4`,
   // Benefits
-  informedAuto: `${BLOB}/informed-auto.gif`,
+  informedAuto: `${BLOB}/informed-auto.mp4`,
   expertiseScreenshot: `${BLOB}/expertise-result.png`,
-  religiousBeliefs: `${BLOB}/religious-beliefs.gif`,
-  findWiseMentors: `${BLOB}/find-wise-mentors.gif`,
-  faithHotline: `${BLOB}/faith-hotline.gif`,
-  comeTogether: `${BLOB}/come-together.gif`,
+  religiousBeliefs: `${BLOB}/religious-beliefs.mp4`,
+  findWiseMentors: `${BLOB}/find-wise-mentors.mp4`,
+  faithHotline: `${BLOB}/faith-hotline.mp4`,
+  comeTogether: `${BLOB}/come-together.mp4`,
   polisComparison: `${BLOB}/polis-comparison.png`,
   paperFigure: `${BLOB}/paper-figure.png`,
 } as const
@@ -57,6 +58,22 @@ function Media({
       <div className="flex aspect-video w-full items-center justify-center rounded-lg border border-dashed border-border bg-muted/40 px-6 text-center text-sm text-muted-foreground">
         {placeholder}
       </div>
+    )
+  }
+  // The walkthrough clips are muted looping MP4s — autoplay them inline like a
+  // GIF. Screenshots are plain images.
+  if (src.endsWith(".mp4")) {
+    return (
+      <video
+        src={src}
+        aria-label={alt}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        className="w-full rounded-lg border border-border shadow-sm"
+      />
     )
   }
   return (
