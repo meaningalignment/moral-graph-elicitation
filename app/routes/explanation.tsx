@@ -328,6 +328,7 @@ export default function Explanation() {
             <article className="rounded-2xl border border-border bg-card/40 p-6 sm:p-8">
               <Step
                 title="Expertise is surfaced"
+                subtitle="Hard-won insight that gets drowned out by simple voting rises to the top."
                 src={MEDIA.informedAuto}
                 alt="Expertise being surfaced from participants"
                 placeholder="Informed automation — Adobe_Express_-_informed-auto_(1).gif"
@@ -351,7 +352,8 @@ export default function Explanation() {
 
             <article className="rounded-2xl border border-border bg-card/40 p-6 sm:p-8">
               <Step
-                title="Finds the wisest values, not just average ones"
+                title="Wiser, not just average"
+                subtitle="Participants weigh which values are wiser than others, instead of averaging preferences."
                 src={MEDIA.religiousBeliefs}
                 alt="Comparing values to find the wiser one"
                 placeholder="Religious beliefs — Adobe_Express_-_religious-beliefs.gif"
@@ -381,7 +383,8 @@ export default function Explanation() {
 
             <article className="rounded-2xl border border-border bg-card/40 p-6 sm:p-8">
               <Step
-                title="Surfaces an entirely new policy landscape"
+                title="A new policy landscape"
+                subtitle="Drilling into what actually matters surfaces innovative, non-ideological interventions."
                 src={MEDIA.faithHotline}
                 alt="A faith-sensitive support hotline intervention"
                 placeholder="Faith hotline — Adobe_Express_-_faith-hotline.gif"
@@ -402,7 +405,8 @@ export default function Explanation() {
 
             <article className="rounded-2xl border border-border bg-card/40 p-6 sm:p-8">
               <Step
-                title="Identifies bridging values"
+                title="Bridges divides"
+                subtitle="Opposing sides often converge on a third, wiser value they both endorse."
                 src={MEDIA.comeTogether}
                 alt="Republicans and Democrats converging on a shared wiser value"
                 placeholder="Come together — Adobe_Express_-_come-together_(1).gif"
@@ -420,7 +424,8 @@ export default function Explanation() {
 
             <article className="rounded-2xl border border-border bg-card/40 p-6 sm:p-8">
               <Step
-                title="Comparison to Pol.is"
+                title="Outperforms Pol.is"
+                subtitle="In a head-to-head study, our approach scored higher across the board."
                 src={MEDIA.polisComparison}
                 alt="Comparison of Moral Graph Elicitation to Pol.is"
                 placeholder="Pol.is comparison — Screenshot_2025-10-01_at_22.12.53.png"
