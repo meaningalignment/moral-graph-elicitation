@@ -131,6 +131,7 @@ function Media({
 function Step({
   number,
   title,
+  subtitle,
   src,
   alt,
   placeholder,
@@ -138,6 +139,7 @@ function Step({
 }: {
   number?: number
   title: string
+  subtitle?: string
   src: string
   alt: string
   placeholder: string
@@ -147,13 +149,20 @@ function Step({
     <section className="space-y-4">
       <div className="flex items-start gap-3">
         {number ? (
-          <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-primary/10 font-serif text-sm font-semibold text-primary">
+          <span className="mt-1 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-primary/10 font-serif text-sm font-semibold text-primary">
             {number}
           </span>
         ) : null}
-        <h3 className="font-serif text-xl font-semibold leading-snug tracking-tight">
-          {title}
-        </h3>
+        <div className="space-y-1">
+          <h3 className="font-serif text-2xl font-semibold leading-tight tracking-tight">
+            {title}
+          </h3>
+          {subtitle ? (
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
       </div>
       <Media src={src} alt={alt} placeholder={placeholder} />
       {children ? (
@@ -275,28 +284,32 @@ export default function Explanation() {
           <div className="space-y-12">
             <Step
               number={1}
-              title="A chatbot drills down into what's actually important to participants"
+              title="Elicit values"
+              subtitle="A chatbot drills down into what's actually important to each participant."
               src={MEDIA.chatbot}
               alt="Chatbot drilling down into a participant's values"
               placeholder="Chatbot demo — Adobe_Express_-_chatbot.gif"
             />
             <Step
               number={2}
-              title="Participants decide whether certain values are wiser than others by voting on generated stories of someone changing their values"
+              title="Vote on wisdom"
+              subtitle="Participants decide whether certain values are wiser than others by voting on generated stories of someone changing their values."
               src={MEDIA.edge}
               alt="Voting on stories of someone changing their values"
               placeholder="Voting demo — Adobe_Express_-_edge_(1).gif"
             />
             <Step
               number={3}
-              title="This results in a graph object that can be used to identify the wisest values of a collective"
+              title="Build the graph"
+              subtitle="The votes produce a graph object that can be used to identify the wisest values of a collective."
               src={MEDIA.graph}
               alt="The resulting moral graph"
               placeholder="Moral graph — Screenshot_2025-10-01_at_22.01.44.png"
             />
             <Step
               number={4}
-              title="The wisest values can then be used to, for example, identify policy interventions"
+              title="Apply the results"
+              subtitle="The wisest values can then be used to, for example, identify policy interventions."
               src={MEDIA.policyInterventions}
               alt="Using the wisest values to identify policy interventions"
               placeholder="Policy interventions — Adobe_Express_-_policy-interventions_(1).gif"
